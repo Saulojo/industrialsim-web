@@ -24,7 +24,7 @@ Principais pacotes (versões exatas nos arquivos de lock): xunit.v3 4.0.3, Micro
 | 2 | `npm ci`, `npm run lint`, `npm test` e `npm run build` passam | Local, num clone novo e no CI | ✅ 10/10 testes; lint e build sem erros |
 | 3 | Com o servidor rodando, a página mostra a versão vinda de `/api/health` | `dotnet run` num clone novo + navegador; teste de integração (`HealthEndpointTests`), teste do componente (`HealthStatus.test.tsx`) e job `integration` do CI | ✅ captura abaixo |
 | 4 | Um texto fixo colocado de propósito num componente faz o lint falhar | Demonstração manual em `App.tsx` + teste permanente `web/tests/lint-rules.test.ts` | ✅ ESLint saiu com código 1 |
-| 5 | O CI fica verde num PR e vermelho quando um teste é quebrado de propósito | PR #1: execução verde; commit que quebra um teste → vermelho; revert → verde | _ver seção 5_ |
+| 5 | O CI fica verde num PR e vermelho quando um teste é quebrado de propósito | PR #1: execução verde; commit que quebra um teste → vermelho; revert → verde | ✅ links na seção 5 |
 | 6 | Outra pessoa segue o README e roda o projeto sem ajuda | Ensaio feito pelo Claude num clone limpo seguindo só o README (ok). **Falta o teste com outra pessoa.** | ⏳ pendente |
 
 ## 1. Build e testes do .NET numa máquina limpa
@@ -119,7 +119,40 @@ A regra também é coberta por teste automático (`web/tests/lint-rules.test.ts`
 
 ## 5. CI verde e vermelho
 
-_Preenchido após as execuções do PR #1._
+Execuções do workflow `CI` no PR #1 (evento `pull_request`):
+
+| Commit | O que mudou | Execução | .NET | Web | Integração | Resultado |
+| --- | --- | --- | --- | --- | --- | --- |
+| `d394afa` | Partes A, B e C | [43074984572](https://github.com/Saulojo/industrialsim-web/actions/runs/43074984572) | ✅ | ✅ | ✅ | 🟢 verde |
+| `be1928a` | Teste quebrado de propósito (`"1.2.3"` → `"9.9.9"` no JSON esperado) | [43075329198](https://github.com/Saulojo/industrialsim-web/actions/runs/43075329198) | ❌ | ✅ | ⏭️ pulado | 🔴 vermelho |
+| `5e35ef7` | Revert do teste quebrado + esta validação | [43076136015](https://github.com/Saulojo/industrialsim-web/actions/runs/43076136015) | ✅ | ✅ | ✅ | 🟢 verde |
+
+O evento `push` gerou execuções paralelas com o mesmo resultado (ex.: [43075321717](https://github.com/Saulojo/industrialsim-web/actions/runs/43075321717), vermelha, para `be1928a`).
+
+Falha registrada no CI com o teste quebrado:
+
+```text
+failed IndustrialSim.Contracts.Tests.HealthResponseTests.Serializes_WithCamelCasePropertyNames (79ms)
+  Assert.Equal() Failure: Strings differ
+  Expected: "{"version":"9.9.9","serverTimeUtc":"2026-11-11T12:"···
+  Actual:   "{"version":"1.2.3","serverTimeUtc":"2026-11-11T12:"···
+IndustrialSim.Contracts.Tests.dll (net10.0|x64) failed with 1 error(s)
+  total: 6
+  failed: 1
+```
+
+O revert (`07f9258`) devolve o código exatamente ao estado de `d394afa`: `git diff d394afa 07f9258 -- server` fica vazio.
+
+Na execução verde final, o job de integração subiu o servidor no runner Linux e conferiu a API e a página:
+
+```text
+{"version":"0.1.0+88092e665f3fea1efcb870e01fe4e1671d22e88e","serverTimeUtc":"2026-11-11T18:18:46.6609054+00:00"}
+Servidor respondeu /api/health e serviu a página.
+```
+
+O hash `88092e6` é o commit de merge que o GitHub cria para testar o PR contra a `main`.
+
+**Proteção da `main`** (configurada em 11/11/2026 via API do GitHub): merge só por pull request; os checks `.NET (build e testes)`, `Web (lint, testes e build)` e `Integração (servidor servindo o web)` precisam estar verdes, com a branch atualizada; sem force push nem exclusão; as regras valem também para administradores.
 
 ## 6. Outra pessoa segue o README
 
