@@ -1,0 +1,93 @@
+# CI da Etapa 0: build e testes do .NET e do web a cada push e pull request.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dotnet:
+    name: .NET (build e testes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: server/**/packages.lock.json
+
+      - name: Restore (versões travadas)
+        run: dotnet restore server/IndustrialSim.sln --locked-mode
+
+      - name: Build (avisos são erros)
+        run: dotnet build server/IndustrialSim.sln --no-restore --configuration Release -warnaserror
+
+      - name: Testes
+        working-directory: server
+        run: dotnet test --no-build --configuration Release
+
+  web:
+    name: Web (lint, testes e build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  integration:
+    name: Integração (servidor servindo o web)
+    runs-on: ubuntu-latest
+    needs: [dotnet, web]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build do web para o wwwroot do servidor
+        working-directory: web
+        run: npm ci && npm run build
+
+      - name: Sobe o servidor e confere /api/health e a página
+        run: |
+          dotnet run --project server/src/IndustrialSim.Server --no-launch-profile --urls http://127.0.0.1:5080 > server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:5080/api/health > health.json && break
+            sleep 1
+          done
+          cat health.json
+          grep -q '"version":"0.1.0' health.json
+          curl -sf http://127.0.0.1:5080/ | grep -q '<div id="root">'
+          echo "Servidor respondeu /api/health e serviu a página."
+
+      - name: Log do servidor
+        if: always()
+        run: cat server.log || true
