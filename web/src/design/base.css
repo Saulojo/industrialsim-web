@@ -1,0 +1,68 @@
+/* Estilos-base. Só tokens: valores fixos são barrados pelo stylelint. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: var(--line-height-tight);
+}
+
+.app {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+}
+
+.app__header {
+  margin-bottom: var(--space-6);
+}
+
+.app__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.app__subtitle {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+.panel {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.panel__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.panel__row {
+  margin: var(--space-1) 0;
+}
+
+.panel__value {
+  font-family: var(--font-family-mono);
+}
+
+.panel__alarm {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-alarm);
+  background: var(--color-alarm-surface);
+}

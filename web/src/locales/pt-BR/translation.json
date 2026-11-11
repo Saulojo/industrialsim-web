@@ -1,0 +1,13 @@
+{
+  "app": {
+    "title": "IndustrialSim Web",
+    "subtitle": "Simulador de plantas industriais de processo contínuo"
+  },
+  "health": {
+    "heading": "Servidor",
+    "loading": "Consultando o servidor…",
+    "version": "Versão: <value>{{version}}</value>",
+    "serverTime": "Hora do servidor: <value>{{time}}</value>",
+    "error": "Não foi possível falar com o servidor."
+  }
+}
