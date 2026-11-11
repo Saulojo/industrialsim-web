@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** nenhuma etapa iniciada. Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapa 0 em validação em 11/11/2026: critérios 1–5 verificados, critério 6 (README seguido por outra pessoa) pendente. Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -117,6 +117,8 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D17 | Plataforma aberta ao público, com limites por conta e por IP, fila quando o servidor lotar, termos de uso e política de privacidade (LGPD). | Cumpre o objetivo de abrir o software a qualquer pessoa sem derrubar o servidor do laboratório. | Acesso restrito à universidade. |
 | D18 | Código escrito do zero; do protótipo, só os modelos 3D são aproveitados. | A arquitetura é outra (servidor autoritativo, web); código novo nasce testado e coerente com as decisões deste documento. | Portar código do protótipo Unity. |
 | D19 | Design numa trilha própria (D1: prototipagem e teste com usuários; D2: sistema de design), entre a Etapa 7 e a Etapa 10. Até lá, telas funcionais simples, já usando tokens (variáveis CSS). IHM segue a ISA-101. | Decisões de interface baseadas em teste com usuários; o redesenho vira troca de tokens e componentes, sem refazer telas; as telas da Fase 2 já nascem no design final. | Desenhar cada tela na etapa que a cria; design só no fim do projeto. |
+| D20 | (11/11/2026, Etapa 0) Testes .NET com xUnit v3 (4.x) sobre a Microsoft Testing Platform, ativada no `global.json` (`"test": {"runner": "Microsoft.Testing.Platform"}`), que também fixa o SDK 10 (`rollForward: latestFeature`). | É o caminho padrão do xUnit 4 com o SDK 10; dispensa `Microsoft.NET.Test.Sdk` e `xunit.runner.visualstudio`; local e CI usam o mesmo SDK, então os avisos tratados como erro são os mesmos nos dois. | VSTest (o xUnit 4 o trata como legado no SDK 10); deixar o SDK livre (o SDK 11 local daria avisos diferentes dos do CI). |
+| D21 | (11/11/2026, Etapa 0) TypeScript fixado em 6.0.x até o typescript-eslint aceitar o TypeScript 7; stylelint com `stylelint-declaration-strict-value` obriga tokens (`var(--…)`) em cor, fonte, espaçamento e raio. | O typescript-eslint 8.72 exige TypeScript abaixo de 6.1; a regra de tokens passa a ser verificada no lint, e não só combinada. | TypeScript 7 sem lint com tipos; tokens só por convenção. |
 
 ## Arquitetura e estrutura do repositório
 
