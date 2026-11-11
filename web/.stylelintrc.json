@@ -1,0 +1,50 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "plugins": ["stylelint-declaration-strict-value"],
+  "rules": {
+    "selector-class-pattern": [
+      "^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$",
+      { "message": "Use classes no padrão BEM em kebab-case (bloco__elemento--modificador)." }
+    ],
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "/color$/",
+        "background",
+        "fill",
+        "stroke",
+        "font-family",
+        "font-size",
+        "font-weight",
+        "line-height",
+        "/^margin/",
+        "/^padding/",
+        "gap",
+        "/radius$/",
+        "box-shadow"
+      ],
+      {
+        "ignoreVariables": true,
+        "ignoreFunctions": false,
+        "ignoreValues": [
+          "0",
+          "auto",
+          "none",
+          "inherit",
+          "initial",
+          "unset",
+          "transparent",
+          "currentcolor"
+        ],
+        "message": "Use um token de design (var(--...)) definido em src/design/tokens.css."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/design/tokens.css"],
+      "rules": {
+        "scale-unlimited/declaration-strict-value": null
+      }
+    }
+  ]
+}

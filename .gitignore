@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+TestResults/
+*.user
+.vs/
+
+# Build do web copiado para o servidor
+server/src/IndustrialSim.Server/wwwroot/
+
+# Node / web
+node_modules/
+web/dist/
+web/coverage/
+*.tsbuildinfo
+
+# Editores e sistema
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store

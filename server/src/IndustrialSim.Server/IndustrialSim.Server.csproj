@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSim.Core\IndustrialSim.Core.csproj" />
+    <ProjectReference Include="..\IndustrialSim.IO\IndustrialSim.IO.csproj" />
+    <ProjectReference Include="..\IndustrialSim.Contracts\IndustrialSim.Contracts.csproj" />
+  </ItemGroup>
+</Project>

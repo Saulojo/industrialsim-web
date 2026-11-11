@@ -1,0 +1,68 @@
+/*
+ * Tokens de design (D19). Toda cor, fonte, espaçamento e raio da interface vem daqui.
+ * Valores provisórios até a Etapa D2; o redesenho será troca destes valores.
+ * IHM no estilo ISA-101: fundo neutro; cor saturada só para alarmes e estados anormais.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Fontes */
+  --font-family-base:
+    system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', consolas, monospace;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.75rem;
+  --font-weight-regular: 400;
+  --font-weight-bold: 600;
+  --line-height-base: 1.5;
+  --line-height-tight: 1.2;
+
+  /* Espaçamentos (escala de 4 px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Raios */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  /* Cores: tema claro (padrão) */
+  --color-bg: #f2f3f4;
+  --color-surface: #fff;
+  --color-text: #1b1f23;
+  --color-text-muted: #50575e;
+  --color-border: #c9cdd1;
+  --color-accent: #2c5a85;
+  --color-alarm: #b3261e;
+  --color-alarm-surface: #fbe9e7;
+}
+
+/* Tema escuro: segue o sistema, salvo escolha explícita de tema claro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #15181b;
+    --color-surface: #1f2327;
+    --color-text: #e5e8eb;
+    --color-text-muted: #a5adb5;
+    --color-border: #3a4047;
+    --color-accent: #8fb8e0;
+    --color-alarm: #ff8a80;
+    --color-alarm-surface: #3b1c1a;
+  }
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #15181b;
+  --color-surface: #1f2327;
+  --color-text: #e5e8eb;
+  --color-text-muted: #a5adb5;
+  --color-border: #3a4047;
+  --color-accent: #8fb8e0;
+  --color-alarm: #ff8a80;
+  --color-alarm-surface: #3b1c1a;
+}

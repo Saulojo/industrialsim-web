@@ -1,2 +1,6 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Normaliza texto em LF no repositório e na cópia de trabalho (Prettier e CI esperam LF)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.glb binary
+*.ico binary

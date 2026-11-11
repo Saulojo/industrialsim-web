@@ -74,12 +74,14 @@ Ao fim da Fase 1, o usuário abre o site, pareia o mestre Modbus dele (CLP, CODE
 
 **Validação**
 
-- [ ] `dotnet build` e `dotnet test` passam sem avisos numa máquina limpa.
-- [ ] `npm ci`, `npm run lint`, `npm test` e `npm run build` passam.
-- [ ] Com o servidor rodando, a página mostra a versão vinda de `/api/health`.
-- [ ] Um texto fixo colocado de propósito num componente faz o lint falhar.
-- [ ] O CI fica verde num pull request e vermelho quando um teste é quebrado de propósito.
-- [ ] Outra pessoa segue o README e roda o projeto sem ajuda.
+- [x] `dotnet build` e `dotnet test` passam sem avisos numa máquina limpa.
+- [x] `npm ci`, `npm run lint`, `npm test` e `npm run build` passam.
+- [x] Com o servidor rodando, a página mostra a versão vinda de `/api/health`.
+- [x] Um texto fixo colocado de propósito num componente faz o lint falhar.
+- [x] O CI fica verde num pull request e vermelho quando um teste é quebrado de propósito.
+- [x] Outra pessoa segue o README e roda o projeto sem ajuda.
+
+Evidências: `docs/validacao/etapa-00.md`.
 
 ### Etapa 1 — Núcleo de simulação
 
