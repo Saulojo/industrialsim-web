@@ -25,7 +25,7 @@ Principais pacotes (versões exatas nos arquivos de lock): xunit.v3 4.0.3, Micro
 | 3 | Com o servidor rodando, a página mostra a versão vinda de `/api/health` | `dotnet run` num clone novo + navegador; teste de integração (`HealthEndpointTests`), teste do componente (`HealthStatus.test.tsx`) e job `integration` do CI | ✅ captura abaixo |
 | 4 | Um texto fixo colocado de propósito num componente faz o lint falhar | Demonstração manual em `App.tsx` + teste permanente `web/tests/lint-rules.test.ts` | ✅ ESLint saiu com código 1 |
 | 5 | O CI fica verde num PR e vermelho quando um teste é quebrado de propósito | PR #1: execução verde; commit que quebra um teste → vermelho; revert → verde | ✅ links na seção 5 |
-| 6 | Outra pessoa segue o README e roda o projeto sem ajuda | Ensaio feito pelo Claude num clone limpo seguindo só o README (ok). **Falta o teste com outra pessoa.** | ⏳ pendente |
+| 6 | Outra pessoa segue o README e roda o projeto sem ajuda | Ensaio feito pelo Claude num clone limpo seguindo só o README; depois, outra pessoa seguiu o README e rodou o projeto (resultado informado pelo Saulo) | ✅ |
 
 ## 1. Build e testes do .NET numa máquina limpa
 
@@ -158,7 +158,7 @@ O hash `88092e6` é o commit de merge que o GitHub cria para testar o PR contra 
 
 Ensaio prévio, feito pelo Claude num clone limpo da branch (Windows, SDK 10.0.404, Node 26.13.0), seguindo só o README: todos os passos funcionaram, e a página mostrou a versão.
 
-**Pendente:** o critério exige outra pessoa. Fica desmarcado no plano até o teste ser feito e o resultado registrado aqui.
+**Teste com outra pessoa:** em 11/11/2026, o Saulo informou que outra pessoa seguiu o README e rodou o projeto sem ajuda, com sucesso. Nome, sistema operacional e capturas desse teste não foram registrados; podem ser acrescentados aqui depois.
 
 ## Observações
 

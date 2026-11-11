@@ -4,7 +4,7 @@ Simulador de plantas industriais de processo contínuo que roda no navegador, ab
 
 ## Fontes da verdade
 
-- `docs/descritivo.md` — requisitos, decisões D01–D19, arquitetura, mapa Modbus, HART, convenções.
+- `docs/descritivo.md` — requisitos, decisões D01–D21, arquitetura, mapa Modbus, HART, convenções.
 - `docs/plano.md` — etapas, escopo e critérios de validação.
 
 Leia o descritivo inteiro e, do plano, "Como usar este plano" e a seção completa da etapa em questão antes de começar. Se algo aqui contradisser esses documentos, os documentos valem.
@@ -12,7 +12,7 @@ Leia o descritivo inteiro e, do plano, "Como usar este plano" e a seção comple
 ## Como trabalhar
 
 - Uma etapa do plano por sessão. Identifique a etapa pela mensagem do usuário ou pela linha "Estado atual" do descritivo; se não estiver claro, pergunte.
-- Siga as decisões D01–D19. Para contrariar alguma, aponte o conflito e proponha a mudança antes de alterar código.
+- Siga as decisões D01–D21. Para contrariar alguma, aponte o conflito e proponha a mudança antes de alterar código.
 - Código escrito do zero. Do protótipo Unity (Saulojo/IC_Proccess_Simulation) só os modelos 3D são aproveitados; o código dele é apenas referência.
 - Trabalhe numa branch por etapa (`etapa-NN-nome`), com commits pequenos e mensagens em português.
 - Escreva os testes junto com o código e rode-os antes de dizer que algo funciona (`dotnet test`, `npm test`, `npm run lint`).

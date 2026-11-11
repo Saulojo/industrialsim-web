@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapa 0 em validação em 11/11/2026: critérios 1–5 verificados, critério 6 (README seguido por outra pessoa) pendente. Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapa 0 concluída em 11/11/2026; próxima: Etapa 1 (núcleo de simulação). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -439,7 +439,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D19. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D21. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.

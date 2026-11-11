@@ -79,7 +79,7 @@ Ao fim da Fase 1, o usuário abre o site, pareia o mestre Modbus dele (CLP, CODE
 - [x] Com o servidor rodando, a página mostra a versão vinda de `/api/health`.
 - [x] Um texto fixo colocado de propósito num componente faz o lint falhar.
 - [x] O CI fica verde num pull request e vermelho quando um teste é quebrado de propósito.
-- [ ] Outra pessoa segue o README e roda o projeto sem ajuda. _Pendente: ensaio num clone limpo feito em 11/11/2026; falta o teste com outra pessoa (ver `docs/validacao/etapa-00.md`)._
+- [x] Outra pessoa segue o README e roda o projeto sem ajuda.
 
 Evidências: `docs/validacao/etapa-00.md`.
 
