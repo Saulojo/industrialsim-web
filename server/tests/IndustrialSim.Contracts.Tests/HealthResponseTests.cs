@@ -14,7 +14,7 @@ public class HealthResponseTests
 
         var json = JsonSerializer.Serialize(response, WebOptions);
 
-        Assert.Equal("{\"version\":\"9.9.9\",\"serverTimeUtc\":\"2026-11-11T12:00:00+00:00\"}", json);
+        Assert.Equal("{\"version\":\"1.2.3\",\"serverTimeUtc\":\"2026-11-11T12:00:00+00:00\"}", json);
     }
 
     [Fact]
