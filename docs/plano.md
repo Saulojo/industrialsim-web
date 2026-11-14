@@ -101,13 +101,15 @@ Evidências: `docs/validacao/etapa-00.md`.
 
 **Validação**
 
-- [ ] RK4: dy/dt = −y em t = 1 s, com dt = 0,01 s, coincide com e⁻¹ com erro < 1e-8.
-- [ ] O atuador de 1ª ordem chega a 63,2% do degrau em t = τ (erro < 0,5%).
-- [ ] Tanque: a variação de volume iguala ∫(Qin − Qout)dt, com erro relativo < 1e-6 em 600 s.
-- [ ] Bomba desligada e saída aberta: o nível cai.
-- [ ] O nível nunca fica negativo nem passa da altura do tanque.
-- [ ] Duas execuções com as mesmas entradas e semente geram o mesmo hash de estado; outra semente muda só o ruído.
-- [ ] Funções de transferência de 1ª e 2ª ordem convertidas para espaço de estados: a resposta ao degrau coincide com a solução analítica (erro < 1e-6).
+- [x] RK4: dy/dt = −y em t = 1 s, com dt = 0,01 s, coincide com e⁻¹ com erro < 1e-8.
+- [x] O atuador de 1ª ordem chega a 63,2% do degrau em t = τ (erro < 0,5%).
+- [x] Tanque: a variação de volume iguala ∫(Qin − Qout)dt, com erro relativo < 1e-6 em 600 s.
+- [x] Bomba desligada e saída aberta: o nível cai.
+- [x] O nível nunca fica negativo nem passa da altura do tanque.
+- [x] Duas execuções com as mesmas entradas e semente geram o mesmo hash de estado; outra semente muda só o ruído.
+- [x] Funções de transferência de 1ª e 2ª ordem convertidas para espaço de estados: a resposta ao degrau coincide com a solução analítica (erro < 1e-6).
+
+Evidências: `docs/validacao/etapa-01.md`.
 
 ### Etapa 2 — Prova de conceito HART-IP com PACTware
 

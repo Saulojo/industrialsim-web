@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapa 0 concluída em 11/11/2026; próxima: Etapa 1 (núcleo de simulação). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapa 1 concluída em 14/11/2026; próxima: Etapa 2 (prova de conceito HART-IP) ou Etapa 3 (motor de cenários). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -119,6 +119,7 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D19 | Design numa trilha própria (D1: prototipagem e teste com usuários; D2: sistema de design), entre a Etapa 7 e a Etapa 10. Até lá, telas funcionais simples, já usando tokens (variáveis CSS). IHM segue a ISA-101. | Decisões de interface baseadas em teste com usuários; o redesenho vira troca de tokens e componentes, sem refazer telas; as telas da Fase 2 já nascem no design final. | Desenhar cada tela na etapa que a cria; design só no fim do projeto. |
 | D20 | (11/11/2026, Etapa 0) Testes .NET com xUnit v3 (4.x) sobre a Microsoft Testing Platform, ativada no `global.json` (`"test": {"runner": "Microsoft.Testing.Platform"}`), que também fixa o SDK 10 (`rollForward: latestFeature`). | É o caminho padrão do xUnit 4 com o SDK 10; dispensa `Microsoft.NET.Test.Sdk` e `xunit.runner.visualstudio`; local e CI usam o mesmo SDK, então os avisos tratados como erro são os mesmos nos dois. | VSTest (o xUnit 4 o trata como legado no SDK 10); deixar o SDK livre (o SDK 11 local daria avisos diferentes dos do CI). |
 | D21 | (11/11/2026, Etapa 0) TypeScript fixado em 6.0.x até o typescript-eslint aceitar o TypeScript 7; stylelint com `stylelint-declaration-strict-value` obriga tokens (`var(--…)`) em cor, fonte, espaçamento e raio. | O typescript-eslint 8.72 exige TypeScript abaixo de 6.1; a regra de tokens passa a ser verificada no lint, e não só combinada. | TypeScript 7 sem lint com tipos; tokens só por convenção. |
+| D22 | (14/11/2026, Etapa 1) Gerador pseudoaleatório próprio para o ruído: xoshiro256\*\* com a semente expandida por SplitMix64 (`IndustrialSim.Core.Numerics.SeededRandom`), com teste contra vetores de referência. | A sequência do `System.Random` com semente não é garantida entre versões do .NET, e a sequência do ruído faz parte do determinismo (RNF02). | `System.Random` com semente. |
 
 ## Arquitetura e estrutura do repositório
 
@@ -439,7 +440,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D21. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D22. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.
