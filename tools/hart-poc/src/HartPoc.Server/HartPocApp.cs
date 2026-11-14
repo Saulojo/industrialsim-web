@@ -28,7 +28,7 @@ public static class HartPocApp
         builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 
         var hart = builder.Configuration.GetSection("Hart");
-        var revision = hart.GetValue("Revision", 5);
+        var revision = hart.GetValue("Revision", 7);
         var pollingAddress = hart.GetValue<byte>("PollingAddress", 0);
         var responseDelayMs = hart.GetValue("ResponseDelayMs", 0);
         var logDirectory = hart.GetValue("LogDirectory", "logs")!;

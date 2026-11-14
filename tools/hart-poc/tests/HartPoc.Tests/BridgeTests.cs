@@ -133,7 +133,7 @@ public class BridgeTests
         var status = await http.GetStringAsync("/api/status", cancellation);
 
         Assert.Contains("Conectar porta serial", page, StringComparison.Ordinal);
-        Assert.Contains("\"hartRevision\":5", status, StringComparison.Ordinal);
+        Assert.Contains("\"hartRevision\":7", status, StringComparison.Ordinal);
         Assert.Contains("\"tag\":\"PT-101\"", status, StringComparison.Ordinal);
     }
 

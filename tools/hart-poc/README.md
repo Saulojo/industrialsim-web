@@ -52,7 +52,7 @@ Opções do servidor (linha de comando):
 
 | Opção | Padrão | Para quê |
 | --- | --- | --- |
-| `--Hart:Revision=7` | `5` | Resposta do comando 0 no formato do HART 7. |
+| `--Hart:Revision=5` | `7` | Resposta do comando 0 no formato do HART 5. O DTM Generic H7 do PACTware só abre o instrumento em HART 7. |
 | `--Hart:PollingAddress=1` | `0` | Endereço de polling do instrumento. |
 | `--Hart:ResponseDelayMs=100` | `0` | Atraso artificial, para achar o limite do time-out do DTM. |
 | `--Hart:LogDirectory=pasta` | `logs` | Onde gravar o log de quadros em hexadecimal. |

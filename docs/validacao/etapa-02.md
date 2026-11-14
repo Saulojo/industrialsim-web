@@ -138,9 +138,40 @@ Limites desta medição:
   ser transmitido. Falta repetir com `EmuBR=yes`.
 - Falta comparar com o time-out configurado no DTM e medir com o servidor em outro PC.
 
-## Critérios 3, 4, 6 e 7
+## Critério 3 / S3 e S4 — PACTware encontra e lê o instrumento (em andamento)
 
-Pendentes: dependem das sessões com o PACTware.
+PACTware 6.3 com o "Serial HART Modem" (Serial HART CommDTM 1.0.0, FieldComm Group) na COM10 e o DTM de
+dispositivo "Generic H7" (FieldComm Group, 1.8.295; DD 7.12.15). Não há DTM da Smar instalado: o PACTware leu a
+identificação e caiu no genérico.
+
+Parâmetros do DTM de comunicação (tela de configuração): mestre primário, 5 preâmbulos, 3 retentativas, busca até
+o endereço 15. Não há campo de time-out; pelo log, o intervalo entre tentativas num endereço vazio é de cerca de
+0,44 s (4 tentativas por endereço).
+
+| Tentativa | Instrumento | Resultado |
+| --- | --- | --- |
+| 1 | HART 5, sem o comando 50 | Varredura encontra o instrumento (comandos 0, 12 e 13). Ao abrir a parametrização online, o DTM pede o comando 50, recebe o código 64 e a tela fica vazia. |
+| 2 | HART 5, com o comando 50 | O comando 50 é respondido, mas o DTM não pede mais nada e a tela continua vazia. |
+| 3 | **HART 7** | A tela "Online Parametrization" abre com as abas e os dados do instrumento. |
+
+Conclusão para a D09: com o Generic H7, o instrumento precisa se declarar **HART 7**.
+
+Valores mostrados pelo PACTware na tentativa 3 (aba "Informação do dispositivo"): fabricante 3E / Smar, tipo
+3E01 / LD301, identificação 929282 (= 0x0E2E02), tag PT-101, tag longa "PT-101 LD301 SIMULADO", data 14/11/2026,
+descrição "LD301 SIMULADO", mensagem "INDUSTRIALSIM WEB - PROVA HART", revisão do protocolo 7, revisões de
+dispositivo, software e hardware 3, 1 e 1. Todos iguais aos do simulador.
+
+Comandos pedidos pelo DTM ao abrir (log `hart-poc-20261114-125235-387.log`):
+
+- Respondidos: 0, 9, 12, 13, 14, 15, 16, 20 e 50.
+- Sem implementação (código 64): 31, 40, 44, 45, 47, 52, 53, 54, 72, 76 e 105. A tela abriu mesmo assim.
+- Nenhum erro de verificação e nenhum byte descartado.
+
+Pendente para fechar o critério: capturas das abas com PV, corrente e faixa.
+
+## Critérios 4, 6 e 7
+
+Pendentes: escrita de faixa e amortecimento, 30 minutos conectado e o resultado do portão.
 
 ## Pontos em aberto
 
