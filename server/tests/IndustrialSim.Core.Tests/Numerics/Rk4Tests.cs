@@ -2,7 +2,7 @@ using IndustrialSim.Core.Numerics;
 
 namespace IndustrialSim.Core.Tests.Numerics;
 
-public class Rk4Tests
+public class Rk4Tests(ITestOutputHelper output)
 {
     private const double Dt = 0.01;
 
@@ -17,6 +17,7 @@ public class Rk4Tests
         }
 
         double error = Math.Abs(y - Math.Exp(-1.0));
+        output.WriteLine($"y(1) = {y:R}; exp(-1) = {Math.Exp(-1.0):R}; erro = {error:E3}");
         Assert.True(error < 1e-8, $"erro = {error:E3}");
     }
 
