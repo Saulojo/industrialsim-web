@@ -89,6 +89,9 @@ public sealed class SignalSet : IReadOnlySignals
             $"O componente '{_owner}' não tem sinal de {_kind} chamado '{name}'. Disponíveis: {string.Join(", ", _names)}.");
     }
 
+    /// <summary>Acesso direto aos valores, para integradores vetoriais dentro do núcleo.</summary>
+    internal Span<double> AsSpan() => _values;
+
     /// <summary>Copia todos os valores de uma vez (mesma ordem de declaração).</summary>
     public void CopyFrom(ReadOnlySpan<double> values)
     {
