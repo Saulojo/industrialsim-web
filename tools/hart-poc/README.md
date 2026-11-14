@@ -1,4 +1,4 @@
-﻿# Prova de conceito HART serial (Etapa 2)
+# Prova de conceito HART serial (Etapa 2)
 
 Ferramenta de teste, fora do produto. Responde à pergunta da Etapa 2: o PACTware consegue configurar um
 instrumento simulado no servidor pela serial, passando por uma COM virtual (com0com) e pelo navegador (Web Serial)?
