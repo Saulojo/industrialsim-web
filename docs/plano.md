@@ -34,8 +34,8 @@ Cada fase termina num marco que já pode ser usado em aula: primeiro o controle 
 Fase 1 · MVP              Fase 2 · Plataforma        Fase 3 · Imersão           Fase 4 · CLP web
 E0  Fundação e CI         E10 Contas e plantas       E14 3D e 1ª pessoa         E21 Runtime soft-PLC
 E1  Núcleo numérico       E11 Compartilhamento       E15 Modelo realista        E22 Editor Ladder
-E2  PoC HART-IP ◆         E12 Turmas/professor       E16 Núcleo HART            E23 Editor FBD
-E3  Motor de cenários     E13 Abertura pública       E17 HART-IP/PACTware
+E2  PoC HART serial ◆     E12 Turmas/professor       E16 Núcleo HART            E23 Editor FBD
+E3  Motor de cenários     E13 Abertura pública       E17 HART serial/PACTware
 E4  I/O e formatos                                   E18 Config. HART web
 E5  Tempo real                                       E19 VR (WebXR)
 E6  Modbus por planta                                E20 Efeitos visuais
@@ -48,7 +48,7 @@ Trilha de design (entre E7 e E10): D1 Protótipo e teste com usuários → D2 Si
 (◆ em E2 = portão de decisão do HART)
 ```
 
-Em destaque, a Etapa 2: a prova de conceito HART-IP vem cedo por ser o maior risco técnico. Ela termina num portão de decisão (◆) e pode correr junto com a Etapa 1; a Etapa 15 pode correr em paralelo a partir da 4; a trilha de design (D1 e D2) fica entre as Etapas 7 e 10.
+Em destaque, a Etapa 2: a prova de conceito do PACTware pela serial (com0com + Web Serial) vem cedo por ser o maior risco técnico. Ela termina num portão de decisão (◆) e pode correr junto com a Etapa 1; a Etapa 15 pode correr em paralelo a partir da 4; a trilha de design (D1 e D2) fica entre as Etapas 7 e 10.
 
 ## Fase 1 — Fundação e MVP
 
@@ -111,50 +111,69 @@ Evidências: `docs/validacao/etapa-00.md`.
 
 Evidências: `docs/validacao/etapa-01.md`.
 
-### Etapa 2 — Prova de conceito HART-IP com PACTware
+### Etapa 2 — Prova de conceito HART serial com PACTware (com0com + Web Serial)
 
-**Objetivo:** descobrir cedo se o PACTware configura um instrumento simulado via HART-IP, sem instalar nada do projeto. É o maior risco técnico, por isso vem antes do resto do HART.
+**Objetivo:** descobrir cedo se o PACTware configura um instrumento simulado no servidor pela serial, usando o DTM de modem HART numa porta COM virtual (com0com) ligada ao navegador pela Web Serial. No PC do usuário, só o driver gratuito com0com é instalado; nada do projeto. É o maior risco técnico, por isso vem antes do resto do HART.
 
 **Depende de:** Etapa 0 (pode correr junto com a Etapa 1).
+
+**Como funciona**
+
+```text
+PACTware (DTM de modem HART) ──► COM10 ═══ com0com ═══ COM11 ◄── Navegador (Web Serial)
+                                                                      │ WebSocket (bytes crus)
+                                                                      ▼
+                                                         Servidor: instrumento HART simulado
+```
+
+O navegador só repassa bytes nos dois sentidos; quem monta os quadros e responde aos comandos HART é o servidor (D01 e D09).
 
 **Escopo**
 
 - Consultar o trabalho HART do protótipo só como referência; todo o código desta etapa é novo.
-- Servidor HART-IP mínimo em .NET, fora do produto (`tools/hart-poc`): comandos 0, 1, 3, 13, 15, 34 e 35 para um transmissor com valor senoidal.
-- Testar com o cliente HART-IP da FieldComm (WindowsHartIpClient) como referência do protocolo.
-- Testar com PACTware, DTMs de comunicação HART-IP disponíveis (ex.: versão de teste do DTM Softing smartLink) e o DTM HART genérico de dispositivo.
-- Medir o plano B: par de COM virtuais (com0com) com o DTM de modem HART.
-- Registrar revisão HART necessária, topologia (gateway ou dispositivo direto), identificação aceita e se a porta é configurável.
+- Servidor mínimo em .NET, fora do produto (`tools/hart-poc`): escravo HART com os comandos 0, 1, 3, 13, 15, 34 e 35 para um transmissor com valor senoidal, e um endpoint WebSocket que recebe e devolve bytes crus. O servidor remonta os quadros a partir do fluxo de bytes (preâmbulos, delimitador, contagem de bytes, checksum), porque uma mensagem do WebSocket pode trazer um quadro pela metade ou mais de um.
+- Página mínima de ponte (`tools/hart-poc/web`), em Chrome ou Edge: botão “Conectar porta serial”, abertura da COM11 em 1200 baud, 8 bits, paridade ímpar e 1 stop bit, repasse de bytes nos dois sentidos, contadores e log em hexadecimal. É ferramenta de teste fora do produto; as regras de idioma e de tokens de design valem só para o `web/`.
+- A Web Serial exige contexto seguro: a página é servida em `localhost`. No teste com o servidor em outro PC, a página continua em `localhost` e só o WebSocket vai ao servidor remoto.
+- Instalar e configurar o com0com no Windows 10/11 (versão assinada, compatível com Secure Boot), com o par renomeado para COM10 e COM11; testar com e sem a opção “emulate baud rate”.
+- Testar com PACTware, o DTM de comunicação HART para modem serial que o acompanha e o DTM HART genérico de dispositivo.
+- Registrar: revisão HART necessária, identificação aceita, se o DTM mexe em RTS/DTR ou exige CD/CTS, se espera eco, e o time-out e as retentativas configuráveis no DTM.
+- Medir o tempo de resposta (do último byte do pedido ao primeiro byte da resposta, visto na COM10) com o servidor no mesmo PC e com o servidor em outro PC da rede.
+- Rascunho do guia `docs/guias/com0com.md`: instalação, assinatura do driver, renomear as portas e opções recomendadas.
 
-**Entregáveis:** `tools/hart-poc/` e `docs/validacao/etapa-02.md` com a decisão.
+**Fora do escopo:** HART-IP (fica como extensão; ver o portão abaixo) e o configurador HART web (Etapa 18).
+
+**Entregáveis:** `tools/hart-poc/`, `docs/guias/com0com.md` (rascunho) e `docs/validacao/etapa-02.md` com a decisão.
 
 **Validação**
 
-- [ ] O cliente da FieldComm conecta e lê a identificação (comando 0) e a PV do instrumento simulado.
-- [ ] Resultado registrado para o PACTware via HART-IP: conecta, encontra o dispositivo, lê a PV e escreve faixa e amortecimento, ou o ponto exato onde falha.
-- [ ] Resultado registrado para o caminho serial com COM virtual.
-- [ ] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com topologia e revisão HART definidas.
+- [ ] com0com instalado e funcionando no Windows do teste, com versão, assinatura e estado do Secure Boot registrados; par COM10/COM11 criado.
+- [ ] A página de ponte abre a COM11 pela Web Serial e repassa bytes nos dois sentidos (teste com um terminal serial na COM10 e o servidor ecoando os bytes).
+- [ ] O PACTware, com o DTM de modem HART na COM10, encontra o instrumento simulado (comando 0) e lê PV, corrente e faixa.
+- [ ] O PACTware escreve faixa e amortecimento, e a mudança aparece no log do servidor e na leitura seguinte.
+- [ ] Tempo de resposta medido com o servidor local e com o servidor em outro PC da rede, comparado ao time-out do DTM.
+- [ ] 30 minutos conectado sem queda nem erro de comunicação no PACTware.
+- [ ] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com revisão HART e parâmetros da serial definidos.
 
-**Portão de decisão: caminho do HART (◆)**
+**Portão de decisão: caminho do PACTware (◆)**
 
 Ao fim da etapa, os critérios medidos abaixo decidem o escopo das Etapas 17 e 18. O resultado, com data e evidências, vai para a decisão D09 do descritivo antes de seguir.
 
 | Critério | Como medir |
 | --- | --- |
-| C1 Conexão | O PACTware conecta ao servidor HART-IP do simulador |
-| C2 Descoberta | Encontra o instrumento simulado na busca de dispositivos |
-| C3 Leitura | Lê PV, corrente e faixa |
-| C4 Escrita | Escreve faixa e amortecimento, e o efeito aparece no simulador |
-| C5 Custo | O DTM de comunicação HART-IP usado é gratuito |
-| C6 Instalação | Nada além do PACTware e de DTMs precisa ser instalado |
-| C7 Estabilidade | 30 minutos conectado sem queda |
-| C8 Isolamento | A porta por planta (ou o pareamento por IP) funciona com o DTM |
+| S1 Driver | O com0com instala e funciona no Windows 10/11 com Secure Boot ligado |
+| S2 Ponte | Chrome e Edge abrem a COM virtual pela Web Serial em 1200 baud, 8 bits, paridade ímpar e 1 stop bit |
+| S3 Descoberta | O PACTware encontra o instrumento simulado na busca de dispositivos |
+| S4 Leitura | Lê PV, corrente e faixa |
+| S5 Escrita | Escreve faixa e amortecimento, e o efeito aparece no simulador |
+| S6 Custo | PACTware, DTMs usados e com0com são gratuitos |
+| S7 Tempo | Resposta dentro do time-out do DTM com o servidor em outro PC da rede (e, se possível, por uma conexão de internet comum) |
+| S8 Estabilidade | 30 minutos conectado sem queda |
 
 | Resultado | Quando | O que fazemos |
 | --- | --- | --- |
-| A — HART-IP aprovado | C1 a C8 atendidos | Etapa 17 implementa o HART-IP completo como caminho do PACTware. Etapa 18 (configurador web) segue como caminho sem instalação, com foco didático. |
-| B — Aprovado com DTM pago | C1–C4, C6–C8 atendidos, mas C5 falha | Etapa 17 mantém o HART-IP para quem tiver o DTM e para outras ferramentas. Etapa 18 vira o caminho principal e completo. O guia explica o custo do DTM. |
-| C — Reprovado | Algum entre C1 e C4 falha | Etapa 17 se reduz a HART-IP para ferramentas abertas (cliente FieldComm, scripts) ou sai do plano. Etapa 18 é o caminho principal. O “conector local HART serial” passa de extensão a etapa opcional depois da Fase 3, para quem precisa do PACTware. |
+| A — Serial aprovado | S1 a S8 atendidos | Etapa 17 implementa a ponte serial no site como caminho do PACTware, com o guia completo. Etapa 18 (configurador web) segue como caminho sem instalação, com foco didático. O HART-IP fica como extensão. |
+| B — Aprovado só com baixa latência | S1–S6 e S8 atendidos, mas S7 falha pela internet | Etapa 17 implementa a ponte serial, e o guia indica o uso na rede do laboratório e os ajustes de time-out e retentativas do DTM. A extensão HART-IP ganha prioridade para quem acessa de fora. |
+| C — Reprovado | Algum entre S1 e S5 falha | Etapa 17 começa por uma prova HART-IP (servidor mínimo, cliente HART-IP da FieldComm e PACTware com DTM HART-IP) e só a implementa se ela passar; senão, sai do plano. Etapa 18 vira o caminho principal e completo. |
 
 ### Etapa 3 — Motor de cenários
 
@@ -310,7 +329,7 @@ Ao fim da etapa, os critérios medidos abaixo decidem o escopo das Etapas 17 e 1
 
 - Dockerfile multiestágio (build do web e do servidor), `docker-compose.yml` e Caddy com HTTPS.
 - Serviço com reinício automático; logs persistidos com rotação.
-- Firewall: 443, 15000–15999 e 16000–16999 (reservada para HART-IP); todo o resto fechado.
+- Firewall: 443 e 15000–15999; todo o resto fechado. A faixa 16000–16999 só abre se o HART-IP for adotado (ver D09).
 - Com a TI: DNS, certificado e IP público, ou acesso por VPN.
 - Opcional: arquivos estáticos em CDN se a banda do laboratório limitar.
 - Roteiro de implantação e atualização em `docs/implantacao.md`.
@@ -393,7 +412,7 @@ Ao fim da Fase 2, qualquer pessoa, de qualquer lugar, cria conta (ou entra como 
 - ASP.NET Core Identity com PostgreSQL (EF Core): cadastro por e-mail com verificação, política de senha, recuperação de senha; login social (Google, Microsoft, GitHub).
 - Modo visitante: planta temporária, sem salvar nem compartilhar, até 60 minutos, com limite por IP.
 - Planta salva: dono, cenário, configurações da Etapa 8, estado e histórico de ensaios. Ao abrir, vira instância; sem ninguém conectado por 30 minutos, hiberna gravando o estado; ao reabrir, continua de onde parou.
-- Ao reabrir, o servidor tenta devolver as mesmas portas Modbus e HART-IP.
+- Ao reabrir, o servidor tenta devolver a mesma porta Modbus (e a HART-IP, se adotado).
 - Página “Minhas plantas”: criar, renomear, duplicar e excluir.
 - Conta: editar perfil, exportar os próprios dados e excluir a conta.
 - Migrações de banco versionadas e backup diário.
@@ -465,7 +484,7 @@ Ao fim da Fase 2, qualquer pessoa, de qualquer lugar, cria conta (ou entra como 
 - Verificação no CI de que nenhuma chave de tradução está faltando.
 - Limites: plantas em execução por conta e por IP, total de instâncias no servidor, fila com aviso quando lotar, requisições por IP, bloqueio temporário após abuso.
 - Proteção contra robôs no cadastro.
-- Termos de uso, política de privacidade (LGPD), página “sobre” e contato; aviso de que Modbus e HART-IP não têm criptografia.
+- Termos de uso, política de privacidade (LGPD), página “sobre” e contato; aviso de que o Modbus (e o HART-IP, se adotado) não tem criptografia.
 - Painel mínimo de administração: uso, plantas ativas e bloqueios.
 - Monitoramento com alerta (ex.: e-mail quando a CPU passar de 80%).
 
@@ -547,41 +566,46 @@ Ao fim da Fase 3, a caldeira tem modelo realista, aparece em 3D e em VR, mostra 
 - Modelo de instrumento: PV, faixa, unidade, amortecimento, corrente, corrente fixa, trim, tag, mensagem, bit de configuração alterada e falhas.
 - Efeitos na planta pela imagem de I/O: faixa → contagens; amortecimento → filtro; corrente fixa → valor forçado.
 - Instrumentos declarados no `scenario.json`.
+- Leitor de quadros a partir de um fluxo de bytes (para a ponte serial): acha o início pelos preâmbulos e delimitador, aceita quadros que chegam em pedaços e descarta lixo.
 
 **Validação**
 
-- [ ] Vetores de teste de quadros (da prova de conceito da Etapa 2 e do cliente FieldComm) codificados e decodificados byte a byte.
+- [ ] Vetores de teste de quadros (gravados do PACTware na prova de conceito da Etapa 2) codificados e decodificados byte a byte.
 - [ ] Checksum errado ou quadro truncado: nenhuma resposta e nenhuma exceção.
 - [ ] Faixa de LT-101 alterada de 0–2 m para 0–1 m com nível em 0,5 m: no formato 0–27648, o valor no Modbus passa de 6912 para 13824.
 - [ ] Amortecimento de 2 s: a resposta a degrau atinge 63,2% em 2 s (erro < 2%).
 - [ ] Corrente fixa em 12 mA: o Modbus mostra 13824 até sair do modo.
 - [ ] O bit de configuração alterada sobe após uma escrita e desce com o comando 38.
 
-### Etapa 17 — HART-IP e PACTware (conforme o portão da Etapa 2)
+### Etapa 17 — HART serial e PACTware (conforme o portão da Etapa 2)
 
-**Objetivo:** cada planta expõe os próprios instrumentos via HART-IP, no escopo definido pelo resultado do portão de decisão da Etapa 2.
+**Objetivo:** o PACTware configura os instrumentos de cada planta pela ponte serial do site (com0com + Web Serial), no escopo definido pelo resultado do portão de decisão da Etapa 2.
 
-**Depende de:** Etapas 2 (resultado do portão), 6 (pareamento) e 16.
+**Depende de:** Etapas 2 (resultado do portão), 7 (WebSocket), 11 (papéis) e 16.
 
 **Escopo comum**
 
-- Servidor HART-IP por planta: portas 16000–16999, ou a 5094 com pareamento por IP, conforme a Etapa 2; TCP e UDP; sessões HART-IP, keep-alive e timeouts.
-- Topologia definida na Etapa 2 (gateway com subdispositivos ou dispositivo direto).
-- Pareamento reaproveitado da Etapa 6.
+- Na aba “Instrumentos” da planta, botão “Conectar porta serial” (Chrome e Edge): a Web Serial abre a COM virtual e o navegador repassa os bytes pelo WebSocket da planta ao núcleo HART da Etapa 16, sem interpretar HART.
+- Os quatro instrumentos respondem em multidrop, cada um no seu endereço de polling, para o PACTware encontrar todos pela mesma porta.
+- Parâmetros da serial e da revisão HART definidos na Etapa 2.
+- Permissões pelos papéis da Etapa 11: dono e operador conectam a porta serial; observador não.
+- Aviso na tela quando o navegador não tem Web Serial, com link para o configurador web.
 - Eventos HART visíveis na IHM e no log (ex.: “faixa de LT-101 alterada pelo PACTware”).
+- Guia `docs/guias/pactware.md`, que inclui a instalação do com0com (a partir do rascunho da Etapa 2).
 
 **Por resultado do portão**
 
-- **A:** guia `docs/guias/pactware.md` completo; o PACTware é o caminho principal para quem usa a ferramenta.
-- **B:** mesmo servidor; o guia explica a licença do DTM e aponta o configurador web como alternativa gratuita.
-- **C:** apenas o servidor HART-IP para ferramentas abertas (cliente FieldComm, scripts), ou a etapa sai do plano, conforme registrado na D09.
+- **A:** a ponte serial é o caminho do PACTware; o guia está completo; o HART-IP fica como extensão.
+- **B:** mesma ponte; o guia explica o limite de latência e os ajustes do DTM; a extensão HART-IP entra na fila logo depois desta etapa.
+- **C:** a etapa começa pela prova HART-IP descrita no portão e só a implementa (porta por planta e pareamento da Etapa 6) se ela passar; senão, sai do plano, conforme registrado na D09.
 
 **Validação**
 
-- [ ] O cliente HART-IP da FieldComm lista os quatro instrumentos e lê e escreve seus parâmetros.
-- [ ] (Resultados A ou B) O PACTware, com o DTM escolhido, encontra os instrumentos, lê a PV e muda faixa e amortecimento; o efeito aparece no Modbus e na IHM.
-- [ ] Com duas plantas simultâneas, o cliente de uma não enxerga os instrumentos da outra.
-- [ ] Uma queda da conexão HART-IP não afeta a planta nem o Modbus.
+- [ ] (Resultados A ou B) O PACTware, pela ponte serial, encontra os quatro instrumentos, lê a PV e muda faixa e amortecimento; o efeito aparece no Modbus e na IHM.
+- [ ] Com duas plantas abertas em PCs diferentes, cada PACTware só enxerga os instrumentos da própria planta.
+- [ ] Fechar a aba ou desconectar a porta não afeta a planta nem o Modbus; o PACTware apenas perde a comunicação.
+- [ ] Um observador não consegue conectar a porta serial.
+- [ ] Teste automático da ponte: um fluxo de bytes gravado do PACTware, entregue em pedaços de tamanhos variados, gera as mesmas respostas.
 - [ ] O escopo executado bate com o resultado registrado na D09.
 
 ### Etapa 18 — Configurador HART web
@@ -739,7 +763,7 @@ Estas entregas ficam fora da sequência principal. Quando uma for escolhida, ela
 | Segundo cenário 3D (ex.: tanques acoplados ou trocador de calor) | Provar, com 3D, que um cenário novo não exige código novo | Marco 3 |
 | PWA e publicação na Meta Quest Store (Bubblewrap) | Instalar como aplicativo no PC e no Quest, a partir do próprio site | Marco 3 |
 | Aplicativo desktop (Tauri) com servidor embutido | Uso sem internet e sem o PC do laboratório, com IP e porta locais escolhidos pelo usuário | Marco 3 |
-| Conector local para HART serial (COM virtual) | PACTware via modem, como instalação opcional; vira etapa opcional se o portão da Etapa 2 der resultado C | Etapa 17 |
+| HART-IP para o PACTware e outras ferramentas | Acesso pelo DTM HART-IP, sem COM virtual, e por ferramentas como o cliente da FieldComm; prioritária se o portão da Etapa 2 der resultado B | Etapa 17 |
 | Driver S7 para o PLCSIM comum | Usuários de TIA Portal sem PLCSIM Advanced nem CLP real | Marco 1 |
 | Som ambiente (bomba, vapor, queimador, buzina de alarme) | Imersão e ambientação | Etapa 20 |
 | Posicionadores HART nas válvulas | Diagnóstico de válvula (curso, atrito) por HART | Etapa 17 |
