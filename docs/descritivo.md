@@ -280,7 +280,7 @@ Os transmissores LT-101, PT-101, FT-101 e FT-102 são dispositivos HART simulado
 - Revisão do protocolo: HART 7 por padrão; HART 5 se o DTM genérico exigir.
 - Serial: parâmetros aceitos pelo DTM de modem HART, comportamento de RTS/CTS e eco, e o tempo de resposta máximo antes do time-out.
 - Endereçamento: os quatro instrumentos em multidrop na mesma porta, cada um com seu endereço de polling.
-- Identificação (fabricante e tipo de dispositivo): valores que façam o PACTware usar o DTM HART genérico, sem imitar marca real.
+- Identificação (fabricante e tipo de dispositivo): valores que façam o PACTware usar o DTM HART genérico, sem imitar marca real. Exceção (14/11/2026, a pedido do autor): na prova de conceito da Etapa 2 (`tools/hart-poc`, fora do produto), o instrumento se identifica como o transmissor de pressão Smar LD301 (fabricante `0x3E`, tipo `0x01`; HCF_SPEC-183), só para teste. A identificação dos instrumentos do produto é definida no resultado do portão.
 
 **Comandos e efeito na simulação**
 
