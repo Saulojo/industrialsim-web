@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\HartPoc.Core\HartPoc.Core.csproj" />
+    <ProjectReference Include="..\..\src\HartPoc.Server\HartPoc.Server.csproj" />
+  </ItemGroup>
+</Project>

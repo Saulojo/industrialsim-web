@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>hart-serial</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HartPoc.Core\HartPoc.Core.csproj" />
+    <PackageReference Include="System.IO.Ports" />
+  </ItemGroup>
+</Project>

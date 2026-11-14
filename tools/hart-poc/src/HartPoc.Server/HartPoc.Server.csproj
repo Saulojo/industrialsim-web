@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\HartPoc.Core\HartPoc.Core.csproj" />
+  </ItemGroup>
+
+  <!-- A página de ponte (tools/hart-poc/web) é servida como arquivos estáticos a partir da pasta de saída. -->
+  <ItemGroup>
+    <Content Include="..\..\web\**\*" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
