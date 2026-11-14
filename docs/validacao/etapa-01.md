@@ -186,4 +186,6 @@ As seções citadas nos comentários do código foram escritas de memória e dev
 
 - [x] Push da branch e pull request aberto.
 - [x] Critérios marcados em `docs/plano.md`, "Estado atual" atualizado e D22 registrada em `docs/descritivo.md` (confirmado pelo Saulo em 14/11/2026).
-- [ ] CI verde no pull request e integração à `main`.
+- [x] CI verde no pull request: no commit `610958e`, os jobs ".NET (build e testes)", "Web (lint, testes e build)" e "Integração" passaram nas duas execuções ([push](https://github.com/Saulojo/industrialsim-web/actions/runs/43550364049) e [pull request](https://github.com/Saulojo/industrialsim-web/actions/runs/43550367383)). Os 94 testes do .NET passaram também no Linux.
+- [x] Conferência feita pelo Saulo em 14/11/2026 ("tudo verificado").
+- [ ] Integração do pull request à `main`.
