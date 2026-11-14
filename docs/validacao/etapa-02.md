@@ -167,11 +167,44 @@ Comandos pedidos pelo DTM ao abrir (log `hart-poc-20261114-125235-387.log`):
 - Sem implementação (código 64): 31, 40, 44, 45, 47, 52, 53, 54, 72, 76 e 105. A tela abriu mesmo assim.
 - Nenhum erro de verificação e nenhum byte descartado.
 
-Pendente para fechar o critério: capturas das abas com PV, corrente e faixa.
+Leitura nas abas "Device Variables" e "Analog Channel" (capturas do usuário, 14/11/2026): PV de 38,842 kPa e
+depois 44,890 kPa (a senoide do simulador vai de 5 a 45 kPa), faixa 0,000–50,000 kPa, amortecimento 0,000 s,
+função de transferência linear, alarme alto, limites do sensor ±50,000 kPa e alcance mínimo 0,417 kPa — todos
+iguais aos do simulador. A corrente é lida pelo comando 2 (no log, 9,67 mA e 35,4% às 13:02:09).
 
-## Critérios 4, 6 e 7
+Pendente para fechar o critério: captura da tela do PACTware que mostra a corrente de malha.
 
-Pendentes: escrita de faixa e amortecimento, 30 minutos conectado e o resultado do portão.
+## Critério 4 / S5 — PACTware escreve faixa e amortecimento
+
+Na aba "Analog Channel", valor digitado e botão "Apply" do rodapé. Log do servidor:
+
+```text
+13:02:09.650 Comando 35: faixa de 0–50 kPa para 0–40 kPa (unidade recebida: código 12)
+   comando 35, dados 0C4220000000000000 -> código de resposta 0
+13:02:09.650 TX FFFFFFFFFF86BE010E2E02230B00400C42200000000000001D
+13:02:26.964 RX FFFFFFFFFF82BE010E2E020F0010                                  (comando 15: leitura seguinte)
+13:02:26.964 TX FFFFFFFFFF86BE010E2E020F14004000000C422000000000000000000000FBFA002F
+13:02:51.356 Comando 34: amortecimento de 0 s para 2 s
+   comando 34, dados 40000000 -> código de resposta 0
+13:02:51.357 TX FFFFFFFFFF86BE010E2E0222060044400000003B
+```
+
+- A leitura seguinte (comando 15) traz o valor superior `42200000` = 40,0 kPa.
+- O status passa a `0x40` (configuração alterada) depois da primeira escrita.
+- Estado do simulador em `/api/status` depois das escritas: `upperRangeKpa: 40`, `dampingS: 2`,
+  `configurationChangeCounter: 3` (o PACTware mandou o comando 35 duas vezes, com o mesmo valor).
+- Efeito na saída: com a PV em 25,19 kPa, a corrente foi a 14,08 mA (62,97% de 0–40 kPa); na faixa antiga seria
+  12,06 mA.
+
+Pendente: captura do PACTware com os valores novos e uma leitura do amortecimento (comando 15) depois da escrita.
+
+Observação: o botão "Aplicar valores" da mesma aba não grava o valor digitado; ele abre o assistente que usa a
+pressão aplicada como ponto de 4 ou 20 mA (comandos 36 e 37, que a prova não implementa: código 64, mostrado pelo
+DTM como "0x40 Undefined").
+
+## Critérios 6 e 7
+
+Pendentes: 30 minutos conectado e o resultado do portão.
 
 ## Pontos em aberto
 
