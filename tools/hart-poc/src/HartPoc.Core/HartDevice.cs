@@ -57,6 +57,17 @@ public sealed class HartDevice
     private const double MinimumCurrentMa = 3.8;
     private const double MaximumCurrentMa = 20.5;
 
+    // Tabelas comuns (HCF_SPEC-183 r22.0): classificação 65 = pressão (tabela 21); unidades 39 = mA e
+    // 57 = por cento; códigos de variável 244 a 246 (tabela 34); status 0xC0 = boa, 0x30 = ruim e constante.
+    private const byte ClassificationPressure = 65;
+    private const byte UnitsMilliamperes = 39;
+    private const byte UnitsPercent = 57;
+    private const byte VariablePercentOfRange = 244;
+    private const byte VariableLoopCurrent = 245;
+    private const byte VariablePrimary = 246;
+    private const byte VariableStatusGood = 0xC0;
+    private const byte VariableStatusBadConstant = 0x30;
+
     private const byte NotUsed = 250;
     private const byte None = 251;
     private const byte AlarmHigh = 0;
@@ -102,6 +113,8 @@ public sealed class HartDevice
     public byte PollingAddress { get; init; }
 
     public string Tag { get; init; } = "PT-101";
+
+    public string LongTag { get; init; } = "PT-101 LD301 SIMULADO";
 
     public string Descriptor { get; init; } = "LD301 SIMULADO";
 
@@ -309,6 +322,17 @@ public sealed class HartDevice
                 return (Success, data);
             }
 
+            case 7:
+                // Endereço de polling e modo da corrente de malha (1 = habilitada; tabela 16).
+                return (Success, [PollingAddress, 1]);
+
+            case 8:
+                // Classificação das variáveis dinâmicas (tabela 21): PV = pressão; as demais não existem.
+                return (Success, [ClassificationPressure, NotUsed, NotUsed, NotUsed]);
+
+            case 9:
+                return ReadDeviceVariablesWithStatus(request);
+
             case 11:
                 // Identificação pela tag: só quem tem a tag responde; os outros ficam calados.
                 if (request.Length < 6)
@@ -353,6 +377,17 @@ public sealed class HartDevice
             case 16:
                 return (Success, [(byte)(FinalAssemblyNumber >> 16), (byte)(FinalAssemblyNumber >> 8), (byte)FinalAssemblyNumber]);
 
+            case 20:
+            {
+                // Tag longa: 32 caracteres Latin-1, completados com zeros.
+                var data = new byte[32];
+                System.Text.Encoding.Latin1.GetBytes(LongTag.AsSpan(0, Math.Min(32, LongTag.Length)), data);
+                return (Success, data);
+            }
+
+            case 33:
+                return ReadDeviceVariables(request);
+
             case 34:
                 return WriteDamping(request);
 
@@ -366,9 +401,108 @@ public sealed class HartDevice
                 // Sem status adicional: tudo zero (6 bytes no HART 5; 9 no HART 7).
                 return (Success, new byte[_identity.HartRevision >= 7 ? 9 : 6]);
 
+            case 50:
+                // Variável de dispositivo de cada variável dinâmica: só a PV existe (variável 0).
+                return (Success, [0, NotUsed, NotUsed, NotUsed]);
+
             default:
                 return (CommandNotImplemented, []);
         }
+    }
+
+    // Valor, unidade e classificação de uma variável de dispositivo; os códigos 244 a 246 são os da
+    // tabela 34 (percentual da faixa, corrente de malha e PV).
+    private bool TryGetVariable(byte code, out byte units, out byte classification, out double value)
+    {
+        var (current, percent, _) = Output();
+        switch (code)
+        {
+            case 0 or VariablePrimary:
+                (units, classification, value) = (PressureUnits.Kilopascal, ClassificationPressure, _pvKpa);
+                return true;
+            case VariablePercentOfRange:
+                (units, classification, value) = (UnitsPercent, 0, percent);
+                return true;
+            case VariableLoopCurrent:
+                (units, classification, value) = (UnitsMilliamperes, 0, current);
+                return true;
+            default:
+                (units, classification, value) = (NotUsed, 0, double.NaN);
+                return false;
+        }
+    }
+
+    private static void WriteNotANumber(Span<byte> destination)
+    {
+        // Valor de "variável não suportada": 7F A0 00 00 (HCF_SPEC-127 r7.1, comando 9).
+        destination[0] = 0x7F;
+        destination[1] = 0xA0;
+        destination[2] = 0x00;
+        destination[3] = 0x00;
+    }
+
+    private (byte ResponseCode, byte[]? Data) ReadDeviceVariablesWithStatus(byte[] request)
+    {
+        if (request.Length == 0)
+        {
+            return (TooFewDataBytes, []);
+        }
+
+        // Status estendido, 8 bytes por variável pedida (até 8) e o carimbo de tempo de 4 bytes.
+        var slots = Math.Min(request.Length, 8);
+        var data = new byte[1 + (slots * 8) + 4];
+        for (var i = 0; i < slots; i++)
+        {
+            var slot = data.AsSpan(1 + (i * 8), 8);
+            slot[0] = request[i];
+            if (TryGetVariable(request[i], out var units, out var classification, out var value))
+            {
+                slot[1] = classification;
+                slot[2] = units;
+                WriteFloat(slot[3..], value);
+                slot[7] = VariableStatusGood;
+            }
+            else
+            {
+                slot[2] = NotUsed;
+                WriteNotANumber(slot[3..]);
+                slot[7] = VariableStatusBadConstant;
+            }
+        }
+
+        // Hora do dia em 1/32 de milissegundo, a partir do tempo do instrumento.
+        var ticks = (uint)(_timeS % 86400.0 * 32000.0);
+        BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(1 + (slots * 8)), ticks);
+        return (Success, data);
+    }
+
+    private (byte ResponseCode, byte[]? Data) ReadDeviceVariables(byte[] request)
+    {
+        if (request.Length == 0)
+        {
+            return (TooFewDataBytes, []);
+        }
+
+        // Código, unidade e valor de cada variável pedida, até 4 (HCF_SPEC-151 r10.0, comando 33).
+        var slots = Math.Min(request.Length, 4);
+        var data = new byte[slots * 6];
+        for (var i = 0; i < slots; i++)
+        {
+            var slot = data.AsSpan(i * 6, 6);
+            slot[0] = request[i];
+            if (TryGetVariable(request[i], out var units, out _, out var value))
+            {
+                slot[1] = units;
+                WriteFloat(slot[2..], value);
+            }
+            else
+            {
+                slot[1] = NotUsed;
+                WriteNotANumber(slot[2..]);
+            }
+        }
+
+        return (Success, data);
     }
 
     private byte[] Identity()

@@ -1,4 +1,4 @@
-# Prova de conceito HART serial (Etapa 2)
+﻿# Prova de conceito HART serial (Etapa 2)
 
 Ferramenta de teste, fora do produto. Responde à pergunta da Etapa 2: o PACTware consegue configurar um
 instrumento simulado no servidor pela serial, passando por uma COM virtual (com0com) e pelo navegador (Web Serial)?
@@ -26,8 +26,8 @@ Imita, só para teste, o transmissor de pressão **Smar LD301**: fabricante `0x3
 (tipo expandido `0x3E01`), conforme as tabelas 8 e 1 da HCF_SPEC-183 r22.0. A PV é uma senoide de 25 ± 20 kPa
 com período de 60 s; a faixa inicial é 0–50 kPa.
 
-- Comandos universais: 0, 1, 2, 3, 11, 12, 13, 14, 15 e 16 (HCF_SPEC-127 r7.1).
-- Comandos de prática comum: 34, 35, 38 e 48 (HCF_SPEC-151 r10.0).
+- Comandos universais: 0, 1, 2, 3, 7, 8, 9, 11, 12, 13, 14, 15, 16 e 20 (HCF_SPEC-127 r7.1).
+- Comandos de prática comum: 33, 34, 35, 38, 48 e 50 (HCF_SPEC-151 r10.0).
 - Qualquer outro comando recebe o código de resposta 64 (comando não implementado) e aparece no log.
 - Quadros e endereçamento conforme a HCF_SPEC-081 r9.0.
 

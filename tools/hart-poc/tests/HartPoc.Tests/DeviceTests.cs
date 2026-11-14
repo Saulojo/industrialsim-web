@@ -218,6 +218,49 @@ public class DeviceTests
     }
 
     [Fact]
+    public void Commands7_8_20And50_DescribeTheLoopAndTheVariables()
+    {
+        var device = Device();
+
+        Assert.Equal([0, 1], Long(device, 7).Data[2..]);
+        Assert.Equal([65, 250, 250, 250], Long(device, 8).Data[2..]);
+        Assert.Equal([0, 250, 250, 250], Long(device, 50).Data[2..]);
+
+        var longTag = Long(device, 20).Data[2..];
+        Assert.Equal(32, longTag.Length);
+        Assert.Equal("PT-101 LD301 SIMULADO", System.Text.Encoding.Latin1.GetString(longTag).TrimEnd('\0'));
+    }
+
+    [Fact]
+    public void Command9_ReturnsEachRequestedVariableWithStatus()
+    {
+        // PV (246), corrente (245) e uma variável que não existe (7).
+        var response = Long(Device(pv: _ => 25.0), 9, [246, 245, 7]);
+
+        Assert.Equal(0, response.Data[0]);
+        Assert.Equal(2 + 1 + (3 * 8) + 4, response.Data.Length);
+        Assert.Equal([246, 65, PressureUnits.Kilopascal], response.Data[3..6]);
+        Assert.Equal(25f, Float(response, 4));
+        Assert.Equal(0xC0, response.Data[10]);
+        Assert.Equal([245, 0, 39], response.Data[11..14]);
+        Assert.Equal(12f, Float(response, 12));
+        Assert.Equal([7, 0, 250, 0x7F, 0xA0, 0x00, 0x00, 0x30], response.Data[19..27]);
+        Assert.Equal(5, Long(Device(), 9).Data[0]);
+    }
+
+    [Fact]
+    public void Command33_ReturnsUnitsAndValueOfEachRequestedVariable()
+    {
+        var response = Long(Device(pv: _ => 25.0), 33, [0, 244]);
+
+        Assert.Equal(2 + 12, response.Data.Length);
+        Assert.Equal([0, PressureUnits.Kilopascal], response.Data[2..4]);
+        Assert.Equal(25f, Float(response, 2));
+        Assert.Equal([244, 57], response.Data[8..10]);
+        Assert.Equal(50f, Float(response, 8));
+    }
+
+    [Fact]
     public void UnknownCommand_AnswersCommandNotImplemented()
     {
         var response = Long(Device(), 109);
