@@ -1,7 +1,7 @@
 # Validação — Etapa 1: Núcleo de simulação
 
 - Branch: `etapa-01-nucleo`
-- Pull request: a abrir
+- Pull request: [Saulojo/industrialsim-web#2](https://github.com/Saulojo/industrialsim-web/pull/2)
 - Data: 14/11/2026
 
 ## Ambiente
@@ -10,7 +10,7 @@
 | --- | --- |
 | Sistema (local) | Windows 11 Pro 10.0.26300 |
 | .NET SDK | 10.0.404 (fixado em `global.json`: 10.0.100 com `rollForward: latestFeature`) |
-| CI | GitHub Actions, `ubuntu-latest` (execução a registrar depois do push) |
+| CI | GitHub Actions, `ubuntu-latest`; execuções na aba "Checks" do pull request |
 
 Nenhum pacote novo: o núcleo usa só a biblioteca padrão do .NET; os testes continuam com xunit.v3 4.0.3.
 
@@ -176,7 +176,7 @@ As seções citadas nos comentários do código foram escritas de memória e dev
 
 ## Decisões e simplificações desta etapa
 
-- **Gerador pseudoaleatório próprio** (proposta de D22): a sequência do `System.Random` com semente não é garantida entre versões do .NET; a do xoshiro256\*\* é fixa e tem teste com vetores de referência.
+- **Gerador pseudoaleatório próprio** (registrado como D22 no descritivo): a sequência do `System.Random` com semente não é garantida entre versões do .NET; a do xoshiro256\*\* é fixa e tem teste com vetores de referência.
 - **Planta de referência no projeto de testes**: pela D04 o produto não tem classe por planta, então o "modelo codificado da Etapa 1", que a Etapa 3 vai comparar com o JSON, fica em `tests/`.
 - **Vazões em m³/s**: o tanque trabalha com volume, como pede o critério 3. A conversão para kg/s do diagnóstico da caldeira fica para o cenário (Etapa 3).
 - **Bomba sem curva**: a vazão depende só da rotação, não da contrapressão.
@@ -184,5 +184,6 @@ As seções citadas nos comentários do código foram escritas de memória e dev
 
 ## Pendências para concluir a etapa
 
-- [ ] Push da branch e CI verde no pull request.
-- [ ] Marcar os critérios em `docs/plano.md`, atualizar "Estado atual" e registrar a D22 em `docs/descritivo.md` (com a confirmação do Saulo).
+- [x] Push da branch e pull request aberto.
+- [x] Critérios marcados em `docs/plano.md`, "Estado atual" atualizado e D22 registrada em `docs/descritivo.md` (confirmado pelo Saulo em 14/11/2026).
+- [ ] CI verde no pull request e integração à `main`.
