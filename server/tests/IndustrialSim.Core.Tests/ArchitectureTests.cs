@@ -26,4 +26,16 @@ public class ArchitectureTests
 
         Assert.Empty(forbidden);
     }
+
+    /// <summary>Etapa 1: nenhum controlador dentro da planta. O PID existe só nos testes, como referência.</summary>
+    [Fact]
+    public void Core_HasNoControllerTypes()
+    {
+        var controllers = CoreAssembly.Reference.GetTypes()
+            .Select(type => type.Name)
+            .Where(name => name.Contains("Pid", StringComparison.OrdinalIgnoreCase)
+                || name.Contains("Controller", StringComparison.OrdinalIgnoreCase));
+
+        Assert.Empty(controllers);
+    }
 }
