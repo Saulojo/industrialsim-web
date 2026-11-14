@@ -49,9 +49,16 @@ const state = {
   timers: [],
 };
 
-function defaultUrl() {
+// O campo guarda só o servidor; o caminho sai do modo escolhido na hora de conectar,
+// para o modo mostrado na tela e o WebSocket usado nunca divergirem.
+function defaultServer() {
   const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
-  return `${scheme}://${location.host}/ws/${ui.mode.value}`;
+  return `${scheme}://${location.host}`;
+}
+
+function socketUrl() {
+  const server = ui.wsUrl.value.trim().replace(/\/ws\/\w+\/?$/, '').replace(/\/+$/, '');
+  return `${server}/ws/${ui.mode.value}`;
 }
 
 function hex(bytes) {
@@ -176,9 +183,10 @@ async function applyOutputSignals() {
 async function connect() {
   ui.connect.disabled = true;
   try {
-    const url = ui.wsUrl.value.trim();
+    const url = socketUrl();
     state.socket = await openSocket(url);
     ui.wsState.textContent = `conectado a ${url}`;
+    log(`WebSocket conectado a ${url}`);
     state.socket.onmessage = onSocketMessage;
     state.socket.onclose = () => {
       ui.wsState.textContent = 'desconectado';
@@ -251,11 +259,7 @@ function saveLog() {
   URL.revokeObjectURL(link.href);
 }
 
-ui.wsUrl.value = defaultUrl();
-ui.mode.addEventListener('change', () => {
-  // Troca só o caminho, para preservar um servidor remoto digitado à mão.
-  ui.wsUrl.value = ui.wsUrl.value.replace(/\/ws\/\w+$/, `/ws/${ui.mode.value}`);
-});
+ui.wsUrl.value = defaultServer();
 ui.connect.addEventListener('click', connect);
 ui.disconnect.addEventListener('click', disconnect);
 ui.dtr.addEventListener('change', applyOutputSignals);

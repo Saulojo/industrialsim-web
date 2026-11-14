@@ -21,12 +21,12 @@
       <section class="panel">
         <h2>1. Servidor</h2>
         <label>
-          Endereço do WebSocket
-          <input id="ws-url" type="text" spellcheck="false" />
+          Servidor (o caminho /ws/… vem do modo escolhido abaixo)
+          <input id="ws-url" type="text" spellcheck="false" autocomplete="off" />
         </label>
         <label>
           Modo
-          <select id="mode">
+          <select id="mode" autocomplete="off">
             <option value="hart">Instrumento HART simulado (/ws/hart)</option>
             <option value="echo">Eco: devolve os bytes recebidos (/ws/echo)</option>
           </select>
