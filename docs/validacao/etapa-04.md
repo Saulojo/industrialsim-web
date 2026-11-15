@@ -1,7 +1,7 @@
 # Validação — Etapa 4: Imagem de I/O, escalas e watchdog
 
 - Branch: `etapa-04-imagem-io`
-- Pull request: a abrir depois da confirmação do autor
+- Pull request: [Saulojo/industrialsim-web#5](https://github.com/Saulojo/industrialsim-web/pull/5)
 - Data: 15/11/2026
 
 ## Ambiente
