@@ -146,13 +146,15 @@ O navegador só repassa bytes nos dois sentidos; quem monta os quadros e respond
 
 **Validação**
 
-- [ ] com0com instalado e funcionando no Windows do teste, com versão, assinatura e estado do Secure Boot registrados; par COM10/COM11 criado.
-- [ ] A página de ponte abre a COM11 pela Web Serial e repassa bytes nos dois sentidos (teste com um terminal serial na COM10 e o servidor ecoando os bytes).
-- [ ] O PACTware, com o DTM de modem HART na COM10, encontra o instrumento simulado (comando 0) e lê PV, corrente e faixa.
-- [ ] O PACTware escreve faixa e amortecimento, e a mudança aparece no log do servidor e na leitura seguinte.
-- [ ] Tempo de resposta medido com o servidor local e com o servidor em outro PC da rede, comparado ao time-out do DTM.
-- [ ] 30 minutos conectado sem queda nem erro de comunicação no PACTware.
-- [ ] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com revisão HART e parâmetros da serial definidos.
+- [x] com0com instalado e funcionando no Windows do teste, com versão, assinatura e estado do Secure Boot registrados; par COM10/COM11 criado.
+- [x] A página de ponte abre a COM11 pela Web Serial e repassa bytes nos dois sentidos (teste com um terminal serial na COM10 e o servidor ecoando os bytes).
+- [x] O PACTware, com o DTM de modem HART na COM10, encontra o instrumento simulado (comando 0) e lê PV, corrente e faixa.
+- [x] O PACTware escreve faixa e amortecimento, e a mudança aparece no log do servidor e na leitura seguinte.
+- [ ] Tempo de resposta medido com o servidor local e com o servidor em outro PC da rede, comparado ao time-out do DTM. *(Parte local medida em 14 e 15/11/2026. A parte com outro PC fica para a Etapa 9, quando o servidor estará no PC do laboratório; não havia segundo computador na Etapa 2.)*
+- [x] 30 minutos conectado sem queda nem erro de comunicação no PACTware.
+- [x] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com revisão HART e parâmetros da serial definidos. *(Registrado como A provisório em 15/11/2026: S1 a S6 e S8 atendidos; S7 a confirmar na Etapa 9.)*
+
+Evidências: `docs/validacao/etapa-02.md`.
 
 **Portão de decisão: caminho do PACTware (◆)**
 
@@ -341,6 +343,7 @@ Ao fim da etapa, os critérios medidos abaixo decidem o escopo das Etapas 17 e 1
 - [ ] Após reiniciar o PC do laboratório, o serviço volta sozinho em menos de 2 minutos.
 - [ ] Teste de carga com 30 plantas e 30 clientes Modbus simulados por 30 minutos, sem erros e dentro das metas de tempo real.
 - [ ] Uma varredura de portas feita de fora mostra só as portas previstas.
+- [ ] (Pendência da Etapa 2, critério S7) Com o servidor da prova HART (`tools/hart-poc`) no PC do laboratório e a página de ponte em outro PC da rede (e, se possível, por uma conexão de internet comum), o tempo de resposta fica dentro do time-out do DTM e o PACTware lê e escreve; o resultado do portão é confirmado como A ou alterado para B na D09.
 - [ ] Marco 1 registrado na linha “Estado atual” do descritivo.
 
 ## Trilha de design

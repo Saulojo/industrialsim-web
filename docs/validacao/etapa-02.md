@@ -1,6 +1,18 @@
-# Validação da Etapa 2 — Prova de conceito HART serial (rascunho)
+# Validação da Etapa 2 — Prova de conceito HART serial
 
-Em andamento. Nenhum critério da etapa está marcado ainda; este arquivo registra o que já foi medido.
+Testes feitos em 14 e 15/11/2026. Resultado do portão de decisão: **A provisório** (ver o fim do arquivo).
+
+## Critérios da etapa
+
+| # | Critério | Como foi verificado | Resultado |
+| --- | --- | --- | --- |
+| 1 | com0com instalado e funcionando, com versão, assinatura e Secure Boot registrados; par COM10/COM11 | `Get-PnpDevice`, assinatura do catálogo, registro do Windows, teste direto do par | Atendido com a versão 2.2.2.0 (a 3.0.0.0 reprova) |
+| 2 | A página de ponte abre a COM11 e repassa bytes nos dois sentidos | `hart-serial echo` na COM10 com o servidor em eco, em Chrome e Edge, com e sem emulação de baud | Atendido |
+| 3 | O PACTware encontra o instrumento e lê PV, corrente e faixa | Capturas do PACTware (identificação, PV, faixa) e log do servidor (comandos 0, 2, 3, 9 e 15) | Atendido; a corrente foi conferida pelo log, sem captura de tela |
+| 4 | O PACTware escreve faixa e amortecimento, com efeito no log e na leitura seguinte | Log do servidor (comandos 35, 34 e 15) e `/api/status` | Atendido |
+| 5 | Tempo de resposta com o servidor local e em outro PC, comparado ao time-out do DTM | `hart-serial measure` na COM10 | **Parcial:** só a parte local; a parte com outro PC fica para a Etapa 9 |
+| 6 | 30 minutos conectado sem queda nem erro no PACTware | Log do servidor e confirmação do usuário | Atendido (33 minutos) |
+| 7 | Resultado do portão registrado na D09, com revisão HART e parâmetros da serial | `docs/descritivo.md` | Registrado como A provisório |
 
 ## Ambiente do teste
 
@@ -258,13 +270,52 @@ não mostrou aviso de comunicação: a barra de estado seguiu em "Conectado". O 
 "≠" ("base de dados do DTM é diferente da base de dados do instrumento"), que compara os dados guardados no
 projeto com os do instrumento e não é erro de comunicação.
 
-## Critério 7
+## S6 — Custo
 
-Pendente: resultado do portão.
+| Programa | Origem | Licença |
+| --- | --- | --- |
+| com0com 2.2.2.0 | `com0com-2.2.2.0-x64-fre-signed.zip`, da página do projeto | Software livre (GPL). É um driver instalado no PC de quem usa o PACTware; não é dependência do projeto nem é distribuído com ele. |
+| PACTware 6.3 (6.3.00029) | Pacote `PACTware_6.3.0.zip` | "License Agreement for PACTware Provided by FieldComm Group" (`PWEULAENG.RTF`): concede cópia e uso nos computadores do usuário; o texto não menciona pagamento nem prazo. |
+| Serial HART CommDTM 1.0.0 | Mesmo pacote, `AdditionalSetupsHARTCommDtm` | Vem no pacote do PACTware; a instalação não pediu chave. |
+| CodeWrights iDTM-FDI 1.8.295 (traz o "Generic H7") | Mesmo pacote, `AdditionalSetupsFDISetup` | Vem no pacote do PACTware; a instalação não pediu chave. O `Licenses.zip` lista só componentes de terceiros. |
 
-## Pontos em aberto
+Nenhum dos programas pediu chave, compra ou cadastro, e não apareceu aviso de período de avaliação em dois dias de
+uso. Limite desta verificação: não foi encontrada uma frase explícita de "gratuito sem prazo" para os dois DTMs.
 
-- **DTMs:** estão instalados o "Serial HART CommDTM 1.0.0" (FieldComm Group) e o "CodeWrights iDTM-FDI PACTware
-  1.8.295". Não há um DTM HART genérico clássico; falta ver no PACTware se o iDTM-FDI abre o instrumento sem um
-  pacote FDI do fabricante, e confirmar a licença de cada um (critério S6).
-- **Segundo PC:** ainda não há outro computador para medir o tempo de resposta remoto (S7).
+## Critério 7 — Portão de decisão: caminho do PACTware
+
+| Critério | Medido | Situação |
+| --- | --- | --- |
+| S1 Driver | com0com 2.2.2.0 no Windows 11 Pro 10.0.26300, com Secure Boot e integridade de memória ligados, sem modo de teste | Atendido |
+| S2 Ponte | Chrome 157 e Edge 157 abrem a COM11 em 1200 baud, 8 bits, paridade ímpar, 1 stop bit; eco byte a byte | Atendido |
+| S3 Descoberta | A varredura do PACTware encontra o instrumento no endereço 0 | Atendido |
+| S4 Leitura | PV, faixa, amortecimento e limites na tela; corrente pelo log | Atendido |
+| S5 Escrita | Faixa 0–50 → 0–40 kPa e amortecimento 0 → 2 s, com efeito na corrente | Atendido |
+| S6 Custo | Nenhum programa pediu compra, chave ou cadastro | Atendido, com o limite descrito acima |
+| S7 Tempo | Local: 15 a 52 ms (sem emulação de baud) e 189 a 328 ms (com), contra cerca de 440 ms do DTM | **Não medido com outro PC** |
+| S8 Estabilidade | 33 minutos, 764 leituras, nenhum erro | Atendido |
+
+**Resultado: A provisório (15/11/2026).** S1 a S6 e S8 atendidos. O S7 será medido na Etapa 9, com o servidor da
+prova no PC do laboratório; se a resposta pela rede não couber no time-out do DTM, o resultado passa a B. Nos dois
+casos a Etapa 17 implementa a ponte serial; o que muda é o guia e a prioridade da extensão HART-IP. Decisão tomada
+com o usuário, registrada na D09 do descritivo.
+
+Definições que saem da prova:
+
+- **Revisão HART:** 7. O "Generic H7" não abre um instrumento que se declara HART 5.
+- **Serial:** 1200 baud, 8 bits, paridade ímpar, 1 stop bit, sem controle de fluxo e sem eco.
+- **com0com:** versão 2.2.2.0 assinada, emulação de baud desligada (padrão).
+- **DTM de comunicação:** mestre primário, 5 preâmbulos, 3 retentativas, cerca de 0,44 s por tentativa.
+- **Identificação:** sem DTM específico instalado, o PACTware usa o genérico. A prova usou a identificação do Smar
+  LD301 só para teste; a dos instrumentos do produto fica para a Etapa 16.
+
+## Para as etapas seguintes
+
+- **Etapa 9:** medir o S7 (critério novo no plano).
+- **Etapa 16:** os logs em `docs/validacao/etapa-02/` têm os quadros reais do PACTware, em hexadecimal, para virar
+  vetores de teste (`pactware-leitura-e-escrita.log` e `pactware-30-minutos-e-emulacao-de-baud.log`). Comandos que o Generic H7 usa além da tabela do descritivo:
+  7, 8, 9, 20 e 50. A norma de enlace manda responder com erro de comunicação a um quadro com byte de verificação
+  errado; o critério da Etapa 16 diz "nenhuma resposta" e precisa ser revisto.
+- **Etapa 17:** o RTS e o DTR do DTM não foram observados; a página de ponte registra os sinais e isso pode ser
+  visto lá. Limpar o buffer da serial ao conectar evita repassar restos de uma sessão anterior.
+- **Não verificado:** valores do LD301 assumidos na prova (limites do sensor, span mínimo, amortecimento máximo).
