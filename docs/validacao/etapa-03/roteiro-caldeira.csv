@@ -1,0 +1,10 @@
+# Roteiro de degraus da caldeira v1 (Etapa 3). Cada linha vale a partir do seu instante, em segundos.
+time,P-101_run,FV-101_command,FV-102_command,FV-103_command
+0,1,0.8228,0.5,0.5
+60,,0.8728,,
+180,,0.8228,,
+240,,,0.55,
+540,,,0.5,
+840,,,,0.6
+1140,,,,0.5
+1440,,,,
