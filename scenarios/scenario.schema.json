@@ -67,6 +67,10 @@
         "$ref": "#/$defs/output"
       },
       "description": "Saídas externas da planta: medições e estados."
+    },
+    "io": {
+      "$ref": "#/$defs/io",
+      "description": "Mapa Modbus da planta: endereços (base 0) ligados às entradas e saídas externas."
     }
   },
   "$defs": {
@@ -137,6 +141,199 @@
         "from": {
           "$ref": "#/$defs/reference",
           "description": "Saída de componente publicada com esse nome."
+        }
+      }
+    },
+    "io": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "coils": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/digitalPoint"
+          },
+          "description": "O mestre escreve: liga uma entrada externa (0 ou 1)."
+        },
+        "discreteInputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/digitalPoint"
+          },
+          "description": "O mestre lê: uma saída externa (≥ 0,5 = 1)."
+        },
+        "holdingRegisters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/analogPoint"
+          },
+          "description": "O mestre escreve: comando 4–20 mA de uma entrada externa."
+        },
+        "inputRegisters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/analogPoint"
+          },
+          "description": "O mestre lê: medição 4–20 mA de uma saída externa."
+        },
+        "diagnostics": {
+          "$ref": "#/$defs/diagnostics"
+        },
+        "watchdog": {
+          "$ref": "#/$defs/watchdog"
+        }
+      }
+    },
+    "digitalPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "signal"
+      ],
+      "properties": {
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Endereço Modbus, em base 0."
+        },
+        "signal": {
+          "type": "string",
+          "description": "Nome da entrada externa (coil) ou da saída externa (entrada discreta)."
+        }
+      }
+    },
+    "analogPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address",
+        "signal"
+      ],
+      "properties": {
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32767,
+          "description": "Endereço Modbus, em base 0. No formato float32, o sinal de endereço a ocupa 2a e 2a+1."
+        },
+        "signal": {
+          "type": "string",
+          "description": "Nome da entrada externa (holding register) ou da saída externa (input register)."
+        },
+        "lrv": {
+          "type": "number",
+          "default": 0,
+          "description": "Valor do sinal, na unidade da planta, em 4 mA."
+        },
+        "urv": {
+          "type": "number",
+          "default": 1,
+          "description": "Valor do sinal, na unidade da planta, em 20 mA. Diferente de lrv."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unidade de engenharia, usada no formato float32 e na interface."
+        },
+        "unitFactor": {
+          "type": "number",
+          "default": 1,
+          "description": "Valor de engenharia = valor do sinal × fator (ex.: 1e-5 de Pa para bar). Diferente de 0."
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Bloco de diagnóstico nos input registers: um float32 (2 registradores) por valor.",
+      "required": [
+        "address",
+        "values"
+      ],
+      "properties": {
+        "address": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Endereço do primeiro registrador do bloco, em base 0."
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "signal"
+            ],
+            "properties": {
+              "signal": {
+                "type": "string",
+                "description": "Nome da saída externa."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unidade de engenharia."
+              },
+              "unitFactor": {
+                "type": "number",
+                "default": 1,
+                "description": "Valor de engenharia = valor do sinal × fator. Diferente de 0."
+              }
+            }
+          }
+        }
+      }
+    },
+    "watchdog": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Se o heartbeat ficar o tempo limite sem mudar, a planta vai ao estado seguro. Desligado por padrão.",
+      "required": [
+        "heartbeatRegister",
+        "safeState"
+      ],
+      "properties": {
+        "heartbeatRegister": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Holding register do heartbeat: contador livre, basta mudar."
+        },
+        "statusDiscreteInput": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "description": "Entrada discreta que vai a 1 quando o watchdog dispara."
+        },
+        "timeoutSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 2,
+          "description": "Tempo limite padrão, em segundos."
+        },
+        "safeState": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "input",
+              "value"
+            ],
+            "properties": {
+              "input": {
+                "type": "string",
+                "description": "Nome da entrada externa."
+              },
+              "value": {
+                "type": "number",
+                "description": "Valor seguro, na unidade da planta."
+              }
+            }
+          },
+          "description": "Entradas externas e os valores que recebem no estado seguro; as demais ficam como estavam."
         }
       }
     },

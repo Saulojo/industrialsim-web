@@ -10,7 +10,7 @@ namespace IndustrialSim.Core.Scenarios;
 /// não divergem. O esquema serve ao editor (autocompletar e avisos); quem valida de fato, com mensagens em
 /// português e o caminho do campo, são <see cref="ScenarioLoader"/> e <see cref="ScenarioPlant"/>.
 /// </summary>
-public static class ScenarioSchemaWriter
+public static partial class ScenarioSchemaWriter
 {
     private const string ReferencePattern = "^.+\\.[^.]+$";
     private const string IdentifierPattern = "^[^.\\s]+$";
@@ -58,6 +58,7 @@ public static class ScenarioSchemaWriter
             WriteArrayOf(writer, "connections", "connection", "Ligações da saída de um componente à entrada de outro.");
             WriteArrayOf(writer, "inputs", "input", "Entradas externas da planta: comandos e cargas.");
             WriteArrayOf(writer, "outputs", "output", "Saídas externas da planta: medições e estados.");
+            WriteIoProperty(writer);
             writer.WriteEndObject();
 
             writer.WriteStartObject("$defs");
@@ -65,6 +66,7 @@ public static class ScenarioSchemaWriter
             WriteConnectionDefinition(writer);
             WriteInputDefinition(writer);
             WriteOutputDefinition(writer);
+            WriteIoDefinitions(writer);
 
             writer.WriteStartObject("component");
             writer.WriteStartArray("oneOf");

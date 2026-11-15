@@ -18,7 +18,29 @@ Cada subpasta é um pacote de cenário (D04): `scenario.json` e, a partir da Eta
 | `inputs` | Entradas externas (comandos e cargas): `name`, `to` (entradas de componentes que alimenta) e `initial`. |
 | `outputs` | Saídas externas (medições e estados): `name` e `from`. |
 
-As seções `io` (mapa Modbus), de instrumentos HART e `visual` entram nas Etapas 4, 16 e 14.
+| `io` | Mapa Modbus (opcional): ver abaixo. |
+
+As seções de instrumentos HART e `visual` entram nas Etapas 16 e 14.
+
+## Seção `io` (mapa Modbus)
+
+Liga endereços Modbus, em base 0, às entradas e saídas externas do cenário. A imagem de I/O é dimensionada por este mapa.
+
+| Campo | Conteúdo |
+| --- | --- |
+| `coils` | O mestre escreve: `address` e `signal` (uma entrada externa, que recebe 0 ou 1). |
+| `discreteInputs` | O mestre lê: `address` e `signal` (uma saída externa; ≥ 0,5 vale 1). |
+| `holdingRegisters` | O mestre escreve um comando 4–20 mA: `address`, `signal` (entrada externa), `lrv` e `urv` (valor da entrada em 4 e 20 mA; padrão 0 e 1), `unit` e `unitFactor`. O comando é limitado à faixa. |
+| `inputRegisters` | O mestre lê uma medição 4–20 mA: `address`, `signal` (saída externa), `lrv` e `urv` (valor do sinal, na unidade da planta, em 4 e 20 mA), `unit` e `unitFactor`. |
+| `diagnostics` | Bloco em unidades de engenharia nos input registers: `address` do primeiro registrador e `values` (`signal`, `unit`, `unitFactor`), um `float32` em 2 registradores por valor. |
+| `watchdog` | `heartbeatRegister` (holding register), `statusDiscreteInput` (vai a 1 quando dispara), `timeoutSeconds` (padrão 2) e `safeState`: lista de `{ "input", "value" }` com o valor seguro de cada entrada externa. As entradas fora da lista ficam como estavam. |
+
+Regras:
+
+- `unit` e `unitFactor` dão a unidade de engenharia: valor de engenharia = valor do sinal × `unitFactor` (ex.: `1e-5` de Pa para bar, `100` de fração para %). É a unidade do formato `float32`, do bloco de diagnóstico e dos valores forçados.
+- A medição vira corrente pela faixa e satura em 3,8 e 20,5 mA; 3,6 e 21 mA só aparecem com o transmissor em falha (NAMUR NE 43).
+- Nos formatos inteiros (0–27648, 0–10000, 0–32767), o sinal de endereço `a` fica no registrador `a`. No formato `float32`, ele ocupa `2a` e `2a+1`. Por isso o heartbeat e o bloco de diagnóstico precisam ficar acima de `2 × (maior endereço) + 1`, e o endereço de um sinal analógico vai até 32767.
+- Uma entrada externa só pode ser comandada por um ponto (coil ou holding register).
 
 ## Tipos de componente
 

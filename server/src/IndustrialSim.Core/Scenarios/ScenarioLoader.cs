@@ -8,13 +8,13 @@ namespace IndustrialSim.Core.Scenarios;
 /// a forma das referências <c>componente.sinal</c>. Não lê arquivo (o núcleo não faz I/O): recebe o texto.
 /// Todos os erros são acumulados e saem juntos, cada um com o caminho do campo.
 /// </summary>
-public static class ScenarioLoader
+public static partial class ScenarioLoader
 {
     /// <summary>Versão do formato que este código lê.</summary>
     public const int CurrentSchemaVersion = 1;
 
     private static readonly string[] RootProperties =
-        ["$schema", "schemaVersion", "id", "description", "stepSeconds", "noiseSeed", "components", "connections", "inputs", "outputs"];
+        ["$schema", "schemaVersion", "id", "description", "stepSeconds", "noiseSeed", "components", "connections", "inputs", "outputs", "io"];
 
     private static readonly string[] ComponentProperties = ["id", "type", "params", "initial"];
     private static readonly string[] ConnectionProperties = ["from", "to"];
@@ -123,6 +123,13 @@ public static class ScenarioLoader
 
         CheckUniqueExternalNames(inputs, outputs, errors);
 
+        // Com erro em inputs ou outputs, os nomes ficam incompletos: a seção io não confere nomes, para não repetir o erro.
+        IoDefinition? io = ReadIo(
+            root,
+            inputs.Contains(null) ? null : [.. inputs.Select(i => i!.Name)],
+            outputs.Contains(null) ? null : [.. outputs.Select(o => o!.Name)],
+            errors);
+
         if (errors.Count > 0)
         {
             return null;
@@ -137,7 +144,8 @@ public static class ScenarioLoader
             components.Select(c => c!).ToList(),
             connections.Select(c => c!).ToList(),
             inputs.Select(i => i!).ToList(),
-            outputs.Select(o => o!).ToList());
+            outputs.Select(o => o!).ToList(),
+            io);
     }
 
     private static int? ReadSchemaVersion(JsonElement root, List<ScenarioError> errors)
