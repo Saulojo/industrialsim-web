@@ -2,4 +2,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IndustrialSim.Core\IndustrialSim.Core.csproj" />
   </ItemGroup>
+
+  <!-- Cenários de teste e os cenários do produto, copiados para a pasta de saída (o núcleo não lê arquivos). -->
+  <ItemGroup>
+    <None Include="Scenarios\Files\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\scenarios\**\*.json" Link="ProductScenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

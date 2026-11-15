@@ -1,0 +1,33 @@
+{
+  "$schema": "../../../../../scenarios/scenario.schema.json",
+  "schemaVersion": 1,
+  "id": "water-tank",
+  "description": "A mesma planta de tanque codificada na Etapa 1 (WaterTankPlant), descrita só em JSON: bomba, válvula linear, tanque e transmissor de nível.",
+  "stepSeconds": 0.01,
+  "noiseSeed": 2026,
+  "components": [
+    { "id": "P-101", "type": "pump", "params": { "ratedFlow": 0.03, "timeConstantSeconds": 1.0 } },
+    { "id": "FV-101", "type": "valve", "params": { "timeConstantSeconds": 2.0, "characteristic": "linear" } },
+    {
+      "id": "TQ-101",
+      "type": "tank",
+      "params": { "areaM2": 1.0, "heightM": 2.0, "outletAreaM2": 0.005, "dischargeCoefficient": 0.61 },
+      "initial": { "levelM": 0.5 }
+    },
+    { "id": "LT-101", "type": "transmitter", "params": { "noiseStandardDeviation": 0.002 } }
+  ],
+  "connections": [
+    { "from": "P-101.flow", "to": "FV-101.inletFlow" },
+    { "from": "FV-101.flow", "to": "TQ-101.inflow" },
+    { "from": "TQ-101.level", "to": "LT-101.value" }
+  ],
+  "inputs": [
+    { "name": "pumpRun", "to": ["P-101.run"], "initial": 0 },
+    { "name": "valveCommand", "to": ["FV-101.command"], "initial": 0 },
+    { "name": "outletOpening", "to": ["TQ-101.outletOpening"], "initial": 1 }
+  ],
+  "outputs": [
+    { "name": "level", "from": "TQ-101.level" },
+    { "name": "measuredLevel", "from": "LT-101.measurement" }
+  ]
+}

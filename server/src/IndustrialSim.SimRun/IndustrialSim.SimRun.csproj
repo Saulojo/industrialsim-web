@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Linha de comando que roda um cenário sem servidor: simrun cenario.json -entradas roteiro.csv -saida resultado.csv -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>simrun</AssemblyName>
+    <RootNamespace>IndustrialSim.SimRun</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSim.Core\IndustrialSim.Core.csproj" />
+  </ItemGroup>
+</Project>

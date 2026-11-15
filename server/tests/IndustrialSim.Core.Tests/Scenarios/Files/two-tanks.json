@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../../scenarios/scenario.schema.json",
+  "schemaVersion": 1,
+  "id": "two-tanks",
+  "description": "Dois tanques em série, criados só com JSON: a saída do primeiro alimenta o segundo. Critério 2 da Etapa 3.",
+  "components": [
+    {
+      "id": "TQ-1",
+      "type": "tank",
+      "params": { "areaM2": 2.0, "heightM": 3.0, "outletAreaM2": 0.005 },
+      "initial": { "levelM": 1.5 }
+    },
+    {
+      "id": "TQ-2",
+      "type": "tank",
+      "params": { "areaM2": 1.5, "heightM": 3.0, "outletAreaM2": 0.004 },
+      "initial": { "levelM": 0.8 }
+    }
+  ],
+  "connections": [
+    { "from": "TQ-1.meanOutflow", "to": "TQ-2.inflow" }
+  ],
+  "inputs": [
+    { "name": "inflow", "to": ["TQ-1.inflow"], "initial": 0.012 },
+    { "name": "opening1", "to": ["TQ-1.outletOpening"], "initial": 1 },
+    { "name": "opening2", "to": ["TQ-2.outletOpening"], "initial": 1 }
+  ],
+  "outputs": [
+    { "name": "level1", "from": "TQ-1.level" },
+    { "name": "level2", "from": "TQ-2.level" },
+    { "name": "outflow2", "from": "TQ-2.outflow" },
+    { "name": "overflow1", "from": "TQ-1.overflow" },
+    { "name": "overflow2", "from": "TQ-2.overflow" }
+  ]
+}
