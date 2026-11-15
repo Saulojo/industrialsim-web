@@ -12,6 +12,9 @@ namespace IndustrialSim.Core.Components;
 /// <remarks>
 /// O nível fica sempre em [0, altura]. O que passaria da borda sai pela saída <see cref="OverflowOutput"/>,
 /// de modo que o balanço ΔV = ∫(Qin − Qout − Qtransbordo)dt continua fechando com o tanque cheio.
+/// A saída <see cref="MeanOutflowOutput"/> é a vazão média que saiu pelo orifício no último passo, tirada do
+/// próprio balanço de volume. É ela que se liga à entrada de outro tanque: com a vazão instantânea
+/// (<see cref="OutflowOutput"/>), o volume que sai de um não seria exatamente o que entra no outro.
 /// </remarks>
 public sealed class Tank : Component
 {
@@ -20,6 +23,7 @@ public sealed class Tank : Component
     public const string LevelOutput = "level";
     public const string OutflowOutput = "outflow";
     public const string OverflowOutput = "overflow";
+    public const string MeanOutflowOutput = "meanOutflow";
     public const string VolumeState = "volume";
 
     private readonly Func<double, double, double> _derivative;
@@ -29,10 +33,12 @@ public sealed class Tank : Component
     private readonly int _levelIndex;
     private readonly int _outflowIndex;
     private readonly int _overflowIndex;
+    private readonly int _meanOutflowIndex;
     private readonly double _outletGain; // Cd·a·√(2g), em m^2,5/s
     private double _heldInflowM3PerS;
     private double _heldOpening;
     private double _overflowM3PerS;
+    private double _meanOutflowM3PerS;
 
     /// <param name="name">Nome da instância.</param>
     /// <param name="areaM2">Área da seção transversal, em m² (&gt; 0).</param>
@@ -81,6 +87,7 @@ public sealed class Tank : Component
         _levelIndex = OutputSignals.Add(LevelOutput);
         _outflowIndex = OutputSignals.Add(OutflowOutput);
         _overflowIndex = OutputSignals.Add(OverflowOutput);
+        _meanOutflowIndex = OutputSignals.Add(MeanOutflowOutput);
         _derivative = VolumeDerivative;
 
         ComputeOutputs();
@@ -120,12 +127,16 @@ public sealed class Tank : Component
     /// <summary>Vazão média de transbordo no último passo, em m³/s.</summary>
     public double OverflowM3PerS => Outputs[_overflowIndex];
 
+    /// <summary>Vazão média pela saída no último passo, em m³/s (volume que saiu ÷ passo).</summary>
+    public double MeanOutflowM3PerS => Outputs[_meanOutflowIndex];
+
     protected override void Advance(double timeSeconds, double stepSeconds)
     {
         _heldInflowM3PerS = Math.Max(0.0, Inputs[_inflowIndex]);
         _heldOpening = Math.Clamp(Inputs[_openingIndex], 0.0, 1.0);
 
-        double volume = Rk4.Step(_derivative, timeSeconds, StateSignals[_volumeIndex], stepSeconds);
+        double volumeBefore = StateSignals[_volumeIndex];
+        double volume = Rk4.Step(_derivative, timeSeconds, volumeBefore, stepSeconds);
 
         double overflowVolume = 0.0;
         if (volume > CapacityM3)
@@ -139,6 +150,8 @@ public sealed class Tank : Component
         }
 
         _overflowM3PerS = overflowVolume / stepSeconds;
+        double dischargedVolume = volumeBefore + (_heldInflowM3PerS * stepSeconds) - volume - overflowVolume;
+        _meanOutflowM3PerS = Math.Max(0.0, dischargedVolume / stepSeconds);
         StateSignals[_volumeIndex] = volume;
     }
 
@@ -148,6 +161,7 @@ public sealed class Tank : Component
         OutputSignals[_levelIndex] = volume / AreaM2;
         OutputSignals[_outflowIndex] = Outflow(volume, Math.Clamp(Inputs[_openingIndex], 0.0, 1.0));
         OutputSignals[_overflowIndex] = _overflowM3PerS;
+        OutputSignals[_meanOutflowIndex] = _meanOutflowM3PerS;
     }
 
     private double VolumeDerivative(double timeSeconds, double volume) => _heldInflowM3PerS - Outflow(volume, _heldOpening);
