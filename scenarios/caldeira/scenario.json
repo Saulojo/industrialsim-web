@@ -97,5 +97,48 @@
     { "name": "LSHH-101", "from": "LSHH-101.active" },
     { "name": "PSH-101", "from": "PSH-101.active" },
     { "name": "PSV-101_open", "from": "PSV-101.open" }
-  ]
+  ],
+  "io": {
+    "coils": [
+      { "address": 0, "signal": "P-101_run" }
+    ],
+    "discreteInputs": [
+      { "address": 0, "signal": "P-101_running" },
+      { "address": 1, "signal": "LSLL-101" },
+      { "address": 2, "signal": "LSHH-101" },
+      { "address": 3, "signal": "PSH-101" },
+      { "address": 4, "signal": "PSV-101_open" }
+    ],
+    "holdingRegisters": [
+      { "address": 0, "signal": "FV-101_command", "lrv": 0.0, "urv": 1.0, "unit": "%", "unitFactor": 100.0 },
+      { "address": 1, "signal": "FV-102_command", "lrv": 0.0, "urv": 1.0, "unit": "%", "unitFactor": 100.0 }
+    ],
+    "inputRegisters": [
+      { "address": 0, "signal": "LT-101", "lrv": 0.0, "urv": 1.2, "unit": "m" },
+      { "address": 1, "signal": "PT-101", "lrv": 0.0, "urv": 1.6e6, "unit": "bar", "unitFactor": 1.0e-5 },
+      { "address": 2, "signal": "FT-101", "lrv": 0.0, "urv": 4.0, "unit": "kg/s" },
+      { "address": 3, "signal": "FT-102", "lrv": 0.0, "urv": 5.0, "unit": "kg/s" },
+      { "address": 4, "signal": "FV-101_position", "lrv": 0.0, "urv": 1.0, "unit": "%", "unitFactor": 100.0 },
+      { "address": 5, "signal": "FV-102_position", "lrv": 0.0, "urv": 1.0, "unit": "%", "unitFactor": 100.0 }
+    ],
+    "diagnostics": {
+      "address": 100,
+      "values": [
+        { "signal": "LT-101", "unit": "m" },
+        { "signal": "PT-101", "unit": "bar", "unitFactor": 1.0e-5 },
+        { "signal": "FT-101", "unit": "kg/s" },
+        { "signal": "FT-102", "unit": "kg/s" },
+        { "signal": "FV-103_position", "unit": "%", "unitFactor": 100.0 }
+      ]
+    },
+    "watchdog": {
+      "heartbeatRegister": 10,
+      "statusDiscreteInput": 5,
+      "timeoutSeconds": 2.0,
+      "safeState": [
+        { "input": "FV-101_command", "value": 1.0 },
+        { "input": "FV-102_command", "value": 0.0 }
+      ]
+    }
+  }
 }

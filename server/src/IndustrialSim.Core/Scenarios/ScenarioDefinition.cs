@@ -15,6 +15,7 @@ namespace IndustrialSim.Core.Scenarios;
 /// <param name="Connections">Ligações saída → entrada entre componentes.</param>
 /// <param name="Inputs">Entradas externas da planta (comandos e cargas).</param>
 /// <param name="Outputs">Saídas externas da planta (medições e estados).</param>
+/// <param name="Io">Mapa Modbus (seção <c>io</c>); nulo se o cenário não tiver.</param>
 public sealed record ScenarioDefinition(
     int SchemaVersion,
     string Id,
@@ -24,7 +25,8 @@ public sealed record ScenarioDefinition(
     IReadOnlyList<ComponentDefinition> Components,
     IReadOnlyList<ConnectionDefinition> Connections,
     IReadOnlyList<InputDefinition> Inputs,
-    IReadOnlyList<OutputDefinition> Outputs);
+    IReadOnlyList<OutputDefinition> Outputs,
+    IoDefinition? Io = null);
 
 /// <summary>Um componente: identificador (a tag), tipo, parâmetros e condições iniciais.</summary>
 public sealed record ComponentDefinition(

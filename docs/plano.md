@@ -220,14 +220,16 @@ Evidências: `docs/validacao/etapa-03.md`.
 
 **Validação**
 
-- [ ] Conversões de ida e volta erram no máximo 1 contagem em toda a faixa, nos três formatos inteiros (teste por varredura).
-- [ ] No formato 0–27648, 3,6 mA vira −691 e 21 mA vira 29376; lido como `INT`, o valor se mantém.
-- [ ] `float32` correto nas duas ordens de palavra, com valores de referência fixos.
-- [ ] Trocar o formato com a planta rodando muda os valores no passo seguinte, sem reiniciar.
-- [ ] Um valor forçado ignora a planta até ser liberado.
-- [ ] Um comando escrito no meio de um passo só muda a planta no passo seguinte.
-- [ ] Com o watchdog ligado e sem mudança do heartbeat por 2 s: FV-101 vai a 100%, FV-102 a 0% e a entrada discreta 5 sobe; com o heartbeat de volta, os comandos voltam a valer.
-- [ ] A imagem de I/O da caldeira ocupa menos de 4 KB (contra cerca de 400 KB no protótipo).
+- [x] Conversões de ida e volta erram no máximo 1 contagem em toda a faixa, nos três formatos inteiros (teste por varredura).
+- [x] No formato 0–27648, 3,6 mA vira −691 e 21 mA vira 29376; lido como `INT`, o valor se mantém.
+- [x] `float32` correto nas duas ordens de palavra, com valores de referência fixos.
+- [x] Trocar o formato com a planta rodando muda os valores no passo seguinte, sem reiniciar.
+- [x] Um valor forçado ignora a planta até ser liberado.
+- [x] Um comando escrito no meio de um passo só muda a planta no passo seguinte.
+- [x] Com o watchdog ligado e sem mudança do heartbeat por 2 s: FV-101 vai a 100%, FV-102 a 0% e a entrada discreta 5 sobe; com o heartbeat de volta, os comandos voltam a valer.
+- [x] A imagem de I/O da caldeira ocupa menos de 4 KB (contra cerca de 400 KB no protótipo).
+
+Evidências: `docs/validacao/etapa-04.md`.
 
 ### Etapa 5 — Servidor de tempo real e instâncias
 
