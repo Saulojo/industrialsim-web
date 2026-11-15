@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ponte HART — prova de conceito</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Ponte serial ↔ WebSocket</h1>
+      <p class="lead">
+        Ferramenta de teste da Etapa 2. Esta página só repassa bytes entre a porta serial (COM11 do com0com) e o
+        servidor; quem entende HART é o servidor.
+      </p>
+
+      <p id="unsupported" class="warning" hidden>
+        Este navegador não tem a Web Serial. Use o Chrome ou o Edge, com a página aberta em <code>localhost</code>.
+      </p>
+
+      <section class="panel">
+        <h2>1. Servidor</h2>
+        <label>
+          Servidor (o caminho /ws/… vem do modo escolhido abaixo)
+          <input id="ws-url" type="text" spellcheck="false" autocomplete="off" />
+        </label>
+        <label>
+          Modo
+          <select id="mode" autocomplete="off">
+            <option value="hart">Instrumento HART simulado (/ws/hart)</option>
+            <option value="echo">Eco: devolve os bytes recebidos (/ws/echo)</option>
+          </select>
+        </label>
+        <p>Estado: <strong id="ws-state">desconectado</strong></p>
+      </section>
+
+      <section class="panel">
+        <h2>2. Porta serial</h2>
+        <p>1200 baud, 8 bits de dados, paridade ímpar, 1 stop bit, sem controle de fluxo.</p>
+        <div class="row">
+          <button id="connect" type="button">Conectar porta serial</button>
+          <button id="disconnect" type="button" disabled>Desconectar</button>
+        </div>
+        <div class="row">
+          <label class="inline"><input id="dtr" type="checkbox" checked /> DTR ligado</label>
+          <label class="inline"><input id="rts" type="checkbox" checked /> RTS ligado</label>
+        </div>
+        <p>Estado: <strong id="serial-state">fechada</strong></p>
+        <p>
+          Sinais vistos nesta ponta (mostram o que o outro lado do par faz com RTS e DTR):
+          <span id="signals" class="mono">—</span>
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>3. Contadores</h2>
+        <dl class="counters">
+          <div><dt>Serial → servidor</dt><dd id="count-up">0 bytes</dd></div>
+          <div><dt>Servidor → serial</dt><dd id="count-down">0 bytes</dd></div>
+          <div><dt>Erros de leitura da serial</dt><dd id="count-errors">0</dd></div>
+          <div><dt>Respostas medidas</dt><dd id="count-replies">0</dd></div>
+          <div><dt>Ida e volta ao servidor (mín. / média / máx.)</dt><dd id="round-trip">—</dd></div>
+          <div><dt>Conectado há</dt><dd id="uptime">—</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel">
+        <h2>4. Log em hexadecimal</h2>
+        <div class="row">
+          <button id="clear" type="button">Limpar</button>
+          <button id="save" type="button">Salvar em arquivo</button>
+          <label class="inline"><input id="autoscroll" type="checkbox" checked /> Rolar junto</label>
+        </div>
+        <pre id="log" class="mono" aria-live="off"></pre>
+      </section>
+    </main>
+    <script src="bridge.js"></script>
+  </body>
+</html>

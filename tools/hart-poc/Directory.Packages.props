@@ -1,0 +1,12 @@
+<Project>
+  <!-- Versões centralizadas dos pacotes NuGet da prova de conceito. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Apache-2.0 -->
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+    <!-- MIT (Microsoft); usado só pela ferramenta de medição na COM10 -->
+    <PackageVersion Include="System.IO.Ports" Version="10.0.15" />
+  </ItemGroup>
+</Project>

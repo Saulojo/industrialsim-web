@@ -5,6 +5,9 @@ TestResults/
 *.user
 .vs/
 
+# Logs de quadros da prova HART (Etapa 2)
+tools/hart-poc/**/logs/
+
 # Build do web copiado para o servidor
 server/src/IndustrialSim.Server/wwwroot/
 

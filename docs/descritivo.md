@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapa 1 concluída em 14/11/2026; próxima: Etapa 2 (prova de conceito HART-IP) ou Etapa 3 (motor de cenários). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapas 1 e 2 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9); próxima: Etapa 3 (motor de cenários). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -106,7 +106,7 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D06 | RK4 de passo fixo, dt = 10 ms; comandos aplicados no início do passo; ruído com semente fixa; unidades SI internas. | Determinismo e reprodutibilidade; comportamento igual ao ciclo de varredura de um CLP. | Passo variável ou ligado ao framerate. |
 | D07 | Modbus TCP padrão, sem extensões de fabricante: uma porta por planta em execução (faixa configurável, padrão 15000–15999), Unit ID configurável, pareamento por IP confirmado no navegador, um ou vários mestres por planta. | Funciona com qualquer mestre (CLP, CODESYS, OpenPLC, SCADA, script) e isola as plantas mesmo atrás do mesmo IP público. | Unit ID como isolamento (editável, não isola); só IP de origem (falha com NAT). |
 | D08 | Formato analógico escolhido por planta: 0–27648 (padrão, igual ao cartão Siemens), 0–10000, 0–32767 ou `float32` em unidades de engenharia. | O usuário escala no mestre como faria numa planta real, no formato do controlador que usa; a faixa HART altera o sinal. | Um único formato fixo. |
-| D09 | HART: núcleo de protocolo próprio, independente do transporte; configurador HART no site sempre disponível; HART-IP para o PACTware conforme o portão de decisão da Etapa 2 (resultados A, B ou C). | Garante HART sem instalação em qualquer caso e decide o caminho do PACTware com dados, não com suposição. | Serial como caminho principal (exige driver de COM virtual no PC do usuário). |
+| D09 | (alterada em 14/11/2026) HART: núcleo de protocolo próprio, independente do transporte; configurador HART no site sempre disponível; PACTware primeiro pela serial: DTM de modem HART numa COM virtual (com0com) ligada ao navegador pela Web Serial, que só repassa bytes ao servidor pelo WebSocket. O escopo final segue o portão de decisão da Etapa 2 (resultados A, B ou C); HART-IP fica como extensão. **Resultado do portão (15/11/2026): A provisório.** S1 a S6 e S8 atendidos; S7 (tempo de resposta com o servidor em outro PC) será medido na Etapa 9 e pode mudar o resultado para B. Definido na prova: instrumento em HART 7; serial em 1200 baud, 8 bits, paridade ímpar, 1 stop bit, sem controle de fluxo; com0com 2.2.2.0 assinado, com a emulação de baud desligada. Evidências em `docs/validacao/etapa-02.md`. | Usa só ferramentas gratuitas (PACTware, DTM de modem HART, com0com) e o caminho que todo DTM de modem suporta; a Web Serial já funciona em ferramentas como o Teleplot; não abre portas extras no servidor nem exige pareamento. O custo é um driver de terceiros no PC de quem usa o PACTware. | HART-IP como caminho principal (DTM HART-IP em geral pago e uma porta por planta); conector local instalável (software do projeto no PC do usuário). |
 | D10 | Hospedagem no PC do laboratório: Linux, Docker, proxy reverso com HTTPS automático (Caddy); arquivos estáticos em CDN gratuita se a banda limitar; mesma imagem migrável para uma VM. | WebXR e WebGPU exigem HTTPS; temporização estável; implantação reproduzível. | Hospedagem serverless (não mantém processo nem abre porta TCP). |
 | D11 | Soft-PLC (Fase 4) roda em .NET no mesmo laço da planta, lendo a imagem de I/O direto; projetos em PLCopen XML. | Determinismo total na malha fechada; intercâmbio com CODESYS, OpenPLC e Beremiz. | CLP rodando no navegador. |
 | D12 | Modelos 3D: Blender → glTF binário (.glb) com compressão (Draco ou Meshopt, texturas KTX2); ligação objeto ↔ variável por convenção de nomes. | Carregamento rápido no navegador; serve a qualquer motor. | FBX e formatos proprietários. |
@@ -135,12 +135,12 @@ PC do usuário                                Servidor do laboratório (.NET 10,
 │                             │              │ Planta em execução (uma por planta aberta)│
 │ Mestre Modbus               │ Modbus TCP   │  ├ Imagem de I/O    ├ Planta (10 ms)     │
 │  CLP, CODESYS, SCADA, script│─────────────►│  ├ Modbus :15xxx    ├ Soft-PLC (Fase 4)  │
-│ PACTware                    │ HART-IP      │  └ HART-IP :16xxx   └ Gravação CSV       │
-│  DTM HART-IP (a validar)    │─────────────►│                                          │
+│ PACTware ► com0com ► página │ WebSocket    │  └ Núcleo HART      └ Gravação CSV       │
+│  (ponte Web Serial)         │─────────────►│                                          │
 └─────────────────────────────┘              └──────────────────────────────────────────┘
 ```
 
-Dentro de cada sessão, planta, Modbus, HART-IP e soft-PLC leem e escrevem a mesma imagem de I/O; o navegador recebe o estado da planta pelo WebSocket.
+Dentro de cada sessão, planta, Modbus, HART e soft-PLC leem e escrevem a mesma imagem de I/O; o navegador recebe o estado da planta pelo WebSocket.
 
 **Módulos do backend (`server/src`)**
 
@@ -277,9 +277,11 @@ Os transmissores LT-101, PT-101, FT-101 e FT-102 são dispositivos HART simulado
 
 **Pontos definidos na Etapa 2 (prova de conceito com o PACTware)**
 
-- Revisão do protocolo: HART 7 por padrão; HART 5 se o DTM genérico exigir.
-- Topologia no HART-IP: um gateway com subdispositivos (comandos 74, 84 e 77) ou um dispositivo por conexão, conforme o que o DTM suportar.
-- Identificação (fabricante e tipo de dispositivo): valores que façam o PACTware usar o DTM HART genérico, sem imitar marca real.
+- Revisão do protocolo: **HART 7** (definido na Etapa 2). O DTM genérico "Generic H7" da FieldComm Group, que acompanha o PACTware 6.3, só abre o instrumento quando ele se declara HART 7; em HART 5 a tela fica vazia.
+- Serial (definido na Etapa 2): 1200 baud, 8 bits, paridade ímpar, 1 stop bit, sem controle de fluxo e sem eco. O "Serial HART CommDTM" usa 5 preâmbulos, 3 retentativas e espera cerca de 0,44 s por resposta (estimado pelo log; a tela dele não tem campo de time-out). A resposta local chega em 15 a 50 ms com a emulação de baud do com0com desligada (recomendado) e em 200 a 330 ms com ela ligada. O uso de RTS e DTR pelo DTM não foi observado; a ponte manteve os dois ligados.
+- Comandos que o Generic H7 pede além dos previstos: 7, 8, 9, 20, 48 e 50 (sem o 50, a tela não abre); ele também sonda 31, 40, 44, 45, 47, 52, 53, 54, 72, 76 e 105 e aceita "não implementado". O assistente "Aplicar valores" usa os comandos 36 e 37.
+- Endereçamento: os quatro instrumentos em multidrop na mesma porta, cada um com seu endereço de polling.
+- Identificação (fabricante e tipo de dispositivo): valores que façam o PACTware usar o DTM HART genérico, sem imitar marca real. Exceção (14/11/2026, a pedido do autor): na prova de conceito da Etapa 2 (`tools/hart-poc`, fora do produto), o instrumento se identifica como o transmissor de pressão Smar LD301 (fabricante `0x3E`, tipo `0x01`; HCF_SPEC-183), só para teste. A identificação dos instrumentos do produto é definida no resultado do portão.
 
 **Comandos e efeito na simulação**
 
@@ -302,8 +304,8 @@ Os transmissores LT-101, PT-101, FT-101 e FT-102 são dispositivos HART simulado
 
 **Transportes**
 
-- **HART-IP (conforme o portão de decisão da Etapa 2):** TCP e UDP. Uma porta por sessão (faixa 16000–16099), com o mesmo pareamento do Modbus. Se o DTM só aceitar a porta padrão 5094, o isolamento fica só pelo pareamento por IP.
-- **Serial (opcional, fora do fluxo principal):** 1200 baud, 8 bits, paridade ímpar, 1 stop bit, via um conector local instalável para quem precisar.
+- **Serial pela ponte no navegador (caminho do PACTware, conforme o portão da Etapa 2):** o PACTware usa o DTM de modem HART numa COM virtual do com0com; o par dessa porta é aberto pela página da planta com a Web Serial (Chrome e Edge), em 1200 baud, 8 bits, paridade ímpar e 1 stop bit, e os bytes vão e voltam pelo WebSocket da planta. O isolamento entre plantas vem do próprio WebSocket, sem porta extra nem pareamento.
+- **HART-IP (extensão):** TCP e UDP, uma porta por sessão (faixa 16000–16999) com o mesmo pareamento do Modbus, ou a 5094 com pareamento por IP. Só entra se o portão da Etapa 2 pedir ou como extensão escolhida.
 - **Configurador HART web:** uma aba no site que lista os instrumentos, lê e escreve os parâmetros e, no modo didático, mostra os quadros trocados em hexadecimal. É o caminho HART garantido, sem instalar nada, qualquer que seja o resultado da Etapa 2.
 
 ## Plantas, contas e colaboração
@@ -322,7 +324,7 @@ Qualquer pessoa pode usar o simulador: sem conta, como visitante, ou com conta, 
 
 - A planta salva guarda dono, cenário, configurações, estado e histórico de ensaios no banco de dados.
 - A instância é a planta rodando no servidor. Ela nasce quando alguém abre a planta, hiberna (gravando o estado) após 30 minutos sem ninguém conectado e, ao ser reaberta, continua de onde parou.
-- Cada instância recebe uma porta Modbus (padrão 15000–15999) e uma porta HART-IP (padrão 16000–16999). Ao reabrir, o servidor tenta devolver a mesma porta, para o mestre não precisar ser reconfigurado.
+- Cada instância recebe uma porta Modbus (padrão 15000–15999) e, se o HART-IP for adotado, uma porta HART-IP (padrão 16000–16999). Ao reabrir, o servidor tenta devolver a mesma porta, para o mestre não precisar ser reconfigurado.
 
 **Compartilhamento**
 
@@ -463,11 +465,11 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 ## Riscos conhecidos
 
-Os dois maiores riscos são externos ao código: o PACTware aceitar HART-IP e a TI liberar o acesso de fora. Por isso eles são testados cedo (Etapas 2 e 9).
+Os dois maiores riscos são externos ao código: o PACTware funcionar pela ponte serial e a TI liberar o acesso de fora. Por isso eles são testados cedo (Etapas 2 e 9).
 
 | Risco | Impacto | Mitigação | Etapa |
 | --- | --- | --- | --- |
-| PACTware não conectar via HART-IP sem instalar nada | Alto | Portão de decisão na Etapa 2 com três resultados já planejados; configurador HART no site garante o uso em qualquer caso | 2, 17, 18 |
+| PACTware não funcionar pela ponte serial (driver com0com, Web Serial ou tempo de resposta) | Alto | Portão de decisão na Etapa 2 com três resultados já planejados; HART-IP como alternativa; configurador HART no site garante o uso em qualquer caso | 2, 17, 18 |
 | TI não liberar IP público, portas ou certificado | Alto | Conversar com a TI antes da Etapa 9; plano B: a mesma imagem Docker numa VM | 9, 13 |
 | Abuso ou ataque com o site aberto ao público | Alto | Limites por conta e por IP, pareamento, varredura de segurança, monitoramento e alertas | 13 |
 | Escopo grande para uma iniciação científica | Alto | Marcos usáveis ao fim de cada fase; Fases 2 e 3 podem trocar de ordem; Fase 4 só no fim | Todas |
@@ -497,6 +499,8 @@ Os dois maiores riscos são externos ao código: o PACTware aceitar HART-IP e a 
 | `MB_CLIENT` | Bloco da Siemens que faz o CLP agir como cliente Modbus TCP. |
 | HART | Protocolo digital sobreposto ao sinal de 4–20 mA, usado para configurar e diagnosticar instrumentos. |
 | HART-IP | HART transportado por TCP/UDP, na porta padrão 5094. |
+| com0com | Driver gratuito para Windows que cria pares de portas COM virtuais ligadas entre si: o que entra numa sai na outra. |
+| Web Serial | API do Chrome e do Edge que deixa uma página abrir uma porta serial do PC, com permissão do usuário. |
 | PACTware / FDT / DTM | PACTware é um aplicativo FDT gratuito; DTMs são os “drivers” que ele usa, de comunicação (modem, HART-IP) e de dispositivo. |
 | PV, LRV, URV | Variável primária do instrumento; início e fim da faixa que corresponde a 4 e 20 mA. |
 | Amortecimento | Constante de tempo do filtro que o instrumento aplica à medição. |
@@ -514,7 +518,7 @@ Os dois maiores riscos são externos ao código: o PACTware aceitar HART-IP e a 
 | Visitante | Quem usa sem conta: uma planta temporária, sem salvar nem compartilhar. |
 | Turma | Grupo criado por um professor; ele acompanha as plantas das atividades da turma. |
 | Pareamento | Autorização, no navegador, dos IPs que podem conectar às portas Modbus e HART-IP da planta. |
-| Portão de decisão | Ponto do plano em que um resultado medido decide qual caminho seguir (ex.: HART-IP na Etapa 2). |
+| Portão de decisão | Ponto do plano em que um resultado medido decide qual caminho seguir (ex.: caminho do PACTware na Etapa 2). |
 | i18n | Internacionalização: textos da interface separados do código, em arquivos por idioma. |
 
 ## Referências

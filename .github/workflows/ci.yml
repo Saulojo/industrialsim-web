@@ -35,6 +35,28 @@ jobs:
         working-directory: server
         run: dotnet test --no-build --configuration Release
 
+  hart-poc:
+    name: Prova HART da Etapa 2 (build e testes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: tools/hart-poc/**/packages.lock.json
+
+      - name: Restore (versões travadas)
+        run: dotnet restore tools/hart-poc/HartPoc.sln --locked-mode
+
+      - name: Build (avisos são erros)
+        run: dotnet build tools/hart-poc/HartPoc.sln --no-restore --configuration Release -warnaserror
+
+      - name: Testes
+        working-directory: tools/hart-poc
+        run: dotnet test --no-build --configuration Release
+
   web:
     name: Web (lint, testes e build)
     runs-on: ubuntu-latest
