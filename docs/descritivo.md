@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapas 1 e 2 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9); próxima: Etapa 3 (motor de cenários). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapas 1 a 3 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9; Etapa 3 em 15/11/2026); próxima: Etapa 4 (imagem de I/O, escalas e watchdog). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -120,6 +120,10 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D20 | (11/11/2026, Etapa 0) Testes .NET com xUnit v3 (4.x) sobre a Microsoft Testing Platform, ativada no `global.json` (`"test": {"runner": "Microsoft.Testing.Platform"}`), que também fixa o SDK 10 (`rollForward: latestFeature`). | É o caminho padrão do xUnit 4 com o SDK 10; dispensa `Microsoft.NET.Test.Sdk` e `xunit.runner.visualstudio`; local e CI usam o mesmo SDK, então os avisos tratados como erro são os mesmos nos dois. | VSTest (o xUnit 4 o trata como legado no SDK 10); deixar o SDK livre (o SDK 11 local daria avisos diferentes dos do CI). |
 | D21 | (11/11/2026, Etapa 0) TypeScript fixado em 6.0.x até o typescript-eslint aceitar o TypeScript 7; stylelint com `stylelint-declaration-strict-value` obriga tokens (`var(--…)`) em cor, fonte, espaçamento e raio. | O typescript-eslint 8.72 exige TypeScript abaixo de 6.1; a regra de tokens passa a ser verificada no lint, e não só combinada. | TypeScript 7 sem lint com tipos; tokens só por convenção. |
 | D22 | (14/11/2026, Etapa 1) Gerador pseudoaleatório próprio para o ruído: xoshiro256\*\* com a semente expandida por SplitMix64 (`IndustrialSim.Core.Numerics.SeededRandom`), com teste contra vetores de referência. | A sequência do `System.Random` com semente não é garantida entre versões do .NET, e a sequência do ruído faz parte do determinismo (RNF02). | `System.Random` com semente. |
+| D23 | (15/11/2026, Etapa 3) O `scenario.json` é validado por código próprio (`ScenarioLoader` e `ScenarioPlant`), que acumula os erros com o caminho do campo. O esquema JSON (`scenarios/scenario.schema.json`) é gerado do mesmo registro de tipos de componente e conferido por teste. | Mensagens em português com o caminho do campo e sem dependência nova; o esquema serve ao editor e não diverge do validador. | Biblioteca de JSON Schema como validador (mensagens genéricas e mais uma dependência). |
+| D24 | (15/11/2026, Etapa 3) A ordem em que os componentes avançam no passo é calculada pelas ligações: quem fornece um sinal avança antes de quem o consome. Num laço de realimentação, a ligação que fecha o laço entrega o valor do passo anterior e entra num componente com estado; um laço só de componentes sem estado (laço algébrico) é erro de validação. | A ordem dos componentes no arquivo deixa de importar, e o resultado continua determinístico (RNF02). | Executar na ordem do arquivo; resolver laços algébricos por iteração. |
+| D25 | (15/11/2026, Etapa 3) Cada transmissor tem gerador de ruído próprio, com semente `noiseSeed + k` (k = ordem do transmissor no arquivo, a partir de 0), e sorteia uma vez por passo. O ruído não entra no hash de estado. | Acrescentar um instrumento no fim não muda o ruído dos anteriores; o primeiro transmissor reproduz o gerador único do modelo da Etapa 1. | Um gerador único para a planta inteira. |
+| D26 | (15/11/2026, Etapa 3) Unidades de vazão nos componentes: `tank` em m³/s; `drum`, `burner` e `steamPressure` em kg/s; `pump` e `valve` na unidade de vazão do cenário. | O bloco de diagnóstico da caldeira é em kg/s; o tanque da Etapa 1 fica como estava. | Converter tudo para uma única unidade de vazão. |
 
 ## Arquitetura e estrutura do repositório
 
@@ -442,7 +446,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D22. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D26. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.
