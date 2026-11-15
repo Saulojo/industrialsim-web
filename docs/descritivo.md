@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapas 1 a 3 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9; Etapa 3 em 15/11/2026); próxima: Etapa 4 (imagem de I/O, escalas e watchdog). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapas 1 a 4 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9; Etapas 3 e 4 em 15/11/2026); próxima: Etapa 5 (servidor de tempo real e instâncias). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -124,6 +124,12 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D24 | (15/11/2026, Etapa 3) A ordem em que os componentes avançam no passo é calculada pelas ligações: quem fornece um sinal avança antes de quem o consome. Num laço de realimentação, a ligação que fecha o laço entrega o valor do passo anterior e entra num componente com estado; um laço só de componentes sem estado (laço algébrico) é erro de validação. | A ordem dos componentes no arquivo deixa de importar, e o resultado continua determinístico (RNF02). | Executar na ordem do arquivo; resolver laços algébricos por iteração. |
 | D25 | (15/11/2026, Etapa 3) Cada transmissor tem gerador de ruído próprio, com semente `noiseSeed + k` (k = ordem do transmissor no arquivo, a partir de 0), e sorteia uma vez por passo. O ruído não entra no hash de estado. | Acrescentar um instrumento no fim não muda o ruído dos anteriores; o primeiro transmissor reproduz o gerador único do modelo da Etapa 1. | Um gerador único para a planta inteira. |
 | D26 | (15/11/2026, Etapa 3) Unidades de vazão nos componentes: `tank` em m³/s; `drum`, `burner` e `steamPressure` em kg/s; `pump` e `valve` na unidade de vazão do cenário. | O bloco de diagnóstico da caldeira é em kg/s; o tanque da Etapa 1 fica como estava. | Converter tudo para uma única unidade de vazão. |
+| D27 | (15/11/2026, Etapa 4) No formato `float32`, o sinal analógico de endereço `a` ocupa os registradores `2a` e `2a+1`. Heartbeat e bloco de diagnóstico não mudam de endereço, e o cenário é recusado se eles caírem sobre os sinais nesse arranjo. | Um `float32` precisa de 2 registradores e os endereços dos sinais no mapa são consecutivos; a regra é simples de explicar e de configurar no mestre. | Mapa separado para o `float32`; manter os endereços e sobrepor sinais. |
+| D28 | (15/11/2026, Etapa 4) A medição satura em 3,8 e 20,5 mA; 3,6 e 21 mA só aparecem com o transmissor em falha (NAMUR NE43). No formato 0–27648 as contagens vão de −4864 a 32511; nos formatos 0–10000 e 0–32767, o valor é limitado ao que cabe em `INT` (em 0–32767, 21 mA satura em 32767). | Comportamento de transmissor real; o mestre distingue medição fora da faixa de instrumento em falha. | Corrente sem limite; registrador sem sinal nos outros formatos. |
+| D29 | (15/11/2026, Etapa 4) A faixa (LRV/URV) fica na entrada `io` de cada registrador, na unidade do sinal da planta; `unit` e `unitFactor` dão a unidade de engenharia (valor de engenharia = valor do sinal × fator), usada no `float32`, no bloco de diagnóstico e nos valores forçados. | A planta continua em SI (D06) e o usuário vê bar e %. | Faixa em unidade de engenharia; planta fora do SI. |
+| D30 | (15/11/2026, Etapa 4) O valor forçado é guardado em unidade de engenharia (ou booleano), passa pela faixa e pelo formato atuais e tem prioridade sobre a planta e sobre a falha do transmissor. | Continua válido quando o formato muda. | Forçar o valor bruto do registrador. |
+| D31 | (15/11/2026, Etapa 4) Ao trocar o formato analógico ou a ordem das palavras, os comandos que estão nos holding registers são regravados no novo formato. | Sem isso, as contagens antigas seriam lidas no formato novo e as válvulas dariam um salto até o mestre reescrever. | Deixar os registradores como estão; zerar os comandos. |
+| D32 | (15/11/2026, Etapa 4) O watchdog conta tempo simulado (passos da planta), e não tempo de relógio. | Determinismo (RNF02): uma gravação reproduzida dispara o watchdog no mesmo passo. | Temporizador de relógio. |
 
 ## Arquitetura e estrutura do repositório
 
@@ -446,7 +452,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D26. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D32. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.
