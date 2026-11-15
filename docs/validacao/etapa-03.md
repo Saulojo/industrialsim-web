@@ -1,7 +1,7 @@
 # Validação — Etapa 3: Motor de cenários
 
 - Branch: `etapa-03-cenarios`
-- Pull request: a abrir, depois da confirmação
+- Pull request: [Saulojo/industrialsim-web#4](https://github.com/Saulojo/industrialsim-web/pull/4)
 - Data: 15/11/2026
 
 ## Ambiente
@@ -10,7 +10,7 @@
 | --- | --- |
 | Sistema (local) | Windows 11 Pro 10.0.26300 |
 | .NET SDK | 10.0.404 (fixado em `global.json`: 10.0.100 com `rollForward: latestFeature`) |
-| CI | GitHub Actions, `ubuntu-latest`; ainda não rodou nesta branch (ela não foi enviada) |
+| CI | GitHub Actions, `ubuntu-latest`; execuções na aba "Checks" do pull request |
 
 Nenhum pacote novo: o leitor de cenário usa o `System.Text.Json` do próprio .NET, e o validador é do projeto.
 
@@ -229,7 +229,6 @@ Os testes do `simrun` (`SimRunTests`, `InputScriptTests`) conferem que o CSV tra
 
 | Item | Situação |
 | --- | --- |
-| CI na branch | Ainda não rodou: a branch não foi enviada. |
 | Valores de tabela do cenário | Poder calorífico do metano, entalpias e densidade a 1 MPa foram citados de Çengel & Boles (tabelas A-27, A-4, A-5) de memória. Conferir no livro antes de usar em texto de pesquisa. |
 | Parâmetros da caldeira | Ilustrativos (caldeira de 7,2 t/h, τ de pressão de 60 s), a ajustar com o orientador. |
 | Mensagens em português no núcleo | As mensagens de validação de cenário e do `simrun` estão em português no código, como as exceções da Etapa 1. São para quem escreve cenários, não texto da interface web. Se forem aparecer no site, passam para os arquivos de idioma na etapa que as exibir. |
