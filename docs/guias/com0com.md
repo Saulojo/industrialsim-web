@@ -3,7 +3,7 @@
 O com0com é um driver gratuito para Windows que cria duas portas COM ligadas entre si: o que entra numa sai na
 outra. O PACTware abre uma ponta (COM10) e a página do site abre a outra (COM11) pela Web Serial.
 
-> Rascunho. A instalação e a troca de nomes já foram verificadas; a opção `EmuBR` ainda não.
+> Rascunho da Etapa 2. Instalação, troca de nomes e a opção `EmuBR` foram verificadas no Windows 11.
 
 ## Qual versão instalar
 
@@ -33,12 +33,14 @@ list
 
 ## Opções a testar
 
-- `EmuBR=yes` ("emulate baud rate"): faz a porta virtual respeitar a velocidade de 1200 baud. A Etapa 2 testa com e
-  sem. Sem ela, 256 bytes atravessam o par em poucos milissegundos. Para ligar, no "Setup Command Prompt":
+- `EmuBR` ("emulate baud rate"): faz a porta virtual respeitar a velocidade de 1200 baud. **Recomendado: deixar
+  desligada**, que é o padrão da instalação. O PACTware funciona das duas formas, mas com ela ligada a resposta do
+  instrumento chega em 200 a 330 ms em vez de 15 a 50 ms, perto do tempo de espera do DTM, e sobra pouca folga para
+  a rede. Para desligar ou ligar, no "Setup Command Prompt" como administrador, com as portas fechadas:
 
   ```text
-  change CNCA0 EmuBR=yes
-  change CNCB0 EmuBR=yes
+  change CNCA0 EmuBR=no
+  change CNCB0 EmuBR=no
   ```
 
 - Os sinais vêm cruzados por padrão (verificado): o RTS de uma ponta é o CTS da outra, e o DTR é o DSR e o DCD.

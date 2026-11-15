@@ -106,7 +106,20 @@ COM10 aberta em 1200 8O1. CTS=1 DSR=1 DCD=1
 Eco: 200 de 200 blocos iguais byte a byte (6786 bytes enviados).
 ```
 
-Pendente para fechar o critério: repetir no Edge e com `EmuBR=yes`.
+Repetições em 15/11/2026, com o Edge 157.0.4341.60:
+
+| Navegador | `EmuBR` | Resultado |
+| --- | --- | --- |
+| Chrome 157 | desligada | 200 de 200 blocos iguais (6786 bytes), cerca de 3 s |
+| Edge 157 | desligada | 200 de 200 blocos iguais (6786 bytes) |
+| Edge 157 | ligada | 100 de 100 blocos iguais (3489 bytes), 73 s |
+
+Na primeira rodada no Edge, 1 dos 200 blocos veio precedido de um resto de pedido do PACTware
+(`FFFFFFFFFF82BE010E2E020908…`) que tinha ficado no buffer da COM11 de quando o PACTware estava conectado; os bytes
+do bloco em si voltaram certos. A rodada seguinte, com o buffer limpo, deu 200 de 200.
+
+Com `EmuBR=yes` (`change CNCA0 EmuBR=yes` e `change CNCB0 EmuBR=yes`; no registro, `EmuBR=4294967295` nas duas
+pontas), o par direto leva 1114 ms para 120 bytes, contra 1100 ms teóricos a 1200 baud.
 
 Nota: uma primeira tentativa foi feita com a página ainda no modo HART; os 5226 bytes chegaram intactos ao
 servidor, mas nada voltou, como esperado nesse modo. A página passou a montar o caminho do WebSocket a partir do
@@ -131,12 +144,33 @@ Até o quadro completo da resposta: mín. 9,8 ms, mediana 18,7 ms, p95 26,6 ms, 
 
 Contadores do servidor ao fim: 202 quadros recebidos, 202 respondidos, 0 erros de verificação, 0 bytes descartados.
 
-Limites desta medição:
+Todas as medições locais (100 pedidos cada, 100% de respostas válidas), até o primeiro byte da resposta:
 
-- É com a ferramenta de teste, não com o PACTware (ele ocupa a COM10 quando está aberto).
-- Sem `EmuBR`, o par não gasta o tempo de 1200 baud; numa linha real, um pedido de 14 bytes leva 128 ms só para
-  ser transmitido. Falta repetir com `EmuBR=yes`.
-- Falta comparar com o time-out configurado no DTM e medir com o servidor em outro PC.
+| Navegador | `EmuBR` | Comando | Mínimo | Mediana | p95 | Máximo | Quadro completo (mediana) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Chrome | desligada | 0 | 10,4 ms | 15,0 ms | 21,4 ms | 24,0 ms | 15,3 ms |
+| Chrome | desligada | 3 | 9,3 ms | 18,4 ms | 26,1 ms | 27,9 ms | 18,7 ms |
+| Edge | desligada | 0 | 22,4 ms | 28,6 ms | 35,5 ms | 45,8 ms | 29,1 ms |
+| Edge | desligada | 3 | 25,1 ms | 32,4 ms | 39,2 ms | 51,7 ms | 33,0 ms |
+| Edge | ligada | 0 | 188,8 ms | 205,0 ms | 222,1 ms | 250,8 ms | 504,2 ms |
+| Edge | ligada | 3 | 248,7 ms | 266,5 ms | 270,3 ms | 327,9 ms | 485,6 ms |
+
+Comparação com o DTM: o Serial HART CommDTM não tem campo de time-out; na varredura, as tentativas num endereço
+vazio saem a cada 0,44 s (medido sem `EmuBR`), e são 4 por endereço (3 retentativas).
+
+PACTware com `EmuBR` ligada (15/11/2026, 00:51 a 00:57): conectou, abriu a "Online Parametrization" e seguiu
+lendo. No log, 120 pedidos nessa conexão: os mesmos da sessão sem emulação, todos respondidos (fora os 60 da
+varredura dos endereços vazios), nenhum erro de verificação e nenhum pedido repetido por retentativa. Os pedidos
+chegam ao servidor em pedaços de 1 a 9 bytes e são remontados sem perda. O ciclo de leitura (comando 9) passou de
+cerca de 2,6 s para 3,5 s; o usuário percebeu a tela mais lenta.
+
+Limites destas medições:
+
+- São com a ferramenta de teste, não com o PACTware (ele ocupa a COM10 quando está aberto). Do PACTware há o
+  resultado funcional acima, não um tempo medido.
+- Com `EmuBR` ligada, a resposta chega perto do time-out estimado do DTM (até 328 ms contra cerca de 440 ms). A
+  folga para a latência de rede é pequena; com `EmuBR` desligada (padrão do com0com), sobra mais de 380 ms.
+- Falta medir com o servidor em outro PC.
 
 ## Critério 3 / S3 e S4 — PACTware encontra e lê o instrumento (em andamento)
 
@@ -233,5 +267,4 @@ Pendente: resultado do portão.
 - **DTMs:** estão instalados o "Serial HART CommDTM 1.0.0" (FieldComm Group) e o "CodeWrights iDTM-FDI PACTware
   1.8.295". Não há um DTM HART genérico clássico; falta ver no PACTware se o iDTM-FDI abre o instrumento sem um
   pacote FDI do fabricante, e confirmar a licença de cada um (critério S6).
-- **Edge e `EmuBR`:** falta repetir o eco e a medição.
 - **Segundo PC:** ainda não há outro computador para medir o tempo de resposta remoto (S7).
