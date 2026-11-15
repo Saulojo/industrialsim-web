@@ -1,2 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\IndustrialSim.Core\IndustrialSim.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Os testes exercitam as fases do passo (copiar comandos, publicar medições) separadamente. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialSim.IO.Tests" />
+  </ItemGroup>
 </Project>
