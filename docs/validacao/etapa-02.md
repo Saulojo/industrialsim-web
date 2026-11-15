@@ -202,9 +202,29 @@ Observação: o botão "Aplicar valores" da mesma aba não grava o valor digitad
 pressão aplicada como ponto de 4 ou 20 mA (comandos 36 e 37, que a prova não implementa: código 64, mostrado pelo
 DTM como "0x40 Undefined").
 
-## Critérios 6 e 7
+## Critério 6 / S8 — 30 minutos conectado (15/11/2026)
 
-Pendentes: 30 minutos conectado e o resultado do portão.
+Servidor iniciado pelo usuário no próprio terminal (HART 7), Chrome com a ponte na COM11, PACTware 6.3 com a
+"Online Parametrization" do instrumento aberta, PC em uso normal durante o teste (aba da ponte em segundo plano).
+Log `hart-poc-20261115-000830-758.log`:
+
+| Medida | Valor |
+| --- | --- |
+| Ponte conectada | 00:08:44, uma única vez; nenhuma desconexão até o fim do log (00:43:10) |
+| Leitura cíclica do PACTware (comando 9) | De 00:10:20 a 00:43:10: cerca de 33 minutos, 764 pedidos, todos com código de resposta 0 |
+| Maior intervalo entre dois pedidos nesse período | 4,4 s (o ciclo normal do DTM fica entre 2,5 e 3,5 s) |
+| Pedidos por janela de 5 minutos | 104, 108, 127, 127, 125, 125 (de 00:10 a 00:40) |
+| Quadros recebidos / respondidos | 879 / 819 |
+| Pedidos sem resposta | 60, todos do comando 0 em endereço curto na varredura inicial dos endereços vazios (1 a 15) |
+| Erros de verificação, bytes descartados, quadros abandonados | 0, 0 e 0 |
+| Bytes recebidos / enviados | 18.192 / 66.344 |
+
+Pelo lado do servidor, não houve queda nem erro de comunicação em 33 minutos. Pendente: confirmação do usuário de
+que o PACTware não mostrou aviso de comunicação no período.
+
+## Critério 7
+
+Pendente: resultado do portão.
 
 ## Pontos em aberto
 
