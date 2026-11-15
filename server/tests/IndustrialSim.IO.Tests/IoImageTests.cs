@@ -71,7 +71,7 @@ public class IoImageTests(ITestOutputHelper output)
                     image.TryWriteHoldingRegisters(2 * w, [value, value]);
                     image.TryWriteCoils(0, [(value & 1) == 0, (value & 1) == 0]);
                 }
-            }, stop.Token)),
+            }, TestContext.Current.CancellationToken)),
         ];
 
         Task reader = Task.Run(() =>
@@ -93,7 +93,7 @@ public class IoImageTests(ITestOutputHelper output)
                     torn++;
                 }
             }
-        }, stop.Token);
+        }, TestContext.Current.CancellationToken);
 
         await Task.Delay(500, TestContext.Current.CancellationToken);
         await stop.CancelAsync();
@@ -123,7 +123,7 @@ public class IoImageTests(ITestOutputHelper output)
             {
                 io.Step();
             }
-        }, stop.Token);
+        }, TestContext.Current.CancellationToken);
 
         Task master = Task.Run(() =>
         {
@@ -134,7 +134,7 @@ public class IoImageTests(ITestOutputHelper output)
                 io.Image.TryWriteHoldingRegister(Caldeira.Heartbeat, heartbeat);
                 io.Image.TryWriteHoldingRegister(Caldeira.WaterValveCommand, (ushort)(heartbeat % 27648));
             }
-        }, stop.Token);
+        }, TestContext.Current.CancellationToken);
 
         Task reader = Task.Run(() =>
         {
@@ -155,7 +155,7 @@ public class IoImageTests(ITestOutputHelper output)
 
                 lastStep = snapshot.StepCount;
             }
-        }, stop.Token);
+        }, TestContext.Current.CancellationToken);
 
         await Task.Delay(500, TestContext.Current.CancellationToken);
         await stop.CancelAsync();
