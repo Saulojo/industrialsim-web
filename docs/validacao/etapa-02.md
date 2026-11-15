@@ -219,8 +219,10 @@ Log `hart-poc-20261115-000830-758.log`:
 | Erros de verificação, bytes descartados, quadros abandonados | 0, 0 e 0 |
 | Bytes recebidos / enviados | 18.192 / 66.344 |
 
-Pelo lado do servidor, não houve queda nem erro de comunicação em 33 minutos. Pendente: confirmação do usuário de
-que o PACTware não mostrou aviso de comunicação no período.
+Pelo lado do servidor, não houve queda nem erro de comunicação em 33 minutos. O usuário confirmou que o PACTware
+não mostrou aviso de comunicação: a barra de estado seguiu em "Conectado". O único indicador é o símbolo amarelo
+"≠" ("base de dados do DTM é diferente da base de dados do instrumento"), que compara os dados guardados no
+projeto com os do instrumento e não é erro de comunicação.
 
 ## Critério 7
 
