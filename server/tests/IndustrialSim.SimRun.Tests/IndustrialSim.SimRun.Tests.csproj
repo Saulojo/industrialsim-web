@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IndustrialSim.SimRun\IndustrialSim.SimRun.csproj" />
+  </ItemGroup>
+
+  <!-- Cenários do produto, copiados para a pasta de saída. -->
+  <ItemGroup>
+    <None Include="..\..\..\scenarios\**\*.json" Link="ProductScenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\IndustrialSim.Core.Tests\Scenarios\Files\*.json" Link="TestScenarios\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

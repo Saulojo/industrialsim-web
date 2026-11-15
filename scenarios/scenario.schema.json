@@ -1,0 +1,693 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cenário do IndustrialSim Web",
+  "description": "Formato do scenario.json, versão 1. Gerado por ScenarioSchemaWriter; não edite à mão.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "components"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Caminho deste esquema, para o editor."
+    },
+    "schemaVersion": {
+      "const": 1,
+      "description": "Versão do formato."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[^.\\s]+$",
+      "description": "Identificador do cenário. Sem espaço e sem ponto."
+    },
+    "description": {
+      "type": "string",
+      "description": "Nota para quem edita o arquivo; não aparece na interface."
+    },
+    "stepSeconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 0.01,
+      "description": "Passo fixo de integração, em segundos."
+    },
+    "noiseSeed": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Semente do ruído dos instrumentos."
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/component"
+      },
+      "description": "Componentes da planta. O id é a tag do equipamento."
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/connection"
+      },
+      "description": "Ligações da saída de um componente à entrada de outro."
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/input"
+      },
+      "description": "Entradas externas da planta: comandos e cargas."
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/output"
+      },
+      "description": "Saídas externas da planta: medições e estados."
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^.+\\.[^.]+$",
+      "description": "Sinal de um componente, no formato 'componente.sinal' (ex.: 'P-101.flow')."
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ],
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/reference",
+          "description": "Saída que fornece o sinal."
+        },
+        "to": {
+          "$ref": "#/$defs/reference",
+          "description": "Entrada que recebe o sinal. Cada entrada só pode ter uma fonte."
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "to"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[^.\\s]+$",
+          "description": "Nome da entrada externa. Sem espaço e sem ponto."
+        },
+        "to": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/reference"
+          },
+          "description": "Entradas de componentes que esta entrada alimenta."
+        },
+        "initial": {
+          "type": "number",
+          "default": 0,
+          "description": "Valor no instante inicial."
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "from"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[^.\\s]+$",
+          "description": "Nome da saída externa. Sem espaço e sem ponto."
+        },
+        "from": {
+          "$ref": "#/$defs/reference",
+          "description": "Saída de componente publicada com esse nome."
+        }
+      }
+    },
+    "component": {
+      "oneOf": [
+        {
+          "title": "pump",
+          "description": "Bomba liga/desliga: a vazão segue o comando com dinâmica de 1ª ordem. Entrada: run. Saídas: flow, running.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "pump"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ratedFlow"
+              ],
+              "properties": {
+                "ratedFlow": {
+                  "description": "vazão nominal, na unidade de vazão do cenário (m³/s ou kg/s)",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "timeConstantSeconds": {
+                  "description": "constante de tempo de partida e parada [s]",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "default": 1
+                },
+                "runningThreshold": {
+                  "description": "fração da rotação acima da qual 'running' vale 1",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "exclusiveMaximum": 1,
+                  "default": 0.5
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "speed": {
+                  "description": "rotação inicial, como fração da nominal",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "valve",
+          "description": "Válvula de controle com atuador de 1ª ordem e característica linear ou igual-percentual. Entradas: command (0 a 1), inletFlow. Saídas: position, opening, flow.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "valve"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "timeConstantSeconds"
+              ],
+              "properties": {
+                "timeConstantSeconds": {
+                  "description": "constante de tempo do atuador [s]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "characteristic": {
+                  "description": "característica inerente de vazão",
+                  "enum": [
+                    "linear",
+                    "equalPercentage"
+                  ],
+                  "default": "linear"
+                },
+                "rangeability": {
+                  "description": "rangeabilidade R da característica igual-percentual",
+                  "type": "number",
+                  "exclusiveMinimum": 1,
+                  "default": 50
+                },
+                "ratedFlow": {
+                  "description": "vazão com a válvula toda aberta, usada quando 'inletFlow' não é ligada",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 1
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "position": {
+                  "description": "posição inicial",
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "tank",
+          "description": "Tanque atmosférico de seção constante, com saída por orifício no fundo (Torricelli). Entradas: inflow (m³/s), outletOpening (0 a 1). Saídas: level (m), outflow, overflow, meanOutflow (m³/s).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "tank"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "areaM2",
+                "heightM",
+                "outletAreaM2"
+              ],
+              "properties": {
+                "areaM2": {
+                  "description": "área da seção transversal [m²]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "heightM": {
+                  "description": "altura do tanque [m]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "outletAreaM2": {
+                  "description": "área do orifício de saída totalmente aberto [m²]",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "dischargeCoefficient": {
+                  "description": "coeficiente de descarga do orifício",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1,
+                  "default": 0.61
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "levelM": {
+                  "description": "nível inicial [m]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "drum",
+          "description": "Tubulão v1: balanço de massa da água, com evaporação dada pelo calor recebido. Entradas: feedwaterFlow (kg/s), heat (W). Saídas: level (m), steamGeneration (kg/s), overflow (kg/s), waterMass (kg).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "drum"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "areaM2",
+                "heightM",
+                "waterDensityKgPerM3",
+                "evaporationEnthalpyJPerKg"
+              ],
+              "properties": {
+                "areaM2": {
+                  "description": "área da seção horizontal [m²]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "heightM": {
+                  "description": "altura interna (diâmetro) [m]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "waterDensityKgPerM3": {
+                  "description": "densidade da água no tubulão [kg/m³]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "evaporationEnthalpyJPerKg": {
+                  "description": "entalpia para evaporar 1 kg de água de alimentação [J/kg]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "levelM": {
+                  "description": "nível inicial [m]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "burner",
+          "description": "Queimador e fornalha: calor = eficiência × poder calorífico × vazão de combustível, com dinâmica de 1ª ordem. Entrada: fuelFlow (kg/s). Saída: heat (W).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "burner"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "lowerHeatingValueJPerKg",
+                "efficiency",
+                "timeConstantSeconds"
+              ],
+              "properties": {
+                "lowerHeatingValueJPerKg": {
+                  "description": "poder calorífico inferior do combustível [J/kg]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "efficiency": {
+                  "description": "fração do calor do combustível que chega à água",
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1
+                },
+                "timeConstantSeconds": {
+                  "description": "constante de tempo da fornalha [s]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "heatW": {
+                  "description": "calor entregue no instante inicial [W]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "steamPressure",
+          "description": "Modelo de pressão v1: acumulador de vapor de 1ª ordem, com saída proporcional à abertura e à pressão manométrica. Entradas: steamGeneration (kg/s), outletOpening (0 a 1), reliefFlow (kg/s). Saídas: pressure (Pa abs), steamFlow (kg/s).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "steamPressure"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "capacitanceKgPerPa",
+                "outletConductanceKgPerSPa"
+              ],
+              "properties": {
+                "capacitanceKgPerPa": {
+                  "description": "capacitância de vapor do gerador [kg/Pa]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "outletConductanceKgPerSPa": {
+                  "description": "condutância da saída de vapor toda aberta [kg/(s·Pa)]",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "downstreamPressurePa": {
+                  "description": "pressão absoluta a jusante da válvula de saída [Pa]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 101325
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "pressurePa": {
+                  "description": "pressão absoluta inicial (padrão: a de jusante) [Pa]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "transmitter",
+          "description": "Transmissor: amortecimento de 1ª ordem, ruído gaussiano com semente e quantização. Entrada: value. Saída: measurement.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "transmitter"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "dampingSeconds": {
+                  "description": "constante de tempo do amortecimento (0 = sem filtro) [s]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                },
+                "noiseStandardDeviation": {
+                  "description": "desvio padrão do ruído, na unidade da medição",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                },
+                "resolution": {
+                  "description": "passo de quantização, na unidade da medição (0 = sem quantização)",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "description": "valor inicial do filtro (padrão: o valor de entrada no instante inicial)",
+                  "type": "number",
+                  "default": 0
+                }
+              }
+            }
+          }
+        },
+        {
+          "title": "switch",
+          "description": "Chave de processo (nível, pressão) com banda morta. Entrada: value. Saída: active (0 ou 1).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "switch"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "setpoint",
+                "direction"
+              ],
+              "properties": {
+                "setpoint": {
+                  "description": "ponto de ajuste, na unidade do valor medido",
+                  "type": "number"
+                },
+                "direction": {
+                  "description": "sentido de atuação: 'rising' atua na subida (chave de alta), 'falling' na queda (chave de baixa)",
+                  "enum": [
+                    "rising",
+                    "falling"
+                  ]
+                },
+                "deadband": {
+                  "description": "banda morta (diferencial), na unidade do valor medido",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 0
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        },
+        {
+          "title": "reliefValve",
+          "description": "Válvula de alívio de ação rápida: abre na pressão de ajuste e fecha na de fechamento. Entrada: pressure (Pa abs). Saídas: open (0 ou 1), flow (kg/s).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "params"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[^.\\s]+$",
+              "description": "Identificador do componente (a tag). Sem espaço e sem ponto."
+            },
+            "type": {
+              "const": "reliefValve"
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "setPressurePa",
+                "reseatPressurePa",
+                "ratedFlowKgPerS"
+              ],
+              "properties": {
+                "setPressurePa": {
+                  "description": "pressão absoluta de ajuste (abertura) [Pa]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "reseatPressurePa": {
+                  "description": "pressão absoluta de fechamento [Pa]",
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "ratedFlowKgPerS": {
+                  "description": "vazão descarregada na pressão de ajuste [kg/s]",
+                  "type": "number",
+                  "minimum": 0
+                },
+                "backPressurePa": {
+                  "description": "contrapressão absoluta na descarga [Pa]",
+                  "type": "number",
+                  "minimum": 0,
+                  "default": 101325
+                }
+              }
+            },
+            "initial": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -193,11 +193,13 @@ Ao fim da etapa, os critérios medidos abaixo decidem o escopo das Etapas 17 e 1
 
 **Validação**
 
-- [ ] O tanque descrito em JSON gera resultado idêntico, bit a bit, ao modelo codificado da Etapa 1 para o mesmo roteiro.
-- [ ] Um cenário de dois tanques em série é criado só com JSON, sem alterar código, e conserva massa (erro < 1e-6).
-- [ ] Dez casos de JSON inválido (tipo desconhecido, ligação para sinal inexistente, parâmetro fora da faixa…) geram erro claro com o caminho do campo.
-- [ ] Caldeira v1 com degraus coerentes: mais água sobe o nível; mais combustível sobe a pressão; mais vapor baixa a pressão (testes de sinal).
-- [ ] A válvula igual-percentual segue a curva teórica com erro < 1%.
+- [x] O tanque descrito em JSON gera resultado idêntico, bit a bit, ao modelo codificado da Etapa 1 para o mesmo roteiro.
+- [x] Um cenário de dois tanques em série é criado só com JSON, sem alterar código, e conserva massa (erro < 1e-6).
+- [x] Dez casos de JSON inválido (tipo desconhecido, ligação para sinal inexistente, parâmetro fora da faixa…) geram erro claro com o caminho do campo.
+- [x] Caldeira v1 com degraus coerentes: mais água sobe o nível; mais combustível sobe a pressão; mais vapor baixa a pressão (testes de sinal).
+- [x] A válvula igual-percentual segue a curva teórica com erro < 1%.
+
+Evidências: `docs/validacao/etapa-03.md`.
 
 ### Etapa 4 — Imagem de I/O, escalas e watchdog
 

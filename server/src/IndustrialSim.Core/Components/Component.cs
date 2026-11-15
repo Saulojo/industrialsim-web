@@ -59,6 +59,17 @@ public abstract class Component
     /// </summary>
     public void UpdateOutputs() => ComputeOutputs();
 
+    /// <summary>
+    /// Chamado uma vez pelo motor de cenários, depois de as entradas receberem os valores iniciais das ligações.
+    /// Deixa o componente ajustar o estado a essas entradas (ex.: o filtro de um transmissor começa no valor medido)
+    /// e recalcula as saídas.
+    /// </summary>
+    public void Initialize()
+    {
+        OnInitialize();
+        ComputeOutputs();
+    }
+
     /// <summary>Substitui o estado (condição inicial ou retomada) e recalcula as saídas.</summary>
     public void SetState(ReadOnlySpan<double> values)
     {
@@ -68,6 +79,11 @@ public abstract class Component
 
     /// <summary>Acrescenta o estado deste componente a um hash de determinismo.</summary>
     public void AddStateTo(ref StateHasher hasher) => hasher.Add(_states.Values);
+
+    /// <summary>Ajuste do estado às entradas iniciais; por padrão, nada.</summary>
+    protected virtual void OnInitialize()
+    {
+    }
 
     /// <summary>Integra o estado em um passo, com as entradas lidas no início e mantidas constantes.</summary>
     protected abstract void Advance(double timeSeconds, double stepSeconds);

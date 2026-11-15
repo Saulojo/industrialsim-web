@@ -1,0 +1,101 @@
+{
+  "$schema": "../scenario.schema.json",
+  "schemaVersion": 1,
+  "id": "caldeira",
+  "description": "Caldeira v1 (Fase 1): balanço de massa no tubulão e pressão de 1ª ordem. Sem controle interno: LIC-101 e PIC-101 são do CLP do usuário. Começa em regime (2 kg/s de vapor a 10 bar abs, nível a meia altura). Parâmetros e fontes em scenarios/caldeira/README.md.",
+  "stepSeconds": 0.01,
+  "noiseSeed": 101,
+  "components": [
+    {
+      "id": "P-101",
+      "type": "pump",
+      "params": { "ratedFlow": 4.0, "timeConstantSeconds": 2.0 },
+      "initial": { "speed": 1.0 }
+    },
+    {
+      "id": "FV-101",
+      "type": "valve",
+      "params": { "timeConstantSeconds": 2.0, "characteristic": "equalPercentage", "rangeability": 50.0 },
+      "initial": { "position": 0.8228 }
+    },
+    {
+      "id": "FV-102",
+      "type": "valve",
+      "params": { "timeConstantSeconds": 2.0, "characteristic": "linear", "ratedFlow": 0.2217 },
+      "initial": { "position": 0.5 }
+    },
+    {
+      "id": "FV-103",
+      "type": "valve",
+      "params": { "timeConstantSeconds": 2.0, "characteristic": "linear" },
+      "initial": { "position": 0.5 }
+    },
+    {
+      "id": "Q-101",
+      "type": "burner",
+      "params": { "lowerHeatingValueJPerKg": 50.05e6, "efficiency": 0.85, "timeConstantSeconds": 10.0 },
+      "initial": { "heatW": 4.716e6 }
+    },
+    {
+      "id": "TB-101",
+      "type": "drum",
+      "params": { "areaM2": 4.8, "heightM": 1.2, "waterDensityKgPerM3": 887.0, "evaporationEnthalpyJPerKg": 2.358e6 },
+      "initial": { "levelM": 0.6 }
+    },
+    {
+      "id": "TB-101-V",
+      "type": "steamPressure",
+      "params": { "capacitanceKgPerPa": 1.335e-4, "outletConductanceKgPerSPa": 4.45e-6 },
+      "initial": { "pressurePa": 1.0e6 }
+    },
+    {
+      "id": "PSV-101",
+      "type": "reliefValve",
+      "params": { "setPressurePa": 1.3e6, "reseatPressurePa": 1.25e6, "ratedFlowKgPerS": 5.0 }
+    },
+    { "id": "LT-101", "type": "transmitter", "params": { "dampingSeconds": 0.5, "noiseStandardDeviation": 0.001 } },
+    { "id": "PT-101", "type": "transmitter", "params": { "dampingSeconds": 0.2, "noiseStandardDeviation": 500.0 } },
+    { "id": "FT-101", "type": "transmitter", "params": { "dampingSeconds": 0.5, "noiseStandardDeviation": 0.005 } },
+    { "id": "FT-102", "type": "transmitter", "params": { "dampingSeconds": 0.5, "noiseStandardDeviation": 0.005 } },
+    { "id": "LSLL-101", "type": "switch", "params": { "setpoint": 0.3, "direction": "falling", "deadband": 0.02 } },
+    { "id": "LSHH-101", "type": "switch", "params": { "setpoint": 0.9, "direction": "rising", "deadband": 0.02 } },
+    { "id": "PSH-101", "type": "switch", "params": { "setpoint": 1.2e6, "direction": "rising", "deadband": 2.0e4 } }
+  ],
+  "connections": [
+    { "from": "P-101.flow", "to": "FV-101.inletFlow" },
+    { "from": "FV-101.flow", "to": "TB-101.feedwaterFlow" },
+    { "from": "FV-102.flow", "to": "Q-101.fuelFlow" },
+    { "from": "Q-101.heat", "to": "TB-101.heat" },
+    { "from": "TB-101.steamGeneration", "to": "TB-101-V.steamGeneration" },
+    { "from": "FV-103.opening", "to": "TB-101-V.outletOpening" },
+    { "from": "TB-101-V.pressure", "to": "PSV-101.pressure" },
+    { "from": "PSV-101.flow", "to": "TB-101-V.reliefFlow" },
+    { "from": "TB-101.level", "to": "LT-101.value" },
+    { "from": "TB-101-V.pressure", "to": "PT-101.value" },
+    { "from": "FV-101.flow", "to": "FT-101.value" },
+    { "from": "TB-101-V.steamFlow", "to": "FT-102.value" },
+    { "from": "TB-101.level", "to": "LSLL-101.value" },
+    { "from": "TB-101.level", "to": "LSHH-101.value" },
+    { "from": "TB-101-V.pressure", "to": "PSH-101.value" }
+  ],
+  "inputs": [
+    { "name": "P-101_run", "to": ["P-101.run"], "initial": 1 },
+    { "name": "FV-101_command", "to": ["FV-101.command"], "initial": 0.8228 },
+    { "name": "FV-102_command", "to": ["FV-102.command"], "initial": 0.5 },
+    { "name": "FV-103_command", "to": ["FV-103.command"], "initial": 0.5 }
+  ],
+  "outputs": [
+    { "name": "LT-101", "from": "LT-101.measurement" },
+    { "name": "PT-101", "from": "PT-101.measurement" },
+    { "name": "FT-101", "from": "FT-101.measurement" },
+    { "name": "FT-102", "from": "FT-102.measurement" },
+    { "name": "FV-101_position", "from": "FV-101.position" },
+    { "name": "FV-102_position", "from": "FV-102.position" },
+    { "name": "FV-103_position", "from": "FV-103.position" },
+    { "name": "P-101_running", "from": "P-101.running" },
+    { "name": "LSLL-101", "from": "LSLL-101.active" },
+    { "name": "LSHH-101", "from": "LSHH-101.active" },
+    { "name": "PSH-101", "from": "PSH-101.active" },
+    { "name": "PSV-101_open", "from": "PSV-101.open" }
+  ]
+}
