@@ -13,6 +13,13 @@
         "dependencies": {
           "IndustrialSim.Core": "[0.1.0, )"
         }
+      },
+      "industrialsim.sessions": {
+        "type": "Project",
+        "dependencies": {
+          "IndustrialSim.Core": "[0.1.0, )",
+          "IndustrialSim.IO": "[0.1.0, )"
+        }
       }
     }
   }

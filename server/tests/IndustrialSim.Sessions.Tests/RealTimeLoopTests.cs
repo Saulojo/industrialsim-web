@@ -32,6 +32,32 @@ public class RealTimeLoopTests
     }
 
     [Fact]
+    public async Task ConcurrentDispose_ReturnsOnlyAfterTheThreadsStop()
+    {
+        // O host pode parar por dois caminhos ao mesmo tempo; nenhum dos dois pode voltar com threads vivas.
+        for (int attempt = 0; attempt < 20; attempt++)
+        {
+            var loop = new RealTimeLoop(new RealTimeLoopOptions { ThreadCount = 2 });
+            loop.Add(new CountingStepper());
+            loop.Start();
+            using var start = new Barrier(2);
+
+            Task<int>[] disposers =
+            [
+                .. Enumerable.Range(0, 2).Select(_ => Task.Run(() =>
+                {
+                    start.SignalAndWait();
+                    loop.Dispose();
+                    return loop.AliveThreadCount;
+                })),
+            ];
+
+            int[] alive = await Task.WhenAll(disposers);
+            Assert.Equal([0, 0], alive);
+        }
+    }
+
+    [Fact]
     public void ThreadsAreNamedBackgroundThreads()
     {
         using var loop = new RealTimeLoop(new RealTimeLoopOptions { ThreadCount = 3 });

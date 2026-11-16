@@ -443,7 +443,16 @@
         "dependencies": {
           "IndustrialSim.Contracts": "[0.1.0, )",
           "IndustrialSim.Core": "[0.1.0, )",
-          "IndustrialSim.IO": "[0.1.0, )"
+          "IndustrialSim.IO": "[0.1.0, )",
+          "IndustrialSim.Sessions": "[0.1.0, )"
+        }
+      },
+      "industrialsim.sessions": {
+        "type": "Project",
+        "dependencies": {
+          "IndustrialSim.Core": "[0.1.0, )",
+          "IndustrialSim.IO": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.15, )"
         }
       },
       "Microsoft.Extensions.Logging.Abstractions": {

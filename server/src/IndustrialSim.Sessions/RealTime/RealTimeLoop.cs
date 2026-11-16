@@ -24,6 +24,9 @@ public sealed class RealTimeLoop : IDisposable
     private readonly Func<IPreciseWaiter> _waiterFactory;
     private readonly ILogger _logger;
     private readonly Lock _addGate = new();
+
+    // Sinalizado quando o primeiro Dispose termina; não é descartado, para quem espera nele.
+    private readonly ManualResetEventSlim _stopped = new(initialState: false);
     private volatile bool _stopping;
     private int _state;
     private string _waiterKind = "not-started";
@@ -139,12 +142,16 @@ public sealed class RealTimeLoop : IDisposable
             stepCost.Summarize());
     }
 
-    /// <summary>Para as threads e espera cada uma terminar.</summary>
+    /// <summary>
+    /// Para as threads e espera cada uma terminar. Uma chamada simultânea (o host pode parar por dois caminhos ao
+    /// mesmo tempo) espera a primeira terminar, para que ninguém volte com threads ainda vivas.
+    /// </summary>
     public void Dispose()
     {
         int previous = Interlocked.Exchange(ref _state, Disposed);
         if (previous == Disposed)
         {
+            _stopped.Wait(Options.ShutdownTimeout * (_threads.Length + 1));
             return;
         }
 
@@ -175,6 +182,8 @@ public sealed class RealTimeLoop : IDisposable
         {
             SessionsLog.LoopStopped(_logger, alive);
         }
+
+        _stopped.Set();
     }
 
     private static string ThreadName(int index) => $"IndustrialSim.Loop.{index}";

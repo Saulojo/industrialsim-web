@@ -11,6 +11,9 @@ tools/hart-poc/**/logs/
 # Build do web copiado para o servidor
 server/src/IndustrialSim.Server/wwwroot/
 
+# Gravações de ensaio do servidor em desenvolvimento (Etapa 5)
+server/src/IndustrialSim.Server/recordings/
+
 # Node / web
 node_modules/
 web/dist/

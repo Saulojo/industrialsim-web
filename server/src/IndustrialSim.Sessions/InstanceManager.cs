@@ -59,6 +59,9 @@ public sealed class InstanceManager : IDisposable
 {
     private readonly Lock _gate = new();
     private readonly Dictionary<Guid, PlantInstance> _instances = [];
+
+    // Sinalizado quando o primeiro Dispose encerra todas as plantas; não é descartado, para quem espera nele.
+    private readonly ManualResetEventSlim _allEnded = new(initialState: false);
     private readonly RealTimeLoop _loop;
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
@@ -209,26 +212,34 @@ public sealed class InstanceManager : IDisposable
         return expired;
     }
 
-    /// <summary>Para a verificação de expiração e encerra todas as plantas.</summary>
+    /// <summary>
+    /// Para a verificação de expiração e encerra todas as plantas. Uma chamada simultânea espera a primeira
+    /// terminar.
+    /// </summary>
     public void Dispose()
     {
         List<Guid> ids;
+        bool alreadyDisposing;
         lock (_gate)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
+            alreadyDisposing = _disposed;
             _disposed = true;
             _expiryTimer?.Dispose();
             _expiryTimer = null;
-            ids = [.. _instances.Keys];
+            ids = alreadyDisposing ? [] : [.. _instances.Keys];
+        }
+
+        if (alreadyDisposing)
+        {
+            _allEnded.Wait();
+            return;
         }
 
         foreach (Guid id in ids)
         {
             End(id, EndReason.Shutdown);
         }
+
+        _allEnded.Set();
     }
 }
