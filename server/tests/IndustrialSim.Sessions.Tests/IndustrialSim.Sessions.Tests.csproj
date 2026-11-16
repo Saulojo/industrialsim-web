@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IndustrialSim.Sessions\IndustrialSim.Sessions.csproj" />
+  </ItemGroup>
+
+  <!-- Os cenários do produto, copiados para a pasta de saída. -->
+  <ItemGroup>
+    <None Include="..\..\..\scenarios\**\*.json" Link="ProductScenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

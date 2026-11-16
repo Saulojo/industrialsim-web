@@ -8,5 +8,7 @@
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
     <!-- MIT -->
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.15" />
+    <!-- MIT; mesma versão do runtime ASP.NET Core 10.0.15 -->
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
   </ItemGroup>
 </Project>

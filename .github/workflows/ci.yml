@@ -14,8 +14,13 @@ concurrency:
 
 jobs:
   dotnet:
-    name: .NET (build e testes)
-    runs-on: ubuntu-latest
+    # Windows é o sistema do servidor do laboratório (D10); Linux continua para manter o código multiplataforma.
+    name: .NET (build e testes, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v7
 
