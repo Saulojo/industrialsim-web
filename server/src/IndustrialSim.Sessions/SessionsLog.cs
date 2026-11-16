@@ -63,4 +63,12 @@ internal static partial class SessionsLog
     [LoggerMessage(EventId = 1203, Level = LogLevel.Error,
         Message = "Planta {InstanceId} parou por falha: {Message}")]
     public static partial void InstanceFaulted(ILogger logger, Guid instanceId, string message);
+
+    [LoggerMessage(EventId = 1300, Level = LogLevel.Error,
+        Message = "Falha ao escrever a gravação {Path}.")]
+    public static partial void RecordingFailed(ILogger logger, Exception exception, string path);
+
+    [LoggerMessage(EventId = 1301, Level = LogLevel.Warning,
+        Message = "A gravação {Path} não terminou de ser escrita em {TimeoutSeconds} s.")]
+    public static partial void RecordingNotFlushed(ILogger logger, string path, double timeoutSeconds);
 }

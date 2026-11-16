@@ -17,9 +17,17 @@ public sealed record InstanceManagerOptions
     /// <summary>Intervalo entre verificações de expiração.</summary>
     public TimeSpan ExpiryCheckInterval { get; init; } = TimeSpan.FromSeconds(5);
 
+    /// <summary>Pasta das gravações de ensaio; um arquivo <c>{id da planta}.csv</c> por planta gravada.</summary>
+    public string RecordingDirectory { get; init; } = "recordings";
+
+    /// <summary>Uma linha de medição na gravação a cada tantos passos (padrão: 10, ou seja, 100 ms).</summary>
+    public int RecordingSampleEverySteps { get; init; } = 10;
+
     internal void Validate()
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(MaxInstances, 1, nameof(MaxInstances));
+        ArgumentException.ThrowIfNullOrWhiteSpace(RecordingDirectory, nameof(RecordingDirectory));
+        ArgumentOutOfRangeException.ThrowIfLessThan(RecordingSampleEverySteps, 1, nameof(RecordingSampleEverySteps));
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(IdleTimeout, TimeSpan.Zero, nameof(IdleTimeout));
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(ExpiryCheckInterval, TimeSpan.Zero, nameof(ExpiryCheckInterval));
     }
@@ -37,7 +45,8 @@ public enum CreatePlantStatus
 /// <param name="ScenarioId">Cenário do catálogo.</param>
 /// <param name="NoiseSeed">Semente do ruído; nula para usar a do cenário.</param>
 /// <param name="OwnerId">Dono; nulo para visitante (contas chegam na Etapa 10).</param>
-public sealed record CreatePlantRequest(string ScenarioId, ulong? NoiseSeed = null, string? OwnerId = null);
+/// <param name="Record">Gravar o ensaio em CSV desde o primeiro passo (RF07).</param>
+public sealed record CreatePlantRequest(string ScenarioId, ulong? NoiseSeed = null, string? OwnerId = null, bool Record = false);
 
 /// <summary>Resultado de <see cref="InstanceManager.Create"/>: a planta, se criada.</summary>
 public sealed record CreatePlantResult(CreatePlantStatus Status, PlantInstance? Instance);
@@ -119,7 +128,11 @@ public sealed class InstanceManager : IDisposable
             }
 
             ulong seed = request.NoiseSeed ?? scenario.Definition.NoiseSeed;
-            instance = new PlantInstance(Guid.NewGuid(), scenario, seed, request.OwnerId, _time, _logger);
+            var id = Guid.NewGuid();
+            (string, int)? recording = request.Record
+                ? (Path.Combine(Options.RecordingDirectory, $"{id:N}.csv"), Options.RecordingSampleEverySteps)
+                : null;
+            instance = new PlantInstance(id, scenario, seed, request.OwnerId, recording, _time, _logger);
             instance.AttachToLoop(_loop.Add(instance));
             _instances.Add(instance.Id, instance);
             count = _instances.Count;

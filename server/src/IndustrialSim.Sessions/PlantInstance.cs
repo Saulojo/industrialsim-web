@@ -1,6 +1,7 @@
 using IndustrialSim.Core.Scenarios;
 using IndustrialSim.IO;
 using IndustrialSim.Sessions.RealTime;
+using IndustrialSim.Sessions.Recording;
 using Microsoft.Extensions.Logging;
 
 namespace IndustrialSim.Sessions;
@@ -72,9 +73,19 @@ public sealed class PlantInstance : IRealTimeStepper
     private string? _faultMessage;
     private int _clientCount;
     private DateTimeOffset _lastActivityUtc;
+    private readonly RecordingFile? _recordingFile;
+    private readonly PlantRecorder? _recorder;
     private LoopRegistration? _registration;
 
-    internal PlantInstance(Guid id, ScenarioEntry scenario, ulong noiseSeed, string? ownerId, TimeProvider time, ILogger logger)
+    /// <param name="recording">Onde gravar o ensaio e de quanto em quanto amostrar; nulo para não gravar.</param>
+    internal PlantInstance(
+        Guid id,
+        ScenarioEntry scenario,
+        ulong noiseSeed,
+        string? ownerId,
+        (string Path, int SampleEverySteps)? recording,
+        TimeProvider time,
+        ILogger logger)
     {
         Id = id;
         Scenario = scenario;
@@ -85,7 +96,17 @@ public sealed class PlantInstance : IRealTimeStepper
         Io = new PlantIo(ScenarioPlant.Create(scenario.Definition, noiseSeed: noiseSeed));
         CreatedUtc = time.GetUtcNow();
         _lastActivityUtc = CreatedUtc;
+
+        if (recording is var (path, sampleEverySteps))
+        {
+            _recordingFile = new RecordingFile(path, logger);
+            var header = new RecordingHeader(scenario.Id, noiseSeed, scenario.Definition.StepSeconds, sampleEverySteps);
+            _recorder = new PlantRecorder(Io, header, _recordingFile.WriteLine);
+        }
     }
+
+    /// <summary>Arquivo CSV da gravação do ensaio (RF07); nulo se a planta não grava.</summary>
+    public string? RecordingPath => _recordingFile?.Path;
 
     public Guid Id { get; }
 
@@ -275,6 +296,7 @@ public sealed class PlantInstance : IRealTimeStepper
             }
 
             Io.Step();
+            _recorder?.OnStepCompleted();
         }
     }
 
@@ -302,7 +324,10 @@ public sealed class PlantInstance : IRealTimeStepper
         }
     }
 
-    /// <summary>Tira a planta do laço. Ao retornar, nenhum passo novo começa. Falso se já estava encerrada.</summary>
+    /// <summary>
+    /// Tira a planta do laço e fecha a gravação. Ao retornar, nenhum passo novo começa e o arquivo da gravação
+    /// está completo. Falso se já estava encerrada.
+    /// </summary>
     internal bool End(EndReason reason)
     {
         LoopRegistration? registration;
@@ -319,8 +344,15 @@ public sealed class PlantInstance : IRealTimeStepper
         }
 
         registration?.Dispose();
+        if (_recordingFile is not null && !_recordingFile.Complete(RecordingFlushTimeout))
+        {
+            SessionsLog.RecordingNotFlushed(_logger, _recordingFile.Path, RecordingFlushTimeout.TotalSeconds);
+        }
+
         return true;
     }
+
+    private static readonly TimeSpan RecordingFlushTimeout = TimeSpan.FromSeconds(5);
 
     private void DetachClient()
     {

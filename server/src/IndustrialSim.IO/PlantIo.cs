@@ -261,12 +261,49 @@ public sealed class PlantIo
         }
     }
 
+    /// <summary>
+    /// Recebe, a cada passo, os comandos copiados da imagem e as configurações em vigor (gravação de ensaios).
+    /// Chamado pela thread do passo; defina antes do primeiro passo.
+    /// </summary>
+    public ICommandLatchObserver? LatchObserver { get; set; }
+
     /// <summary>Avança um passo: comandos, planta, medições.</summary>
     public void Step()
     {
         LatchCommands();
         Plant.Step();
         PublishInputs();
+    }
+
+    /// <summary>
+    /// Avança um passo com os comandos e as configurações dados (reprodução de uma gravação), no lugar dos que
+    /// estão na imagem. Os comandos são escritos na imagem já no formato de <paramref name="settings"/>, que
+    /// passa a valer neste passo sem regravar os comandos (D31 não se aplica: eles já estão no formato novo).
+    /// </summary>
+    public void StepWithCommands(ReadOnlySpan<bool> coils, ReadOnlySpan<ushort> holdingRegisters, IoSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        if (coils.Length != Image.CoilCount || holdingRegisters.Length != Image.HoldingRegisterCount)
+        {
+            throw new ArgumentException(
+                $"A imagem tem {Image.CoilCount} coils e {Image.HoldingRegisterCount} holding registers; vieram {coils.Length} e {holdingRegisters.Length}.");
+        }
+
+        Validate(settings);
+        bool[] coilValues = coils.ToArray();
+        ushort[] holdingValues = holdingRegisters.ToArray();
+        lock (_sync)
+        {
+            _pendingSettings = null;
+            ApplySettings(settings, rewriteCommands: false);
+            Image.RewriteCommands((coilArea, holdingArea) =>
+            {
+                coilValues.CopyTo(coilArea);
+                holdingValues.CopyTo(holdingArea);
+            });
+        }
+
+        Step();
     }
 
     /// <summary>Fase 1 do passo: copia os comandos da imagem para a planta e avalia o watchdog.</summary>
@@ -298,6 +335,8 @@ public sealed class PlantIo
                     Plant.SetInput(safe.PlantIndex, safe.Value);
                 }
             }
+
+            LatchObserver?.OnCommandsLatched(Plant.Clock.StepCount, _coils, _holdingRegisters, _settings);
         }
     }
 
@@ -455,8 +494,13 @@ public sealed class PlantIo
         }
 
         _pendingSettings = null;
+        ApplySettings(next, rewriteCommands: true);
+    }
+
+    private void ApplySettings(IoSettings next, bool rewriteCommands)
+    {
         IoSettings previous = _settings;
-        if (next.Format != previous.Format || next.WordOrder != previous.WordOrder)
+        if (rewriteCommands && (next.Format != previous.Format || next.WordOrder != previous.WordOrder))
         {
             // Dentro da trava da imagem: lê os comandos no formato antigo e regrava no novo, sem que uma
             // escrita do mestre caia no meio.
