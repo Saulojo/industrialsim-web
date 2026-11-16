@@ -85,7 +85,7 @@ A Fase 1 entrega o essencial: uma planta controlada por qualquer mestre Modbus, 
 | RNF04 | Desempenho | Física a 100 Hz por planta; estado enviado ao cliente a 20–30 Hz; 30 plantas usando menos de 50% de um núcleo; cliente ≥ 60 fps em notebook de referência e ≥ 72 fps no Quest. |
 | RNF05 | Tempo real | Deriva entre tempo simulado e tempo de relógio < 0,1%; um comando Modbus que chega ao servidor vale no passo seguinte (≤ 10 ms). |
 | RNF06 | Segurança | Da internet, só a porta 443 e as faixas de portas de planta ficam acessíveis; conexões Modbus e HART-IP só valem após pareamento; limites de uso por conta e por IP. |
-| RNF07 | Hardware modesto | Roda no PC do laboratório em Linux; meta: 4 GB de RAM e CPU de 4 núcleos (2015 em diante). A mesma imagem Docker roda numa VM se a demanda crescer. |
+| RNF07 | Hardware modesto | Roda no PC do laboratório com Windows 10 ou 11; meta: 4 GB de RAM e CPU de 4 núcleos (2015 em diante). Se a demanda crescer, o mesmo servidor roda numa VM (Windows ou Linux). |
 | RNF08 | Testabilidade | Núcleo sem dependência de rede ou interface; testes automatizados em Core, IO, Modbus e HART; CI verde para integrar. |
 | RNF09 | Evolução segura | Protocolo cliente-servidor versionado; cenários validados por um esquema JSON; migrações de banco versionadas. |
 | RNF10 | Privacidade (LGPD) | Dados pessoais mínimos; termos de uso e política de privacidade publicados; exportação e exclusão de conta funcionando. |
@@ -107,7 +107,7 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D07 | Modbus TCP padrão, sem extensões de fabricante: uma porta por planta em execução (faixa configurável, padrão 15000–15999), Unit ID configurável, pareamento por IP confirmado no navegador, um ou vários mestres por planta. | Funciona com qualquer mestre (CLP, CODESYS, OpenPLC, SCADA, script) e isola as plantas mesmo atrás do mesmo IP público. | Unit ID como isolamento (editável, não isola); só IP de origem (falha com NAT). |
 | D08 | Formato analógico escolhido por planta: 0–27648 (padrão, igual ao cartão Siemens), 0–10000, 0–32767 ou `float32` em unidades de engenharia. | O usuário escala no mestre como faria numa planta real, no formato do controlador que usa; a faixa HART altera o sinal. | Um único formato fixo. |
 | D09 | (alterada em 14/11/2026) HART: núcleo de protocolo próprio, independente do transporte; configurador HART no site sempre disponível; PACTware primeiro pela serial: DTM de modem HART numa COM virtual (com0com) ligada ao navegador pela Web Serial, que só repassa bytes ao servidor pelo WebSocket. O escopo final segue o portão de decisão da Etapa 2 (resultados A, B ou C); HART-IP fica como extensão. **Resultado do portão (15/11/2026): A provisório.** S1 a S6 e S8 atendidos; S7 (tempo de resposta com o servidor em outro PC) será medido na Etapa 9 e pode mudar o resultado para B. Definido na prova: instrumento em HART 7; serial em 1200 baud, 8 bits, paridade ímpar, 1 stop bit, sem controle de fluxo; com0com 2.2.2.0 assinado, com a emulação de baud desligada. Evidências em `docs/validacao/etapa-02.md`. | Usa só ferramentas gratuitas (PACTware, DTM de modem HART, com0com) e o caminho que todo DTM de modem suporta; a Web Serial já funciona em ferramentas como o Teleplot; não abre portas extras no servidor nem exige pareamento. O custo é um driver de terceiros no PC de quem usa o PACTware. | HART-IP como caminho principal (DTM HART-IP em geral pago e uma porta por planta); conector local instalável (software do projeto no PC do usuário). |
-| D10 | Hospedagem no PC do laboratório: Linux, Docker, proxy reverso com HTTPS automático (Caddy); arquivos estáticos em CDN gratuita se a banda limitar; mesma imagem migrável para uma VM. | WebXR e WebGPU exigem HTTPS; temporização estável; implantação reproduzível. | Hospedagem serverless (não mantém processo nem abre porta TCP). |
+| D10 | (alterada em 16/11/2026) Hospedagem no PC do laboratório, que roda Windows: o servidor .NET roda como serviço do Windows (início automático e reinício em falha), atrás de um proxy reverso com HTTPS automático (Caddy para Windows, também como serviço; a forma de instalá-lo fica para a Etapa 9); PostgreSQL nativo do Windows (a partir da Etapa 10); Firewall do Windows só com as portas previstas; arquivos estáticos em CDN gratuita se a banda limitar. O código continua multiplataforma, com testes no Windows e no Linux, para que uma VM (Windows ou Linux) possa assumir se a demanda crescer. | O PC do laboratório é Windows; WebXR e WebGPU exigem HTTPS; o tempo real é medido no mesmo sistema que roda a planta; o serviço nativo dispensa uma camada de VM. | Linux com Docker (decisão original; o PC alvo passou a ser Windows); Docker Desktop no Windows (roda Linux numa VM, gasta mais memória e o tempo real deixaria de ser o do Windows); IIS (mais configuração, e o laço de tempo real precisa de um processo sempre ativo); hospedagem serverless (não mantém processo nem abre porta TCP). |
 | D11 | Soft-PLC (Fase 4) roda em .NET no mesmo laço da planta, lendo a imagem de I/O direto; projetos em PLCopen XML. | Determinismo total na malha fechada; intercâmbio com CODESYS, OpenPLC e Beremiz. | CLP rodando no navegador. |
 | D12 | Modelos 3D: Blender → glTF binário (.glb) com compressão (Draco ou Meshopt, texturas KTX2); ligação objeto ↔ variável por convenção de nomes. | Carregamento rápido no navegador; serve a qualquer motor. | FBX e formatos proprietários. |
 | D13 | Contas com ASP.NET Core Identity e PostgreSQL (EF Core): e-mail com verificação e login social (Google, Microsoft, GitHub); modo visitante sem conta, com limites. | Componente maduro, gratuito e no mesmo processo; visitante mantém o “só abrir o site”. | Provedor de identidade separado (ex.: Keycloak), pesado para o PC do laboratório. |
@@ -136,7 +136,7 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 Um único processo .NET no servidor do laboratório mantém todas as plantas; navegador, CLP e PACTware do usuário apenas se conectam a ele.
 
 ```text
-PC do usuário                                Servidor do laboratório (.NET 10, Docker)
+PC do usuário                                Servidor do laboratório (.NET 10, Windows)
 ┌─────────────────────────────┐              ┌──────────────────────────────────────────┐
 │ Navegador                   │ HTTPS :443   │ Proxy HTTPS (Caddy)                      │
 │  3D e VR (Babylon.js)       │─────────────►│        ▼                                 │
@@ -194,7 +194,7 @@ industrialsim-web/
 │     ├─ scenario.json
 │     └─ model.glb
 ├─ tools/         (implementações de referência em Python para validação cruzada)
-├─ deploy/        (Dockerfile, docker-compose.yml com PostgreSQL, Caddyfile)
+├─ deploy/        (publicação, instalação do serviço do Windows, Caddyfile)
 └─ docs/
    ├─ descritivo.md, plano.md
    ├─ guias/      (conexão com TIA Portal, CODESYS, OpenPLC, Python, PACTware)
@@ -397,7 +397,7 @@ O site é aberto a qualquer pessoa, dentro e fora da universidade; os limites ex
 - **Rede:** da internet, só ficam acessíveis a porta 443 (site e WebSocket) e as faixas de portas de planta. Todo o resto fica fechado no firewall.
 - **Protocolos industriais:** Modbus TCP e HART-IP não têm senha nem criptografia; a proteção é o pareamento por IP. Isso aparece nos termos de uso e na própria interface.
 - **LGPD:** dados pessoais mínimos (e-mail e nome de exibição); termos de uso e política de privacidade; exportação e exclusão da conta; logs com retenção curta.
-- **Capacidade:** se a demanda passar do que o PC do laboratório aguenta, a mesma imagem Docker roda numa VM (servidor da universidade ou nuvem).
+- **Capacidade:** se a demanda passar do que o PC do laboratório aguenta, o mesmo servidor roda numa VM Windows ou Linux (servidor da universidade ou nuvem).
 - **TI da universidade:** domínio, certificado HTTPS, IP público e liberação das portas. Sem isso, o uso fica restrito à rede da universidade até a migração para uma VM.
 
 ## Convenções de desenvolvimento e testes
@@ -480,7 +480,7 @@ Os dois maiores riscos são externos ao código: o PACTware funcionar pela ponte
 | Risco | Impacto | Mitigação | Etapa |
 | --- | --- | --- | --- |
 | PACTware não funcionar pela ponte serial (driver com0com, Web Serial ou tempo de resposta) | Alto | Portão de decisão na Etapa 2 com três resultados já planejados; HART-IP como alternativa; configurador HART no site garante o uso em qualquer caso | 2, 17, 18 |
-| TI não liberar IP público, portas ou certificado | Alto | Conversar com a TI antes da Etapa 9; plano B: a mesma imagem Docker numa VM | 9, 13 |
+| TI não liberar IP público, portas ou certificado | Alto | Conversar com a TI antes da Etapa 9; plano B: o mesmo servidor numa VM | 9, 13 |
 | Abuso ou ataque com o site aberto ao público | Alto | Limites por conta e por IP, pareamento, varredura de segurança, monitoramento e alertas | 13 |
 | Escopo grande para uma iniciação científica | Alto | Marcos usáveis ao fim de cada fase; Fases 2 e 3 podem trocar de ordem; Fase 4 só no fim | Todas |
 | Demanda maior que o PC do laboratório | Médio | Hibernação de plantas, fila de espera, migração para VM | 10, 13 |
@@ -489,7 +489,7 @@ Os dois maiores riscos são externos ao código: o PACTware funcionar pela ponte
 | Redes que bloqueiam portas diferentes da 443 | Médio | Testar de redes externas; documentar; portas configuráveis | 9, 13 |
 | Desempenho de VR no Quest, que tem processador de celular | Médio | Orçamento de polígonos, níveis de detalhe e texturas KTX2; medir no aparelho | 14, 19, 20 |
 | Modelo da caldeira instável com dt = 10 ms | Médio | Verificação cruzada com integrador de passo variável; subpassos se necessário | 15 |
-| PC do laboratório desligado ou indisponível | Médio | Serviço com reinício automático em Docker; backup diário do banco; configuração versionada | 9 |
+| PC do laboratório desligado ou indisponível | Médio | Serviço do Windows com início automático e reinício em falha; backup diário do banco; configuração versionada | 9 |
 | Traduções imprecisas | Baixo | Revisão humana; termos técnicos mantidos; verificação de chaves no CI | 13 |
 
 ## Glossário
