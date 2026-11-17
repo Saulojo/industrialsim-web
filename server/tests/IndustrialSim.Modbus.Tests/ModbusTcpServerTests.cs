@@ -165,6 +165,25 @@ public sealed class ModbusTcpServerTests : IDisposable
         Assert.Equal(0, gate.ActiveLeases);
     }
 
+    /// <summary>
+    /// Pendente sem nenhuma requisição: a leitura começada na abertura da conexão continua valendo depois da
+    /// autorização, e a primeira requisição é respondida.
+    /// </summary>
+    [Fact]
+    public async Task PendingConnectionWithoutRequests_IsAnsweredRightAfterAuthorization()
+    {
+        var gate = new TestGate(GateMode.Hold);
+        ModbusTcpServer server = Start(new IoImage(0, 0, 1, 0), gate);
+        RawModbusClient client = await ConnectRaw(server);
+        TestGate.HeldRequest held = await gate.NextHeldAsync();
+        await Task.Delay(Silence, TestContext.Current.CancellationToken);
+
+        held.Allow();
+        await WaitUntil(() => Assert.Single(server.Connections).Authorized);
+
+        Assert.Equal([0x03, 0x02, 0x00, 0x00], await client.RequestAsync(1, 0x03, 0x00, 0x00, 0x00, 0x01));
+    }
+
     [Fact]
     public async Task RefusedConnection_IsClosed()
     {
@@ -252,7 +271,7 @@ public sealed class ModbusTcpServerTests : IDisposable
         server.Dispose();
 
         Assert.True(await client.WasClosedByServerAsync());
-        Assert.Equal(0, gate.ActiveLeases);
+        await WaitUntil(() => gate.ActiveLeases == 0);
         using var next = new ModbusTcpServer(new ModbusDevice(new IoImage(0, 0, 1, 0)), new TestGate());
         next.Start(endPoint);
         Assert.Equal(endPoint, next.LocalEndPoint);

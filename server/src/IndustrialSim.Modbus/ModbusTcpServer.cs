@@ -15,14 +15,10 @@ public sealed record ModbusServerOptions
     /// <summary>Tempo sem tráfego até o TCP sondar o mestre (keepalive), para derrubar conexões mortas.</summary>
     public TimeSpan KeepAliveTime { get; init; } = TimeSpan.FromSeconds(30);
 
-    /// <summary>Quanto o encerramento espera as conexões terminarem.</summary>
-    public TimeSpan ShutdownTimeout { get; init; } = TimeSpan.FromSeconds(2);
-
     internal void Validate()
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(MaxConnections, 1, nameof(MaxConnections));
         ArgumentOutOfRangeException.ThrowIfLessThan(KeepAliveTime, TimeSpan.FromSeconds(1), nameof(KeepAliveTime));
-        ArgumentOutOfRangeException.ThrowIfLessThan(ShutdownTimeout, TimeSpan.Zero, nameof(ShutdownTimeout));
     }
 }
 
@@ -55,7 +51,6 @@ public sealed class ModbusTcpServer : IDisposable
     private readonly ConcurrentDictionary<long, Connection> _connections = new();
     private readonly Lock _gateLock = new();
     private Socket? _listener;
-    private Task? _acceptLoop;
     private long _nextConnectionId;
     private bool _disposed;
 
@@ -125,7 +120,7 @@ public sealed class ModbusTcpServer : IDisposable
 
             _listener = listener;
             LocalEndPoint = (IPEndPoint)listener.LocalEndPoint!;
-            _acceptLoop = Task.Run(() => AcceptLoopAsync(listener));
+            _ = Task.Run(() => AcceptLoopAsync(listener));
         }
 
         ModbusLog.ServerStarted(_logger, LocalEndPoint);
@@ -154,11 +149,14 @@ public sealed class ModbusTcpServer : IDisposable
         return closed;
     }
 
-    /// <summary>Para de escutar, fecha todas as conexões e espera elas terminarem (até o tempo limite).</summary>
+    /// <summary>
+    /// Para de escutar e fecha todas as conexões. Ao retornar, a porta está livre e os sockets estão fechados;
+    /// as tarefas das conexões terminam sozinhas em seguida, sem bloquear quem chamou (esperar por elas aqui
+    /// prenderia uma thread do pool enquanto elas precisam do pool para terminar).
+    /// </summary>
     public void Dispose()
     {
         Socket? listener;
-        Task? acceptLoop;
         lock (_gateLock)
         {
             if (_disposed)
@@ -168,19 +166,15 @@ public sealed class ModbusTcpServer : IDisposable
 
             _disposed = true;
             listener = _listener;
-            acceptLoop = _acceptLoop;
         }
 
         _stopping.Cancel();
         listener?.Dispose();
-
-        List<Task> pending = [.. _connections.Values.Select(c => c.Close())];
-        if (acceptLoop is not null)
+        foreach (Connection connection in _connections.Values)
         {
-            pending.Add(acceptLoop);
+            _ = connection.Close();
         }
 
-        Task.WaitAll([.. pending.Select(t => t.ContinueWith(static _ => { }, TaskScheduler.Default))], _options.ShutdownTimeout);
         if (LocalEndPoint is not null)
         {
             ModbusLog.ServerStopped(_logger, LocalEndPoint);
@@ -426,7 +420,7 @@ public sealed class ModbusTcpServer : IDisposable
         /// <summary>Libera o cancelamento da conexão (ligado ao do servidor) quando ela termina.</summary>
         public void ReleaseToken() => _closing.Dispose();
 
-        /// <summary>Fecha a conexão; devolve a tarefa que a atende, para quem quiser esperar.</summary>
+        /// <summary>Fecha a conexão; devolve a tarefa que a atende.</summary>
         public Task Close()
         {
             try

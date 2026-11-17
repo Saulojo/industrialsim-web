@@ -325,8 +325,8 @@ public sealed class PlantModbusTests : IDisposable
         manager.End(plant.Id);
 
         Assert.True(await master.WasClosedByServerAsync());
+        await WaitUntil(() => plant.Modbus.Connections.Count == 0);
         Assert.Equal(0, plant.ClientCount);
-        Assert.Empty(plant.Modbus.Connections);
     }
 
     private static async Task WaitUntil(Func<bool> condition)
