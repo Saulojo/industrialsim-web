@@ -13,6 +13,7 @@ public class RealTimeLoopTests
         var steppers = Enumerable.Range(0, 4).Select(i => new CountingStepper($"p{i}")).ToArray();
         LoopRegistration[] registrations = [.. steppers.Select(loop.Add)];
 
+        var running = Stopwatch.StartNew();
         loop.Start();
         Assert.Equal(2, loop.AliveThreadCount);
         await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
@@ -22,12 +23,16 @@ public class RealTimeLoopTests
         var stopwatch = Stopwatch.StartNew();
         loop.Dispose();
         stopwatch.Stop();
+        running.Stop();
 
         Assert.Equal(0, loop.AliveThreadCount);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2), $"Dispose levou {stopwatch.Elapsed}.");
         Assert.Equal(4, metrics.PlantCount);
         Assert.Equal(2, registrations.Select(r => r.ThreadIndex).Distinct().Count());
-        Assert.All(steppers, s => Assert.InRange(s.Steps, 80, 110));
+        // Pelo menos 80 passos no segundo pedido; no máximo um a cada 10 ms do tempo que o laço de fato rodou
+        // (numa máquina carregada, o Task.Delay de 1 s pode durar mais), com folga de 2 passos.
+        long maxSteps = (long)(running.Elapsed.TotalSeconds / 0.01) + 2;
+        Assert.All(steppers, s => Assert.InRange(s.Steps, 80, maxSteps));
         Assert.True(Math.Abs(tracking.Drift) < 0.05, $"Deriva de {tracking.Drift:P2} em {tracking.WallSeconds:0.###} s.");
     }
 

@@ -230,7 +230,8 @@ public class ModbusApiTests(ITestOutputHelper output)
             using var master = new ModbusTcpClient { ConnectTimeout = 5000, ReadTimeout = 5000, WriteTimeout = 5000 };
             master.Connect(EndPoint(summaries[i]), ModbusEndianness.BigEndian);
             ushort beat = 0;
-            while (DateTime.UtcNow < stopAt)
+            // Pelo menos 20 ciclos por mestre, mesmo que a thread comece depois do prazo (CI sobrecarregado).
+            while (Interlocked.Read(ref writes[i]) < 20 || DateTime.UtcNow < stopAt)
             {
                 master.WriteMultipleRegisters(1, 0, new[] { WaterValve(i), FuelValve(i) });
                 master.WriteSingleRegister(1, 10, (ushort)((i << 10) | (beat++ & 0x3FF)));
@@ -249,6 +250,7 @@ public class ModbusApiTests(ITestOutputHelper output)
         await Task.Delay(100, Cancel);
 
         Assert.Empty(mismatches);
+        Assert.All(writes, w => Assert.True(w >= 20, $"Um mestre fez só {w} ciclos."));
         for (int i = 0; i < Plants; i++)
         {
             Assert.True(manager.TryGet(summaries[i].Id, out PlantInstance? plant));
