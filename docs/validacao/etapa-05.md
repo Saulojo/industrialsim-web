@@ -133,6 +133,6 @@ Ao parar o host, o ASP.NET Core pode chamar o `StopAsync` dos serviços duas vez
 
 ## Pendências e observações
 
-- **CI:** o job .NET no Windows e o novo passo de SIGINT no job de integração só rodam quando a branch subir para o GitHub.
+- **CI no Windows:** na VM compartilhada do GitHub (`windows-latest`, com os projetos de teste rodando em paralelo), uma espera de 2 ms levou 10,8 ms (mediana), embora o temporizador de alta resolução tenha sido criado. O Windows Server escalona com fatias longas. Por isso, no CI, `Windows_UsesTheHighResolutionTimer_…` confere só que o temporizador de alta resolução é usado; a precisão é medida nesta máquina (erro mediano abaixo de 1 ms) e no ensaio de carga. O teste de gravação em tempo real passou a contar escritas, e não tempo, para ter o mesmo tamanho numa máquina lenta.
 - **Gravações:** os arquivos ficam na pasta configurada depois que a planta acaba, e ainda não há política para limpá-los (cerca de 130 KB por minuto de ensaio, ou 8 MB por hora: a gravação de 22,8 s do servidor tem 50 KB). Isso deve entrar no histórico de ensaios da Etapa 10.
 - **RF07:** a reprodução existe na biblioteca e no `simrun`. A IHM para exportar e reproduzir chega nas Etapas 7 e 8.

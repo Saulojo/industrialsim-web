@@ -130,12 +130,12 @@ public sealed class RecordingTests : IDisposable
             PlantInstance plant = Assert.IsType<PlantInstance>(result.Instance);
             path = Assert.IsType<string>(plant.RecordingPath);
 
-            // Um "mestre" escreve em momentos aleatórios, sem sincronia com o passo.
+            // Um "mestre" escreve em momentos aleatórios, sem sincronia com o passo. Conta escritas, e não
+            // tempo, para o ensaio ter o mesmo tamanho numa máquina lenta (o CI).
             var random = new Random(7);
             ushort heartbeat = 0;
-            DateTime end = DateTime.UtcNow.AddSeconds(1.5);
             int writes = 0;
-            while (DateTime.UtcNow < end)
+            while (writes < 80)
             {
                 plant.Io.Image.TryWriteHoldingRegister(Heartbeat, heartbeat++);
                 plant.Io.Image.TryWriteHoldingRegister(WaterValve, AnalogCodec.ToRegister((short)random.Next(0, 27649)));
@@ -160,7 +160,10 @@ public sealed class RecordingTests : IDisposable
             Replayer.Replay(reader, Caldeira, replayed);
         }
 
-        Assert.True(DataRows(original).Length > 50, "Gravação curta demais.");
+        // Linhas fora da amostragem de 10 em 10 passos são de comandos que mudaram no meio do ensaio.
+        string[] rows = DataRows(original);
+        int changeRows = rows.Count(r => long.Parse(r[..r.IndexOf(',', StringComparison.Ordinal)], System.Globalization.CultureInfo.InvariantCulture) % 10 != 0);
+        Assert.True(changeRows >= 20, $"Só {changeRows} linhas de mudança em {rows.Length} linhas.");
         Assert.Equal(Sha256(original), Sha256(replayed.ToString()));
     }
 

@@ -94,6 +94,13 @@ public class RealTimeLoopTests
         using IPreciseWaiter waiter = PreciseWaiter.Create();
         Assert.Equal("windows-high-resolution-timer", waiter.Kind);
 
+        // A precisão é medida na máquina de verdade (e no ensaio de carga). No CI, a VM compartilhada roda os
+        // projetos de teste em paralelo e o Windows Server escalona com fatias longas: a thread acorda com até
+        // ~10 ms de atraso, o que não diz nada sobre o PC do laboratório.
+        Assert.SkipWhen(
+            Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true",
+            "Precisão do temporizador não é medida na VM compartilhada do CI.");
+
         var errors = new List<double>();
         for (int i = 0; i < 50; i++)
         {
