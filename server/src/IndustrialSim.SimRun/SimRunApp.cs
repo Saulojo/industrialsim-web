@@ -21,6 +21,8 @@ public static class SimRunApp
           simrun --esquema <arquivo.json>       grava o esquema JSON do scenario.json
           simrun reproduzir <gravacao.csv> --cenario <scenario.json> --saida <copia.csv>
                                                 reproduz uma gravação de ensaio do servidor e compara os SHA-256
+          simrun carga --cenario <scenario.json> [--plantas 30] [--minutos 10] [--threads 2] [--relatorio <rel.json>]
+                                                ensaio de carga em tempo real: deriva, atraso do passo e CPU
 
         Opções:
           --entradas   roteiro CSV: coluna 'time' (s) e uma coluna por entrada do cenário; cada linha vale a partir do seu instante
@@ -39,6 +41,11 @@ public static class SimRunApp
         if (args.Length > 0 && args[0] == ReplayCommand.Name)
         {
             return ReplayCommand.Run(args[1..], stdout, stderr);
+        }
+
+        if (args.Length > 0 && args[0] == LoadCommand.Name)
+        {
+            return LoadCommand.Run(args[1..], stdout, stderr);
         }
 
         if (!Options.TryParse(args, out Options? options, out string? usageError))
