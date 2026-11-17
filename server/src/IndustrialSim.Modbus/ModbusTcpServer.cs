@@ -37,11 +37,18 @@ public sealed record ModbusConnectionInfo(long Id, IPEndPoint Remote, DateTimeOf
 /// <remarks>
 /// Cada conexão atende uma requisição por vez, na ordem em que chegam. Enquanto o pareamento não decide, a
 /// conexão fica aberta e as requisições que chegam são lidas e descartadas, sem resposta: assim o fluxo TCP não
-/// perde o enquadramento, e um comando antigo não é executado depois da autorização. Um cabeçalho MBAP inválido
+/// perde o enquadramento, e um comando antigo não é executado depois da autorização. Uma requisição que chega
+/// até <see cref="DecisionGrace"/> antes de a autorização alcançar a conexão é atendida. Um cabeçalho MBAP inválido
 /// fecha a conexão; uma requisição inválida recebe resposta de exceção e a conexão continua.
 /// </remarks>
 public sealed class ModbusTcpServer : IDisposable
 {
+    /// <summary>
+    /// Quanto uma requisição recebida com a conexão pendente espera a decisão do pareamento antes de ser
+    /// descartada: cobre o intervalo entre aceitar o pedido e a decisão chegar à conexão.
+    /// </summary>
+    public static readonly TimeSpan DecisionGrace = TimeSpan.FromMilliseconds(50);
+
     private readonly ModbusDevice _device;
     private readonly IConnectionGate _gate;
     private readonly ModbusServerOptions _options;
@@ -265,6 +272,15 @@ public sealed class ModbusTcpServer : IDisposable
                     if (!await read.ConfigureAwait(false))
                     {
                         return;
+                    }
+
+                    // A decisão pode estar a caminho (o pedido acabou de ser aceito e o mestre já mandou a
+                    // requisição): espera um instante antes de descartar. Se ela chegar, a requisição fica no
+                    // buffer e é atendida como a primeira da conexão autorizada.
+                    if (await Task.WhenAny(authorization, Task.Delay(DecisionGrace, token)).ConfigureAwait(false) == authorization)
+                    {
+                        read = Task.FromResult(true);
+                        break;
                     }
 
                     discarded++;

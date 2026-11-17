@@ -184,6 +184,26 @@ public sealed class ModbusTcpServerTests : IDisposable
         Assert.Equal([0x03, 0x02, 0x00, 0x00], await client.RequestAsync(1, 0x03, 0x00, 0x00, 0x00, 0x01));
     }
 
+    /// <summary>
+    /// Uma requisição mandada logo depois do aceite, antes de a decisão alcançar a conexão, é atendida (e não
+    /// descartada como as de antes da autorização). Repetido para pegar as duas ordens de chegada.
+    /// </summary>
+    [Fact]
+    public async Task ARequestSentRightAfterTheDecision_IsAnswered()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            var gate = new TestGate(GateMode.Hold);
+            ModbusTcpServer server = Start(new IoImage(0, 0, 1, 0), gate);
+            RawModbusClient client = await ConnectRaw(server);
+            TestGate.HeldRequest held = await gate.NextHeldAsync();
+
+            held.Allow();
+
+            Assert.Equal([0x03, 0x02, 0x00, 0x00], await client.RequestAsync(1, 0x03, 0x00, 0x00, 0x00, 0x01));
+        }
+    }
+
     [Fact]
     public async Task RefusedConnection_IsClosed()
     {

@@ -65,7 +65,6 @@ public class ModbusApiTests(ITestOutputHelper output)
         request = await WaitForPending(client, plant.Id);
         Assert.Equal("127.0.0.1", request.Address);
         Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync($"/api/plants/{plant.Id}/modbus/pairing/{request.Id}/accept", null, Cancel)).StatusCode);
-        await WaitUntilAuthorized(client, plant.Id);
         Assert.Equal([0x06, 0x00, 0x00, 0x36, 0x00], await master.RequestAsync(1, 0x06, 0x00, 0x00, 0x36, 0x00));
 
         info = await GetModbus(client, plant.Id);
@@ -277,17 +276,6 @@ public class ModbusApiTests(ITestOutputHelper output)
             }
 
             Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), "O pedido de pareamento não apareceu.");
-            await Task.Delay(10, Cancel);
-        }
-    }
-
-    /// <summary>Espera a conexão segurada passar a autorizada (a decisão chega a ela de forma assíncrona).</summary>
-    private static async Task WaitUntilAuthorized(HttpClient client, Guid plant)
-    {
-        var watch = Stopwatch.StartNew();
-        while (!(await GetModbus(client, plant)).Connections.Any(c => c.Authorized))
-        {
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), "A conexão aceita não passou a autorizada.");
             await Task.Delay(10, Cancel);
         }
     }
