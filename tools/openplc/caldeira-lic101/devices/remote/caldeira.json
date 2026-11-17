@@ -1,0 +1,119 @@
+{
+  "name": "caldeira",
+  "protocol": "modbus-tcp",
+  "modbusTcpConfig": {
+    "host": "127.0.0.1",
+    "port": 15000,
+    "slaveId": 1,
+    "timeout": 1000,
+    "ioGroups": [
+      {
+        "id": "874daecf-82ab-4c8c-ad5f-0e839c4c81a6",
+        "name": "medicoes",
+        "functionCode": "4",
+        "cycleTime": 100,
+        "offset": "0",
+        "length": 6,
+        "errorHandling": "keep-last-value",
+        "ioPoints": [
+          {
+            "id": "medicoes_0",
+            "name": "medicoes_0",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW0",
+            "alias": "LT101"
+          },
+          {
+            "id": "medicoes_1",
+            "name": "medicoes_1",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW1",
+            "alias": ""
+          },
+          {
+            "id": "medicoes_2",
+            "name": "medicoes_2",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW2",
+            "alias": ""
+          },
+          {
+            "id": "medicoes_3",
+            "name": "medicoes_3",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW3",
+            "alias": ""
+          },
+          {
+            "id": "medicoes_4",
+            "name": "medicoes_4",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW4",
+            "alias": "FV101_POS"
+          },
+          {
+            "id": "medicoes_5",
+            "name": "medicoes_5",
+            "type": "Analog Input (Input Register)",
+            "iecLocation": "%IW5",
+            "alias": ""
+          }
+        ]
+      },
+      {
+        "id": "5ed7fbdf-5a0a-4fd2-ab1d-3887d693fc66",
+        "name": "fv101",
+        "functionCode": "6",
+        "cycleTime": 100,
+        "offset": "0",
+        "length": 1,
+        "errorHandling": "keep-last-value",
+        "ioPoints": [
+          {
+            "id": "fv101_0",
+            "name": "fv101_0",
+            "type": "Analog Output (Single Register)",
+            "iecLocation": "%QW0",
+            "alias": "FV101_CMD"
+          }
+        ]
+      },
+      {
+        "id": "f56eb5b7-e30d-4ec3-88f6-ccd4821cc4c6",
+        "name": "heartbeat",
+        "functionCode": "6",
+        "cycleTime": 100,
+        "offset": "10",
+        "length": 1,
+        "errorHandling": "keep-last-value",
+        "ioPoints": [
+          {
+            "id": "heartbeat_0",
+            "name": "heartbeat_0",
+            "type": "Analog Output (Single Register)",
+            "iecLocation": "%QW1",
+            "alias": "HEARTBEAT"
+          }
+        ]
+      },
+      {
+        "id": "15bbee41-aea7-46ea-9f12-69fda6f95bed",
+        "name": "bomba",
+        "functionCode": "5",
+        "cycleTime": 100,
+        "offset": "0",
+        "length": 1,
+        "errorHandling": "keep-last-value",
+        "ioPoints": [
+          {
+            "id": "bomba_0",
+            "name": "bomba_0",
+            "type": "Digital Output (Single Coil)",
+            "iecLocation": "%QX0.0",
+            "alias": "P101_RUN"
+          }
+        ]
+      }
+    ]
+  }
+}
