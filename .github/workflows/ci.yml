@@ -106,7 +106,9 @@ jobs:
       - name: Build do servidor
         run: dotnet build server/src/IndustrialSim.Server --configuration Release
 
-      # Roda a DLL direto (e não por "dotnet run"), para o SIGINT chegar ao próprio servidor.
+      # Roda a DLL direto (e não por "dotnet run"), para o sinal chegar ao próprio servidor. O encerramento é
+      # por SIGTERM, o sinal de um gerenciador de serviços: num bash não interativo, um processo iniciado com
+      # "&" ignora o SIGINT (POSIX, sem controle de jobs). O Ctrl+C foi verificado no Windows (Etapa 5).
       - name: Sobe o servidor, confere a página e a API e encerra com plantas ativas (Etapa 5)
         working-directory: server/src/IndustrialSim.Server
         run: |
@@ -130,17 +132,23 @@ jobs:
           grep -q '"plantCount":5' metrics.json
           echo
 
-          kill -INT "$SERVER_PID"
+          kill -TERM "$SERVER_PID"
           for i in $(seq 1 50); do
             kill -0 "$SERVER_PID" 2>/dev/null || break
             sleep 0.1
           done
           if kill -0 "$SERVER_PID" 2>/dev/null; then
-            echo "O servidor não terminou 5 s depois do SIGINT."
+            echo "O servidor não terminou 5 s depois do SIGTERM."
             exit 1
           fi
+          set +e
           wait "$SERVER_PID"
-          echo "Código de saída do servidor: $?"
+          EXIT_CODE=$?
+          set -e
+          echo "Código de saída do servidor: $EXIT_CODE"
+          test "$EXIT_CODE" -eq 0
+          grep -q 'Application is shutting down' "$GITHUB_WORKSPACE/server.log"
+          grep -q 'encerrada (Shutdown)' "$GITHUB_WORKSPACE/server.log"
           grep -q 'threads ainda vivas: 0' "$GITHUB_WORKSPACE/server.log"
           echo "Servidor encerrado com 5 plantas ativas, sem threads do laço penduradas."
 
