@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapas 1 a 4 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9; Etapas 3 e 4 em 15/11/2026); próxima: Etapa 5 (servidor de tempo real e instâncias). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapas 1 a 5 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9; Etapas 3 e 4 em 15/11/2026; Etapa 5 em 17/11/2026, com o servidor do laboratório passando a Windows pela D10); próxima: Etapa 6 (Modbus TCP por planta com pareamento). Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -130,6 +130,9 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D30 | (15/11/2026, Etapa 4) O valor forçado é guardado em unidade de engenharia (ou booleano), passa pela faixa e pelo formato atuais e tem prioridade sobre a planta e sobre a falha do transmissor. | Continua válido quando o formato muda. | Forçar o valor bruto do registrador. |
 | D31 | (15/11/2026, Etapa 4) Ao trocar o formato analógico ou a ordem das palavras, os comandos que estão nos holding registers são regravados no novo formato. | Sem isso, as contagens antigas seriam lidas no formato novo e as válvulas dariam um salto até o mestre reescrever. | Deixar os registradores como estão; zerar os comandos. |
 | D32 | (15/11/2026, Etapa 4) O watchdog conta tempo simulado (passos da planta), e não tempo de relógio. | Determinismo (RNF02): uma gravação reproduzida dispara o watchdog no mesmo passo. | Temporizador de relógio. |
+| D33 | (17/11/2026, Etapa 5) Laço de tempo real em threads dedicadas (padrão: 2), compartilhadas pelas plantas; cada planta fica numa thread só, a menos ocupada quando entra. Os ciclos seguem uma grade fixa no relógio monotônico (`Stopwatch`); depois de um atraso, até 10 passos são recuperados em seguida, e o excesso é descartado e aparece na deriva. No Windows, a espera usa o temporizador de alta resolução (`CREATE_WAITABLE_TIMER_HIGH_RESOLUTION`); nos outros sistemas, `Thread.Sleep`. | Passo de 10 ms preciso no Windows (D10) sem girar a CPU nem mudar o relógio do sistema; a grade fixa não acumula erro (RNF05); uma planta que falha sai do laço sem parar as outras. Medido: 30 plantas, p99 de 0,76 ms e 1,1% de um núcleo. | Uma thread por planta (mais threads e trocas de contexto); `Thread.Sleep` ou `PeriodicTimer` no Windows (resolução de cerca de 15,6 ms); `timeBeginPeriod` (muda o relógio do sistema inteiro); recuperar todo o atraso (rajada de passos depois de uma pausa longa). |
+| D34 | (17/11/2026, Etapa 5) Gravação de ensaio em CSV (`industrialsim-recording/1`): cabeçalho com cenário, semente, passo e amostragem; por linha, os coils e holding registers brutos copiados no início do passo, as configurações de I/O, as entradas e as saídas da planta em SI e o watchdog; uma linha por passo com mudança e uma a cada 100 ms. A reprodução aplica esses valores passo a passo e gera o mesmo arquivo, byte a byte. A planta em execução escreve o arquivo por uma fila, fora da thread do laço. | Registra os comandos como o mestre os mandou (formato, watchdog e distúrbios incluídos) e transforma a reprodução num teste de determinismo (RNF02); a escrita no disco não atrasa o passo. | Gravar só as entradas da planta em SI (não reproduz formato nem watchdog); uma linha por passo (arquivo 10 vezes maior); escrever no disco pela thread do laço. |
+| D35 | (17/11/2026, Etapa 5) Uma planta sem cliente expira depois de `IdleTimeout` (padrão: 30 min) sem atividade (criação, consulta pela API ou saída de um cliente); até a Etapa 10, expirar é encerrar. Os erros da API REST trazem só um código (`{ "code": "..." }`), que a interface traduz pelos arquivos de idioma. | Libera memória sem depender do banco de dados (Etapa 10); erros sem texto fixo no servidor (RNF11). | Plantas sem expiração até a Etapa 10; mensagens de erro em texto na API. |
 
 ## Arquitetura e estrutura do repositório
 
@@ -452,7 +455,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D32. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D35. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.

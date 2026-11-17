@@ -249,11 +249,13 @@ Evidências: `docs/validacao/etapa-04.md`.
 
 **Validação**
 
-- [ ] 30 plantas da caldeira por 10 minutos, no Windows: deriva entre tempo simulado e relógio < 0,1%; atraso do passo no percentil 99 < 5 ms; CPU total < 50% de um núcleo (números no relatório).
-- [ ] Reproduzir uma gravação gera CSV idêntico ao original (mesmo hash).
-- [ ] Uma planta sem cliente expira no tempo configurado e libera recursos (teste com tempo reduzido).
-- [ ] Testes de API com `WebApplicationFactory` cobrem criar, consultar e encerrar.
-- [ ] Encerrar o processo com plantas ativas (Ctrl+C ou parada do host, como na parada do serviço) não deixa threads penduradas.
+- [x] 30 plantas da caldeira por 10 minutos, no Windows: deriva entre tempo simulado e relógio < 0,1%; atraso do passo no percentil 99 < 5 ms; CPU total < 50% de um núcleo (números no relatório).
+- [x] Reproduzir uma gravação gera CSV idêntico ao original (mesmo hash).
+- [x] Uma planta sem cliente expira no tempo configurado e libera recursos (teste com tempo reduzido).
+- [x] Testes de API com `WebApplicationFactory` cobrem criar, consultar e encerrar.
+- [x] Encerrar o processo com plantas ativas (Ctrl+C ou parada do host, como na parada do serviço) não deixa threads penduradas.
+
+Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de desenvolvimento (Windows 11); repetir no PC do laboratório no teste de carga da Etapa 9.
 
 ### Etapa 6 — Modbus TCP por planta com pareamento
 
