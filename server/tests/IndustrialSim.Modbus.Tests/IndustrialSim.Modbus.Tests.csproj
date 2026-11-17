@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\IndustrialSim.Modbus\IndustrialSim.Modbus.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentModbus" />
+  </ItemGroup>
+
+  <!-- Os cenários do produto, copiados para a pasta de saída. -->
+  <ItemGroup>
+    <None Include="..\..\..\scenarios\**\*.json" Link="ProductScenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
