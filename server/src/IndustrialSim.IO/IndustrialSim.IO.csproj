@@ -6,5 +6,7 @@
   <!-- Os testes exercitam as fases do passo (copiar comandos, publicar medições) separadamente. -->
   <ItemGroup>
     <InternalsVisibleTo Include="IndustrialSim.IO.Tests" />
+    <!-- Os testes do Modbus publicam medições conhecidas na imagem, sem montar uma planta. -->
+    <InternalsVisibleTo Include="IndustrialSim.Modbus.Tests" />
   </ItemGroup>
 </Project>

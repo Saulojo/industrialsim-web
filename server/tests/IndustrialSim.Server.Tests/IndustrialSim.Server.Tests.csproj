@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="FluentModbus" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\IndustrialSim.Server\IndustrialSim.Server.csproj" />
+  </ItemGroup>
+
+  <!-- Mestre Modbus de socket dos testes do Modbus. -->
+  <ItemGroup>
+    <Compile Include="..\IndustrialSim.Modbus.Tests\RawModbusClient.cs" Link="RawModbusClient.cs" />
   </ItemGroup>
 </Project>

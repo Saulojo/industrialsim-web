@@ -1,0 +1,20 @@
+{
+  "port": 15000,
+  "unitId": 1,
+  "authorizedMasters": [
+    "127.0.0.1"
+  ],
+  "pendingRequests": [],
+  "connections": [
+    {
+      "id": 2,
+      "address": "127.0.0.1",
+      "port": 55274,
+      "connectedUtc": "2026-11-17T20:53:16.6366234+00:00",
+      "authorized": true,
+      "requests": 2397
+    }
+  ],
+  "requests": 2397,
+  "exceptionResponses": 0
+}

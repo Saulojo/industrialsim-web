@@ -13,6 +13,7 @@ public class RealTimeLoopTests
         var steppers = Enumerable.Range(0, 4).Select(i => new CountingStepper($"p{i}")).ToArray();
         LoopRegistration[] registrations = [.. steppers.Select(loop.Add)];
 
+        var running = Stopwatch.StartNew();
         loop.Start();
         Assert.Equal(2, loop.AliveThreadCount);
         await Task.Delay(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
@@ -22,12 +23,16 @@ public class RealTimeLoopTests
         var stopwatch = Stopwatch.StartNew();
         loop.Dispose();
         stopwatch.Stop();
+        running.Stop();
 
         Assert.Equal(0, loop.AliveThreadCount);
         Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(2), $"Dispose levou {stopwatch.Elapsed}.");
         Assert.Equal(4, metrics.PlantCount);
         Assert.Equal(2, registrations.Select(r => r.ThreadIndex).Distinct().Count());
-        Assert.All(steppers, s => Assert.InRange(s.Steps, 80, 110));
+        // Pelo menos 80 passos no segundo pedido; no máximo um a cada 10 ms do tempo que o laço de fato rodou
+        // (numa máquina carregada, o Task.Delay de 1 s pode durar mais), com folga de 2 passos.
+        long maxSteps = (long)(running.Elapsed.TotalSeconds / 0.01) + 2;
+        Assert.All(steppers, s => Assert.InRange(s.Steps, 80, maxSteps));
         Assert.True(Math.Abs(tracking.Drift) < 0.05, $"Deriva de {tracking.Drift:P2} em {tracking.WallSeconds:0.###} s.");
     }
 
@@ -101,13 +106,25 @@ public class RealTimeLoopTests
             Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true",
             "Precisão do temporizador não é medida na VM compartilhada do CI.");
 
+        // Mede numa thread com a mesma prioridade das threads do laço (AboveNormal): com outros projetos de teste
+        // rodando em paralelo (ex.: 30 mestres Modbus da Etapa 6), uma thread de prioridade normal acorda atrasada
+        // pelo escalonador, o que não diz nada sobre o temporizador.
         var errors = new List<double>();
-        for (int i = 0; i < 50; i++)
+        var measure = new Thread(() =>
         {
-            long start = Stopwatch.GetTimestamp();
-            waiter.Wait(TimeSpan.FromMilliseconds(2));
-            errors.Add(Stopwatch.GetElapsedTime(start).TotalMilliseconds - 2.0);
-        }
+            for (int i = 0; i < 50; i++)
+            {
+                long start = Stopwatch.GetTimestamp();
+                waiter.Wait(TimeSpan.FromMilliseconds(2));
+                errors.Add(Stopwatch.GetElapsedTime(start).TotalMilliseconds - 2.0);
+            }
+        })
+        {
+            Priority = ThreadPriority.AboveNormal,
+            IsBackground = true,
+        };
+        measure.Start();
+        Assert.True(measure.Join(TimeSpan.FromSeconds(10)), "A medição não terminou em 10 s.");
 
         errors.Sort();
         double median = errors[errors.Count / 2];

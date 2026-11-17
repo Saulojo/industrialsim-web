@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using IndustrialSim.Sessions.Modbus;
 using IndustrialSim.Sessions.RealTime;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,8 +24,13 @@ public sealed record InstanceManagerOptions
     /// <summary>Uma linha de medição na gravação a cada tantos passos (padrão: 10, ou seja, 100 ms).</summary>
     public int RecordingSampleEverySteps { get; init; } = 10;
 
+    /// <summary>Servidor Modbus das plantas (seção <c>Simulation:Modbus</c>).</summary>
+    public ModbusEndpointOptions Modbus { get; init; } = new();
+
     internal void Validate()
     {
+        ArgumentNullException.ThrowIfNull(Modbus, nameof(Modbus));
+        Modbus.Validate();
         ArgumentOutOfRangeException.ThrowIfLessThan(MaxInstances, 1, nameof(MaxInstances));
         ArgumentException.ThrowIfNullOrWhiteSpace(RecordingDirectory, nameof(RecordingDirectory));
         ArgumentOutOfRangeException.ThrowIfLessThan(RecordingSampleEverySteps, 1, nameof(RecordingSampleEverySteps));
@@ -39,6 +45,9 @@ public enum CreatePlantStatus
     Created,
     ScenarioNotFound,
     LimitReached,
+
+    /// <summary>Nenhuma porta Modbus livre na faixa configurada.</summary>
+    ModbusPortsExhausted,
 }
 
 /// <summary>Pedido de criação de uma planta.</summary>
@@ -53,7 +62,8 @@ public sealed record CreatePlantResult(CreatePlantStatus Status, PlantInstance? 
 
 /// <summary>
 /// Plantas em execução no servidor: cria, lista, encerra e expira por falta de cliente, com limite de plantas
-/// ao mesmo tempo. Cada planta é isolada: tem a sua planta, a sua imagem de I/O e o seu gerador de ruído.
+/// ao mesmo tempo. Cada planta é isolada: tem a sua planta, a sua imagem de I/O, o seu gerador de ruído e a sua
+/// porta Modbus, com o seu pareamento.
 /// </summary>
 public sealed class InstanceManager : IDisposable
 {
@@ -65,7 +75,9 @@ public sealed class InstanceManager : IDisposable
     private readonly RealTimeLoop _loop;
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
+    private readonly PortAllocator _ports;
     private ITimer? _expiryTimer;
+    private ITimer? _pairingTimer;
     private bool _disposed;
 
     public InstanceManager(
@@ -83,6 +95,7 @@ public sealed class InstanceManager : IDisposable
         Options.Validate();
         _time = time ?? TimeProvider.System;
         _logger = logger ?? NullLogger<InstanceManager>.Instance;
+        _ports = new PortAllocator(Options.Modbus.PortRangeStart, Options.Modbus.PortRangeEnd);
     }
 
     public ScenarioCatalog Catalog { get; }
@@ -100,13 +113,21 @@ public sealed class InstanceManager : IDisposable
         }
     }
 
-    /// <summary>Passa a verificar a expiração a cada <see cref="InstanceManagerOptions.ExpiryCheckInterval"/>.</summary>
+    /// <summary>Portas Modbus em uso pelas plantas em execução.</summary>
+    public int ModbusPortsInUse => _ports.InUseCount;
+
+    /// <summary>
+    /// Passa a verificar a expiração das plantas a cada <see cref="InstanceManagerOptions.ExpiryCheckInterval"/> e
+    /// os pedidos de pareamento vencidos a cada <see cref="ModbusEndpointOptions.PairingCheckInterval"/>.
+    /// </summary>
     public void StartExpiryTimer()
     {
         lock (_gate)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
             _expiryTimer ??= _time.CreateTimer(_ => ExpireIdle(), null, Options.ExpiryCheckInterval, Options.ExpiryCheckInterval);
+            TimeSpan pairing = Options.Modbus.PairingCheckInterval;
+            _pairingTimer ??= _time.CreateTimer(_ => ExpirePairingRequests(), null, pairing, pairing);
         }
     }
 
@@ -135,7 +156,16 @@ public sealed class InstanceManager : IDisposable
             (string, int)? recording = request.Record
                 ? (Path.Combine(Options.RecordingDirectory, $"{id:N}.csv"), Options.RecordingSampleEverySteps)
                 : null;
-            instance = new PlantInstance(id, scenario, seed, request.OwnerId, recording, _time, _logger);
+            try
+            {
+                instance = new PlantInstance(id, scenario, seed, request.OwnerId, recording, StartModbus, _time, _logger);
+            }
+            catch (ModbusPortsExhaustedException)
+            {
+                SessionsLog.ModbusPortsExhausted(_logger, scenario.Id, Options.Modbus.PortRangeStart, Options.Modbus.PortRangeEnd);
+                return new CreatePlantResult(CreatePlantStatus.ModbusPortsExhausted, null);
+            }
+
             instance.AttachToLoop(_loop.Add(instance));
             _instances.Add(instance.Id, instance);
             count = _instances.Count;
@@ -177,7 +207,9 @@ public sealed class InstanceManager : IDisposable
             count = _instances.Count;
         }
 
-        if (instance.End(reason))
+        bool ended = instance.End(reason);
+        _ports.Release(instance.Modbus.Port);
+        if (ended)
         {
             SessionsLog.InstanceEnded(_logger, instance.Id, reason, Math.Round(instance.Tracking.SimulatedSeconds, 3), count);
         }
@@ -213,6 +245,12 @@ public sealed class InstanceManager : IDisposable
     }
 
     /// <summary>
+    /// Fecha, em todas as plantas, os pedidos de pareamento sem resposta no tempo limite (D07: 60 s). Devolve
+    /// quantos venceram.
+    /// </summary>
+    public int ExpirePairingRequests() => List().Sum(i => i.Modbus.Pairing.ExpirePending());
+
+    /// <summary>
     /// Para a verificação de expiração e encerra todas as plantas. Uma chamada simultânea espera a primeira
     /// terminar.
     /// </summary>
@@ -226,6 +264,8 @@ public sealed class InstanceManager : IDisposable
             _disposed = true;
             _expiryTimer?.Dispose();
             _expiryTimer = null;
+            _pairingTimer?.Dispose();
+            _pairingTimer = null;
             ids = alreadyDisposing ? [] : [.. _instances.Keys];
         }
 
@@ -242,4 +282,7 @@ public sealed class InstanceManager : IDisposable
 
         _allEnded.Set();
     }
+
+    private PlantModbus? StartModbus(PlantInstance instance) =>
+        PlantModbus.Start(instance.Id, instance.Io.Image, instance.AttachClient, Options.Modbus, _ports, _time, _logger);
 }

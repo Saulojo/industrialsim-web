@@ -1,11 +1,13 @@
 using IndustrialSim.Sessions;
+using IndustrialSim.Sessions.Modbus;
 using IndustrialSim.Sessions.RealTime;
 
 namespace IndustrialSim.Server;
 
 /// <summary>
 /// Liga as plantas em execução ao host (seção <c>Simulation</c> do appsettings): catálogo de cenários, laço de
-/// tempo real, gerenciador de plantas e o serviço que inicia e para os dois junto com o processo.
+/// tempo real, gerenciador de plantas (com o Modbus de cada planta) e o serviço que inicia e para os dois junto
+/// com o processo.
 /// </summary>
 internal static class SimulationServices
 {
@@ -20,9 +22,14 @@ internal static class SimulationServices
         services.AddSingleton(_ =>
         {
             InstanceManagerOptions options = section.GetSection("Instances").Get<InstanceManagerOptions>() ?? new InstanceManagerOptions();
+            ModbusEndpointOptions modbus = section.GetSection("Modbus").Get<ModbusEndpointOptions>() ?? new ModbusEndpointOptions();
 
             // Gravações relativas à raiz de conteúdo do host.
-            return options with { RecordingDirectory = Path.GetFullPath(options.RecordingDirectory, environment.ContentRootPath) };
+            return options with
+            {
+                RecordingDirectory = Path.GetFullPath(options.RecordingDirectory, environment.ContentRootPath),
+                Modbus = modbus,
+            };
         });
 
         // O laço usa sempre o relógio do sistema (Stopwatch); o TimeProvider registrado vale para horários e expiração.
