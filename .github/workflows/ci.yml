@@ -40,6 +40,18 @@ jobs:
         working-directory: server
         run: dotnet test --no-build --configuration Release
 
+  # A proteção da main exige um check chamado ".NET (build e testes)". Este job resume a matriz acima e só
+  # passa se o .NET passou no Windows e no Linux (com "always", uma falha na matriz vira falha aqui, e não
+  # um job pulado, que contaria como aprovado).
+  dotnet-summary:
+    name: .NET (build e testes)
+    runs-on: ubuntu-latest
+    needs: [dotnet]
+    if: always()
+    steps:
+      - name: Windows e Linux passaram
+        run: test "${{ needs.dotnet.result }}" = "success"
+
   hart-poc:
     name: Prova HART da Etapa 2 (build e testes)
     runs-on: ubuntu-latest
