@@ -1,7 +1,7 @@
 # Validação — Etapa 6: Modbus TCP por planta com pareamento
 
 - Branch: `etapa-06-modbus`
-- Pull request: (link acrescentado depois de aberto)
+- Pull request: [Saulojo/industrialsim-web#7](https://github.com/Saulojo/industrialsim-web/pull/7)
 - Data: 17/11/2026
 
 ## Ambiente
