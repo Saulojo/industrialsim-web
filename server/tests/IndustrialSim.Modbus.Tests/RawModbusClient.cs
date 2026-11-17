@@ -49,7 +49,8 @@ internal sealed class RawModbusClient : IDisposable
         byte[] frame = Frame(unitId, pdu);
         await SendAsync(frame);
         (ushort transactionId, byte[] response) = await ReceiveAsync(DefaultTimeout)
-            ?? throw new TimeoutException("O servidor não respondeu.");
+            ?? throw new TimeoutException(
+                $"O servidor não respondeu. Pool de threads: {ThreadPool.ThreadCount} threads, {ThreadPool.PendingWorkItemCount} itens na fila.");
         Assert.Equal(_transactionId, transactionId);
         return response;
     }
