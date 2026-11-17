@@ -101,13 +101,25 @@ public class RealTimeLoopTests
             Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true",
             "Precisão do temporizador não é medida na VM compartilhada do CI.");
 
+        // Mede numa thread com a mesma prioridade das threads do laço (AboveNormal): com outros projetos de teste
+        // rodando em paralelo (ex.: 30 mestres Modbus da Etapa 6), uma thread de prioridade normal acorda atrasada
+        // pelo escalonador, o que não diz nada sobre o temporizador.
         var errors = new List<double>();
-        for (int i = 0; i < 50; i++)
+        var measure = new Thread(() =>
         {
-            long start = Stopwatch.GetTimestamp();
-            waiter.Wait(TimeSpan.FromMilliseconds(2));
-            errors.Add(Stopwatch.GetElapsedTime(start).TotalMilliseconds - 2.0);
-        }
+            for (int i = 0; i < 50; i++)
+            {
+                long start = Stopwatch.GetTimestamp();
+                waiter.Wait(TimeSpan.FromMilliseconds(2));
+                errors.Add(Stopwatch.GetElapsedTime(start).TotalMilliseconds - 2.0);
+            }
+        })
+        {
+            Priority = ThreadPriority.AboveNormal,
+            IsBackground = true,
+        };
+        measure.Start();
+        Assert.True(measure.Join(TimeSpan.FromSeconds(10)), "A medição não terminou em 10 s.");
 
         errors.Sort();
         double median = errors[errors.Count / 2];

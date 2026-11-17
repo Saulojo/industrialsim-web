@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using FluentModbus;
 using IndustrialSim.IO;
 
@@ -297,12 +298,12 @@ public sealed class ModbusTcpServerTests : IDisposable
         Assert.Equal(endPoint, next.LocalEndPoint);
     }
 
-    private static async Task WaitUntil(Func<bool> condition)
+    private static async Task WaitUntil(Func<bool> condition, [CallerArgumentExpression(nameof(condition))] string? expression = null)
     {
         DateTime deadline = DateTime.UtcNow.AddSeconds(5);
         while (!condition())
         {
-            Assert.True(DateTime.UtcNow < deadline, "A condição não foi atingida em 5 s.");
+            Assert.True(DateTime.UtcNow < deadline, $"Não foi atingido em 5 s: {expression}");
             await Task.Delay(10, TestContext.Current.CancellationToken);
         }
     }

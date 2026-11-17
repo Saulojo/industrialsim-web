@@ -136,8 +136,9 @@ public class ModbusApiTests(ITestOutputHelper output)
 
     /// <summary>
     /// Critério 1, de ponta a ponta: com a planta em tempo real, um mestre independente (FluentModbus) escreve
-    /// "fechar" em FV-101 e a posição real publicada muda em até 2 passos depois do último passo visto antes da
-    /// escrita; a leitura de LT-101 é coerente com a planta.
+    /// "fechar" em FV-101 e a posição real publicada muda em até 2 passos depois de a escrita chegar ao servidor
+    /// (o servidor só responde depois de gravar na imagem, então a referência é o passo publicado logo depois da
+    /// resposta); a leitura de LT-101 é coerente com a planta.
     /// </summary>
     [Fact]
     public async Task AMasterWritesFV101_ThePositionStartsMovingWithinTwoSteps_AndLT101IsCoherent()
@@ -154,6 +155,7 @@ public class ModbusApiTests(ITestOutputHelper output)
         short positionBefore = master.ReadInputRegisters<short>(1, 4, 1)[0];
         long stepBeforeWrite = plant.Io.Image.Snapshot().StepCount;
         master.WriteSingleRegister(1, 0, (short)0);
+        long stepAfterWrite = plant.Io.Image.Snapshot().StepCount;
 
         // Acompanha a imagem até a posição publicada mudar.
         IoSnapshot snapshot;
@@ -165,9 +167,11 @@ public class ModbusApiTests(ITestOutputHelper output)
         }
         while (AnalogCodec.FromRegister(snapshot.InputRegisters[4]) >= positionBefore);
 
-        long steps = snapshot.StepCount - stepBeforeWrite;
-        output.WriteLine($"Posição publicada mudou {steps} passo(s) depois do último passo visto antes da escrita ({watch.Elapsed.TotalMilliseconds:F1} ms).");
-        Assert.InRange(steps, 1, 2);
+        long steps = snapshot.StepCount - stepAfterWrite;
+        output.WriteLine(
+            $"Escrita enviada no passo {stepBeforeWrite} e já na imagem no passo {stepAfterWrite}; posição publicada mudou no passo {snapshot.StepCount} ({steps} passo(s) depois).");
+        Assert.True(snapshot.StepCount > stepBeforeWrite, $"A posição mudou no passo {snapshot.StepCount}, antes da escrita ({stepBeforeWrite}).");
+        Assert.True(steps <= 2, $"A posição mudou {steps} passos depois de a escrita chegar (passos {stepAfterWrite} e {snapshot.StepCount}).");
         Assert.True(master.ReadInputRegisters<short>(1, 4, 1)[0] < positionBefore);
 
         // LT-101 lido pelo mestre e a saída da planta no mesmo instante (entre dois passos), com até 1 contagem
