@@ -167,7 +167,15 @@ public class SimulationApiTests
         }
 
         Assert.Empty(list!);
-        Assert.Equal(0, factory.Services.GetRequiredService<RealTimeLoop>().GetMetrics().PlantCount);
+
+        // A planta encerrada não dá mais passos, mas a thread do laço só a tira da sua lista no ciclo seguinte.
+        RealTimeLoop loop = factory.Services.GetRequiredService<RealTimeLoop>();
+        for (int i = 0; i < 50 && loop.GetMetrics().PlantCount > 0; i++)
+        {
+            await Task.Delay(20, Cancel);
+        }
+
+        Assert.Equal(0, loop.GetMetrics().PlantCount);
     }
 
     [Fact]
