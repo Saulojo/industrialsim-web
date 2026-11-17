@@ -1,0 +1,30 @@
+Servidor em Release no Windows 11 (17/11/2026), 5 plantas da caldeira criadas pela API (uma gravando),
+encerrado com Ctrl+C 23 s depois. Log do console (ambiente Development, formato simples; os campos
+SpanId/TraceId das requisições foram omitidos aqui).
+
+PS C:\Projetos\industrialsim-web\server\src\IndustrialSim.Server> dotnet bin\Release\net10.0\IndustrialSim.Server.dll --urls http://127.0.0.1:5080
+12:32:09.827 info: IndustrialSim.Sessions.ScenarioCatalog[1100] Cenário caldeira carregado de C:\Projetos\industrialsim-web\server\src\IndustrialSim.Server\bin\Release\net10.0\scenarios\caldeira\scenario.json.
+12:32:09.839 info: IndustrialSim.Sessions.RealTime.RealTimeLoop[1000] Laço de tempo real iniciado: 2 threads, passo de 10 ms, recuperação de até 10 passos, espera por windows-high-resolution-timer.
+12:32:09.914 info: Microsoft.Hosting.Lifetime[14] Now listening on: http://127.0.0.1:5080
+12:32:09.914 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+12:32:11.521 info: IndustrialSim.Sessions.InstanceManager[1200] Planta 838c23d7-2f9e-4c5f-b22b-8da267dba1a1 criada: cenário caldeira, semente 101, thread 0 do laço (1 plantas em execução).
+12:32:11.573 info: IndustrialSim.Sessions.InstanceManager[1200] Planta 44be4ec4-538e-42bd-9fa1-16f2b0ca3e82 criada: cenário caldeira, semente 101, thread 1 do laço (2 plantas em execução).
+12:32:11.607 info: IndustrialSim.Sessions.InstanceManager[1200] Planta c4ffc50a-8477-4516-b877-bd21ce402bad criada: cenário caldeira, semente 101, thread 0 do laço (3 plantas em execução).
+12:32:11.642 info: IndustrialSim.Sessions.InstanceManager[1200] Planta 64ad28ac-8e43-4efc-baff-ae7d391a1160 criada: cenário caldeira, semente 101, thread 1 do laço (4 plantas em execução).
+12:32:11.676 info: IndustrialSim.Sessions.InstanceManager[1200] Planta 11f8b32c-f6c7-43e4-9488-82c2de1faafb criada: cenário caldeira, semente 101, thread 0 do laço (5 plantas em execução).
+(Ctrl+C)
+12:32:34.367 info: Microsoft.Hosting.Lifetime[0] Application is shutting down...
+12:32:34.380 info: IndustrialSim.Sessions.InstanceManager[1201] Planta 838c23d7-2f9e-4c5f-b22b-8da267dba1a1 encerrada (Shutdown) com 22.86 s simulados (4 plantas em execução).
+12:32:34.380 info: IndustrialSim.Sessions.InstanceManager[1201] Planta 44be4ec4-538e-42bd-9fa1-16f2b0ca3e82 encerrada (Shutdown) com 22.81 s simulados (3 plantas em execução).
+12:32:34.380 info: IndustrialSim.Sessions.InstanceManager[1201] Planta c4ffc50a-8477-4516-b877-bd21ce402bad encerrada (Shutdown) com 22.77 s simulados (2 plantas em execução).
+12:32:34.380 info: IndustrialSim.Sessions.InstanceManager[1201] Planta 64ad28ac-8e43-4efc-baff-ae7d391a1160 encerrada (Shutdown) com 22.740000000000002 s simulados (1 plantas em execução).
+12:32:34.380 info: IndustrialSim.Sessions.InstanceManager[1201] Planta 11f8b32c-f6c7-43e4-9488-82c2de1faafb encerrada (Shutdown) com 22.71 s simulados (0 plantas em execução).
+12:32:34.390 info: IndustrialSim.Sessions.RealTime.RealTimeLoop[1001] Laço de tempo real encerrado; threads ainda vivas: 0.
+PS C:\Projetos\industrialsim-web\server\src\IndustrialSim.Server>
+
+Depois do Ctrl+C:
+- processos dotnet com IndustrialSim.Server.dll na linha de comando: 0 (Get-CimInstance Win32_Process)
+- GET http://127.0.0.1:5080/api/health: porta fechada
+- do "shutting down" ao "threads ainda vivas: 0": 23 ms
+
+(O tempo "22.740000000000002 s" saiu sem arredondar; depois deste ensaio o log passou a arredondar para 3 casas.)

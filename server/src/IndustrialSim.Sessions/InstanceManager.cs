@@ -179,7 +179,7 @@ public sealed class InstanceManager : IDisposable
 
         if (instance.End(reason))
         {
-            SessionsLog.InstanceEnded(_logger, instance.Id, reason, instance.Tracking.SimulatedSeconds, count);
+            SessionsLog.InstanceEnded(_logger, instance.Id, reason, Math.Round(instance.Tracking.SimulatedSeconds, 3), count);
         }
 
         return true;

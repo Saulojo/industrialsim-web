@@ -1,0 +1,40 @@
+{
+  "StartedAt": "2026-11-17T09:31:45.0806245-03:00",
+  "Machine": "SAULO",
+  "Os": "Microsoft Windows 10.0.26300",
+  "Runtime": ".NET 10.0.15",
+  "ProcessorCount": 24,
+  "Scenario": "caldeira",
+  "Plants": 30,
+  "Threads": 2,
+  "WaiterKind": "windows-high-resolution-timer",
+  "WallSeconds": 600.0459427,
+  "Steps": 1800150,
+  "MinStepsPerPlant": 60005,
+  "MaxStepsPerPlant": 60005,
+  "MaxDrift": 8.14388767065852E-06,
+  "Lateness": {
+    "Count": 1800150,
+    "MeanMs": 0.3260514389911929,
+    "P50Ms": 0.31,
+    "P99Ms": 0.76,
+    "MaxMs": 3.3632
+  },
+  "StepCost": {
+    "Count": 1800150,
+    "MeanMs": 0.0037010346360024995,
+    "P50Ms": 0.01,
+    "P99Ms": 0.02,
+    "MaxMs": 3.0749
+  },
+  "LateCycles": 0,
+  "DroppedCycles": 0,
+  "Overruns": 0,
+  "CpuOfOneCore": 0.01119705929477323,
+  "WorkingSetMb": 50.26953125,
+  "MasterScans": 5497,
+  "DriftMet": true,
+  "LatenessMet": true,
+  "CpuMet": true,
+  "AllMet": true
+}
