@@ -6,7 +6,8 @@ namespace IndustrialSim.Server;
 
 /// <summary>
 /// API REST das plantas (Etapa 5): listar cenários, criar planta, listar, consultar estado, encerrar, baixar a
-/// gravação do ensaio e ver as métricas do laço. Erros devolvem só um código (<see cref="ApiError"/>).
+/// gravação do ensaio e ver as métricas do laço. O Modbus de cada planta fica em <see cref="ModbusApi"/>.
+/// Erros devolvem só um código (<see cref="ApiError"/>).
 /// </summary>
 internal static class SimulationApi
 {
@@ -20,6 +21,7 @@ internal static class SimulationApi
         plants.MapGet("/{id:guid}", GetState);
         plants.MapDelete("/{id:guid}", End);
         plants.MapGet("/{id:guid}/recording", GetRecording);
+        plants.MapModbusApi();
 
         app.MapGet("/api/simulation/metrics", (RealTimeLoop loop) => ToResponse(loop.GetMetrics()));
     }
@@ -37,6 +39,8 @@ internal static class SimulationApi
             CreatePlantStatus.Created when result.Instance is { } instance =>
                 Results.Created($"/api/plants/{instance.Id}", ToSummary(instance)),
             CreatePlantStatus.ScenarioNotFound => Results.BadRequest(new ApiError(ApiErrorCodes.ScenarioNotFound)),
+            CreatePlantStatus.ModbusPortsExhausted =>
+                Results.Json(new ApiError(ApiErrorCodes.ModbusPortsExhausted), statusCode: StatusCodes.Status503ServiceUnavailable),
             _ => Results.Json(new ApiError(ApiErrorCodes.InstanceLimitReached), statusCode: StatusCodes.Status503ServiceUnavailable),
         };
     }
@@ -83,7 +87,7 @@ internal static class SimulationApi
         return Results.File(stream, "text/csv", $"{instance.ScenarioId}-{instance.Id:N}.csv");
     }
 
-    private static IResult PlantNotFound() => Results.NotFound(new ApiError(ApiErrorCodes.PlantNotFound));
+    internal static IResult PlantNotFound() => Results.NotFound(new ApiError(ApiErrorCodes.PlantNotFound));
 
     private static ScenarioSummary ToSummary(ScenarioEntry entry) => new(
         entry.Id,
@@ -105,7 +109,8 @@ internal static class SimulationApi
         instance.CreatedUtc,
         instance.LastActivityUtc,
         instance.ClientCount,
-        instance.RecordingPath is not null);
+        instance.RecordingPath is not null,
+        instance.Modbus.Port);
 
     private static LoopMetricsResponse ToResponse(LoopMetrics metrics) => new(
         metrics.ThreadCount,

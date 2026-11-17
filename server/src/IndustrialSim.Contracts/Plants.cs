@@ -36,6 +36,7 @@ public static class PlantStatuses
 /// <param name="LastActivityUtc">Última atividade; sem clientes, a planta expira um tempo depois dela.</param>
 /// <param name="ClientCount">Clientes ligados à planta.</param>
 /// <param name="Recording">Se o ensaio está sendo gravado.</param>
+/// <param name="ModbusPort">Porta Modbus TCP da planta.</param>
 public sealed record PlantSummary(
     Guid Id,
     string ScenarioId,
@@ -44,7 +45,8 @@ public sealed record PlantSummary(
     DateTimeOffset CreatedUtc,
     DateTimeOffset LastActivityUtc,
     int ClientCount,
-    bool Recording);
+    bool Recording,
+    int ModbusPort);
 
 /// <summary>Valor de um sinal externo da planta, em SI.</summary>
 public sealed record SignalReading(string Name, double Value);
@@ -115,4 +117,7 @@ public static class ApiErrorCodes
     public const string InstanceLimitReached = "instance-limit-reached";
     public const string RecordingNotFound = "recording-not-found";
     public const string InvalidRequest = "invalid-request";
+    public const string ModbusPortsExhausted = "modbus-ports-exhausted";
+    public const string PairingRequestNotFound = "pairing-request-not-found";
+    public const string MasterNotFound = "master-not-found";
 }

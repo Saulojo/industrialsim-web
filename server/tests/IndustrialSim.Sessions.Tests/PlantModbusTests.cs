@@ -53,6 +53,47 @@ public sealed class PlantModbusTests : IDisposable
         return client;
     }
 
+    /// <summary>
+    /// Critério 1, passo a passo: um mestre escreve "fechar" em FV-101 e a posição real começa a mudar no passo
+    /// seguinte (o critério admite até 2); a leitura de LT-101 pelo Modbus é a da planta no mesmo passo.
+    /// </summary>
+    [Fact]
+    public async Task AWriteToFV101_MovesTheValveWithinTwoSteps_AndTheLT101ReadingMatchesThePlant()
+    {
+        PlantInstance plant = Created(CreateManager().Create(new CreatePlantRequest("caldeira")));
+        var stepper = (IRealTimeStepper)plant;
+        plant.Modbus.Pairing.Authorize(Local);
+        RawModbusClient master = await Connect(plant, Local);
+        for (int i = 0; i < 5; i++)
+        {
+            stepper.Step();
+        }
+
+        double positionBefore = Output(plant.GetState(), "FV-101_position");
+        short countsBefore = await ReadInputRegister(master, 4);
+
+        // Holding register 0 = 0 contagens = 4 mA = válvula fechada. A escrita fica na imagem até o passo seguinte.
+        Assert.Equal([0x06, 0x00, 0x00, 0x00, 0x00], await master.RequestAsync(1, 0x06, 0x00, 0x00, 0x00, 0x00));
+        Assert.Equal(positionBefore, Output(plant.GetState(), "FV-101_position"));
+
+        stepper.Step();
+
+        PlantState after = plant.GetState();
+        Assert.Equal(0.0, Input(after, "FV-101_command"));
+        Assert.True(Output(after, "FV-101_position") < positionBefore, "A posição de FV-101 não mudou no passo seguinte à escrita.");
+        Assert.True(await ReadInputRegister(master, 4) < countsBefore, "A posição publicada no input register 4 não mudou.");
+
+        // LT-101: contagens no formato 0–27648 pela faixa 0–1,2 m, com no máximo 1 contagem de diferença.
+        for (int i = 0; i < 50; i++)
+        {
+            stepper.Step();
+        }
+
+        double level = Output(plant.GetState(), "LT-101");
+        short levelCounts = await ReadInputRegister(master, 0);
+        Assert.InRange(levelCounts - (27648.0 * level / 1.2), -1.0, 1.0);
+    }
+
     [Fact]
     public void PortAllocator_RotatesThroughTheRange_SkipsBusyPorts_AndReleases()
     {
@@ -304,5 +345,16 @@ public sealed class PlantModbusTests : IDisposable
         using var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         return ((IPEndPoint)listener.LocalEndpoint).Port;
+    }
+
+    private static double Input(PlantState state, string name) => state.Inputs.Single(s => s.Name == name).Value;
+
+    private static double Output(PlantState state, string name) => state.Outputs.Single(s => s.Name == name).Value;
+
+    private static async Task<short> ReadInputRegister(RawModbusClient master, byte address)
+    {
+        byte[] response = await master.RequestAsync(1, 0x04, 0x00, address, 0x00, 0x01);
+        Assert.Equal(4, response.Length);
+        return (short)((response[2] << 8) | response[3]);
     }
 }
