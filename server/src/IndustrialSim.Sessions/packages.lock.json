@@ -24,6 +24,13 @@
         "dependencies": {
           "IndustrialSim.Core": "[0.1.0, )"
         }
+      },
+      "industrialsim.modbus": {
+        "type": "Project",
+        "dependencies": {
+          "IndustrialSim.IO": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.15, )"
+        }
       }
     }
   }

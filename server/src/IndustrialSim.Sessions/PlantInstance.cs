@@ -1,5 +1,6 @@
 using IndustrialSim.Core.Scenarios;
 using IndustrialSim.IO;
+using IndustrialSim.Sessions.Modbus;
 using IndustrialSim.Sessions.RealTime;
 using IndustrialSim.Sessions.Recording;
 using Microsoft.Extensions.Logging;
@@ -57,7 +58,7 @@ public sealed record PlantState(
 /// O passo roda na thread do laço, sob a trava da instância; a leitura do estado usa a mesma trava, então vê
 /// sempre um passo completo. Depois de <see cref="InstanceManager.End"/>, nenhum passo começa.
 /// <para>
-/// "Cliente" é quem mantém a planta em uso (o WebSocket da Etapa 7 e os mestres Modbus da Etapa 6), por
+/// "Cliente" é quem mantém a planta em uso (o WebSocket da Etapa 7 e os mestres Modbus autorizados), por
 /// <see cref="AttachClient"/>. Sem cliente, a planta expira depois do tempo configurado desde a última
 /// atividade (D14; até a Etapa 10, expirar é encerrar).
 /// </para>
@@ -78,12 +79,17 @@ public sealed class PlantInstance : IRealTimeStepper
     private LoopRegistration? _registration;
 
     /// <param name="recording">Onde gravar o ensaio e de quanto em quanto amostrar; nulo para não gravar.</param>
+    /// <param name="startModbus">
+    /// Cria o Modbus da planta, já escutando numa porta; nulo se não houver porta livre, e então a planta não é
+    /// criada (<see cref="ModbusPortsExhaustedException"/>). Roda antes de a gravação abrir o arquivo.
+    /// </param>
     internal PlantInstance(
         Guid id,
         ScenarioEntry scenario,
         ulong noiseSeed,
         string? ownerId,
         (string Path, int SampleEverySteps)? recording,
+        Func<PlantInstance, PlantModbus?> startModbus,
         TimeProvider time,
         ILogger logger)
     {
@@ -96,6 +102,7 @@ public sealed class PlantInstance : IRealTimeStepper
         Io = new PlantIo(ScenarioPlant.Create(scenario.Definition, noiseSeed: noiseSeed));
         CreatedUtc = time.GetUtcNow();
         _lastActivityUtc = CreatedUtc;
+        Modbus = startModbus(this) ?? throw new ModbusPortsExhaustedException();
 
         if (recording is var (path, sampleEverySteps))
         {
@@ -124,6 +131,9 @@ public sealed class PlantInstance : IRealTimeStepper
 
     /// <summary>Imagem de I/O e configurações; é o que o Modbus (Etapa 6) e a IHM (Etapas 7 e 8) usam.</summary>
     public PlantIo Io { get; }
+
+    /// <summary>Servidor Modbus da planta: porta, Unit ID, pareamento e conexões dos mestres.</summary>
+    public PlantModbus Modbus { get; }
 
     /// <summary>Nome nos logs do laço.</summary>
     public string Name => $"Planta {Id}";
@@ -325,8 +335,8 @@ public sealed class PlantInstance : IRealTimeStepper
     }
 
     /// <summary>
-    /// Tira a planta do laço e fecha a gravação. Ao retornar, nenhum passo novo começa e o arquivo da gravação
-    /// está completo. Falso se já estava encerrada.
+    /// Fecha o Modbus, tira a planta do laço e fecha a gravação. Ao retornar, nenhum mestre está conectado,
+    /// nenhum passo novo começa e o arquivo da gravação está completo. Falso se já estava encerrada.
     /// </summary>
     internal bool End(EndReason reason)
     {
@@ -343,6 +353,7 @@ public sealed class PlantInstance : IRealTimeStepper
             registration = _registration;
         }
 
+        Modbus.Dispose();
         registration?.Dispose();
         if (_recordingFile is not null && !_recordingFile.Complete(RecordingFlushTimeout))
         {
@@ -376,3 +387,6 @@ public sealed class PlantInstance : IRealTimeStepper
         }
     }
 }
+
+/// <summary>Nenhuma porta Modbus livre na faixa: a planta não pode ser criada.</summary>
+internal sealed class ModbusPortsExhaustedException() : Exception("Nenhuma porta Modbus livre na faixa configurada.");

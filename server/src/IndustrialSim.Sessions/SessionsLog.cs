@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Logging;
 
 namespace IndustrialSim.Sessions;
@@ -71,4 +72,40 @@ internal static partial class SessionsLog
     [LoggerMessage(EventId = 1301, Level = LogLevel.Warning,
         Message = "A gravação {Path} não terminou de ser escrita em {TimeoutSeconds} s.")]
     public static partial void RecordingNotFlushed(ILogger logger, string path, double timeoutSeconds);
+
+    [LoggerMessage(EventId = 1204, Level = LogLevel.Warning,
+        Message = "Planta do cenário {ScenarioId} recusada: nenhuma porta Modbus livre entre {PortRangeStart} e {PortRangeEnd}.")]
+    public static partial void ModbusPortsExhausted(ILogger logger, string scenarioId, int portRangeStart, int portRangeEnd);
+
+    [LoggerMessage(EventId = 1400, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: pedido de pareamento {RequestId} de {Address}.")]
+    public static partial void PairingRequested(ILogger logger, Guid instanceId, Guid requestId, IPAddress address);
+
+    [LoggerMessage(EventId = 1401, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: pedido de pareamento {RequestId} de {Address} aceito.")]
+    public static partial void PairingAccepted(ILogger logger, Guid instanceId, Guid requestId, IPAddress address);
+
+    [LoggerMessage(EventId = 1402, Level = LogLevel.Warning,
+        Message = "Planta {InstanceId}: pedido de pareamento {RequestId} de {Address} recusado.")]
+    public static partial void PairingRefused(ILogger logger, Guid instanceId, Guid requestId, IPAddress address);
+
+    [LoggerMessage(EventId = 1403, Level = LogLevel.Warning,
+        Message = "Planta {InstanceId}: pedido de pareamento {RequestId} de {Address} sem resposta no tempo limite.")]
+    public static partial void PairingExpired(ILogger logger, Guid instanceId, Guid requestId, IPAddress address);
+
+    [LoggerMessage(EventId = 1404, Level = LogLevel.Warning,
+        Message = "Planta {InstanceId}: conexão de {Address} fechada; o IP foi recusado há pouco.")]
+    public static partial void PairingRecentlyRefused(ILogger logger, Guid instanceId, IPAddress address);
+
+    [LoggerMessage(EventId = 1405, Level = LogLevel.Warning,
+        Message = "Planta {InstanceId}: conexão de {Address} fechada; já há {MaxPendingRequests} pedidos de pareamento pendentes.")]
+    public static partial void PairingPendingLimit(ILogger logger, Guid instanceId, IPAddress address, int maxPendingRequests);
+
+    [LoggerMessage(EventId = 1406, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: mestre {Address} autorizado.")]
+    public static partial void MasterAuthorized(ILogger logger, Guid instanceId, IPAddress address);
+
+    [LoggerMessage(EventId = 1407, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: autorização do mestre {Address} retirada; {ClosedConnections} conexões fechadas.")]
+    public static partial void MasterRevoked(ILogger logger, Guid instanceId, IPAddress address, int closedConnections);
 }
