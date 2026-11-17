@@ -1,7 +1,7 @@
 # Validação — Etapa 5: Servidor de tempo real e instâncias
 
 - Branch: `etapa-05-tempo-real`
-- Pull request: (preencher ao abrir)
+- Pull request: [Saulojo/industrialsim-web#6](https://github.com/Saulojo/industrialsim-web/pull/6)
 - Data: 17/11/2026
 
 ## Ambiente
