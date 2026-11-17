@@ -1,7 +1,4 @@
 PROGRAM main
-  (* Malha de nível LIC-101 da caldeira do IndustrialSim Web: LT-101 -> PI -> FV-101.
-     Endereços do Remote Device "caldeira" (devices/remote/caldeira.json), escala 0-27648 = 4-20 mA.
-     PI em % da faixa, com anti-windup; sintonia SIMC (Skogestad, 2003): Kp 20, Ti 250 s. *)
   VAR
     LT101 AT %IW0 : INT;                (* LT-101: nível do tubulão, 0-1,2 m *)
     FV101_POS AT %IW4 : INT;            (* FV-101: posição real, 0-100 % *)
@@ -23,7 +20,7 @@ PROGRAM main
     beat : INT := 0;
   END_VAR
 
-  (* Espera a primeira medição chegar (até o pareamento, as leituras falham e ficam em 0). *)
+(* Espera a primeira medição chegar (até o pareamento, as leituras falham e ficam em 0). *)
   IF NOT started THEN
     IF LT101 > 0 THEN
       integral := INT_TO_REAL(FV101_POS) / 276.48;  (* partida sem solavanco *)
@@ -47,4 +44,5 @@ PROGRAM main
   END_IF;
   HEARTBEAT := beat;
   P101_RUN := TRUE;
+
 END_PROGRAM

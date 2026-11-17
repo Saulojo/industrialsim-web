@@ -1,0 +1,23 @@
+[
+  {
+    "area": "coil",
+    "address": 0,
+    "classicAddress": 1,
+    "author": "127.0.0.1",
+    "timeUtc": "2026-11-17T20:57:16.825325+00:00"
+  },
+  {
+    "area": "holding-register",
+    "address": 0,
+    "classicAddress": 40001,
+    "author": "127.0.0.1",
+    "timeUtc": "2026-11-17T20:57:16.6246525+00:00"
+  },
+  {
+    "area": "holding-register",
+    "address": 10,
+    "classicAddress": 40011,
+    "author": "127.0.0.1",
+    "timeUtc": "2026-11-17T20:57:16.7253139+00:00"
+  }
+]

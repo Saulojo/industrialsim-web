@@ -4,8 +4,8 @@
   "modbusTcpConfig": {
     "host": "127.0.0.1",
     "port": 15000,
-    "slaveId": 1,
     "timeout": 1000,
+    "slaveId": 1,
     "ioGroups": [
       {
         "id": "874daecf-82ab-4c8c-ad5f-0e839c4c81a6",

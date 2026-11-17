@@ -3,15 +3,23 @@
   "communicationPort": "",
   "runtimeIpAddress": "",
   "vendorScreenData": {},
-  "vendorScreenDataByBoard": {},
+  "vendorScreenDataByBoard": {
+    "OpenPLC Simulator": {}
+  },
+  "selectedPlatformOptions": {},
+  "vppPackagePinsByBoard": {},
   "persistentStorage": {
     "enabled": false,
     "path": "",
     "flushSeconds": 5
   },
-  "persistentStorageByBoard": {},
-  "selectedPlatformOptions": {},
-  "vppPackagePinsByBoard": {},
+  "persistentStorageByBoard": {
+    "OpenPLC Simulator": {
+      "enabled": false,
+      "path": "",
+      "flushSeconds": 5
+    }
+  },
   "targetDevice": {
     "orchestratorId": "",
     "deviceId": "",

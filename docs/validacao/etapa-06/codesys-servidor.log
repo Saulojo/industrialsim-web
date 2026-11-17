@@ -1,0 +1,7 @@
+20:53:13.139 info: IndustrialSim.Sessions.InstanceManager[2010] Conexão Modbus 1 aberta por 127.0.0.1:55270 na porta 15000.
+20:53:13.150 info: IndustrialSim.Sessions.InstanceManager[1400] Planta 90c5a37d-3de8-4e7b-9e40-45716812217a: pedido de pareamento 34554794-2c40-4e37-83f0-c11f1e92f277 de 127.0.0.1.
+20:53:16.360 info: IndustrialSim.Sessions.InstanceManager[1401] Planta 90c5a37d-3de8-4e7b-9e40-45716812217a: pedido de pareamento 34554794-2c40-4e37-83f0-c11f1e92f277 de 127.0.0.1 aceito.
+20:53:16.361 info: IndustrialSim.Sessions.InstanceManager[2011] Conexão Modbus 1 de 127.0.0.1:55270 autorizada; 3 requisições recebidas antes da autorização foram descartadas.
+20:53:16.451 info: IndustrialSim.Sessions.InstanceManager[2013] Conexão Modbus 1 de 127.0.0.1:55270 fechada depois de 0 requisições.
+20:53:16.636 info: IndustrialSim.Sessions.InstanceManager[2010] Conexão Modbus 2 aberta por 127.0.0.1:55274 na porta 15000.
+20:53:16.637 info: IndustrialSim.Sessions.InstanceManager[2011] Conexão Modbus 2 de 127.0.0.1:55274 autorizada; 0 requisições recebidas antes da autorização foram descartadas.

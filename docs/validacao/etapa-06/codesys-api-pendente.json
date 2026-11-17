@@ -1,0 +1,26 @@
+{
+  "port": 15000,
+  "unitId": 1,
+  "authorizedMasters": [],
+  "pendingRequests": [
+    {
+      "id": "34554794-2c40-4e37-83f0-c11f1e92f277",
+      "address": "127.0.0.1",
+      "requestedUtc": "2026-11-17T20:53:13.1437916+00:00",
+      "expiresUtc": "2026-11-17T20:54:13.1437916+00:00",
+      "waitingConnections": 1
+    }
+  ],
+  "connections": [
+    {
+      "id": 1,
+      "address": "127.0.0.1",
+      "port": 55270,
+      "connectedUtc": "2026-11-17T20:53:13.1299498+00:00",
+      "authorized": false,
+      "requests": 0
+    }
+  ],
+  "requests": 0,
+  "exceptionResponses": 0
+}
