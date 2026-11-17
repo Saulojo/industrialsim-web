@@ -68,9 +68,9 @@ public sealed class PlantModbusTests : IDisposable
         Assert.Equal(4, ports.InUseCount);
     }
 
-    /// <summary>Cada planta escuta numa porta própria da faixa, e encerrar a planta fecha e devolve a porta.</summary>
+    /// <summary>Cada planta escuta numa porta própria da faixa.</summary>
     [Fact]
-    public async Task EachPlantListensOnItsOwnPortInTheRange_ReleasedWhenItEnds()
+    public void EachPlantListensOnItsOwnPortInTheRange()
     {
         InstanceManager manager = CreateManager();
         PlantInstance a = Created(manager.Create(new CreatePlantRequest("caldeira")));
@@ -81,17 +81,36 @@ public sealed class PlantModbusTests : IDisposable
         Assert.Equal(IPAddress.Loopback, a.Modbus.LocalEndPoint.Address);
         Assert.Equal(1, a.Modbus.UnitId);
         Assert.Equal(2, manager.ModbusPortsInUse);
+    }
 
-        a.Modbus.Pairing.Authorize(Local);
-        RawModbusClient master = await Connect(a, Local);
+    /// <summary>
+    /// Encerrar a planta fecha as conexões e devolve a porta: outro programa consegue escutar nela, e uma
+    /// planta nova a reaproveita. A faixa tem uma porta só, para outros testes em paralelo não a tomarem.
+    /// </summary>
+    [Fact]
+    public async Task EndingAPlant_ClosesItsConnections_AndReleasesThePort()
+    {
+        int port = FreePort();
+        InstanceManager manager = CreateManager(new ModbusEndpointOptions { PortRangeStart = port, PortRangeEnd = port });
+        PlantInstance plant = Created(manager.Create(new CreatePlantRequest("caldeira")));
+        Assert.Equal(port, plant.Modbus.Port);
+        Assert.Equal(CreatePlantStatus.ModbusPortsExhausted, manager.Create(new CreatePlantRequest("caldeira")).Status);
+
+        plant.Modbus.Pairing.Authorize(Local);
+        RawModbusClient master = await Connect(plant, Local);
         Assert.Equal([0x04, 0x02, 0x36, 0x00], await master.RequestAsync(1, ReadLevel));
 
-        int port = a.Modbus.Port;
-        manager.End(a.Id);
+        manager.End(plant.Id);
 
         Assert.True(await master.WasClosedByServerAsync());
-        Assert.Equal(1, manager.ModbusPortsInUse);
-        await Assert.ThrowsAnyAsync<SocketException>(() => RawModbusClient.ConnectAsync(new IPEndPoint(IPAddress.Loopback, port)));
+        Assert.Equal(0, manager.ModbusPortsInUse);
+        using (var other = new TcpListener(IPAddress.Loopback, port))
+        {
+            other.Start();
+        }
+
+        PlantInstance next = Created(manager.Create(new CreatePlantRequest("caldeira")));
+        Assert.Equal(port, next.Modbus.Port);
     }
 
     [Fact]
@@ -277,5 +296,13 @@ public sealed class PlantModbusTests : IDisposable
             Assert.True(DateTime.UtcNow < deadline, "A condição não foi atingida em 5 s.");
             await Task.Delay(10, TestContext.Current.CancellationToken);
         }
+    }
+
+    /// <summary>Uma porta livre no momento (dada pelo sistema e liberada em seguida).</summary>
+    private static int FreePort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        return ((IPEndPoint)listener.LocalEndpoint).Port;
     }
 }
