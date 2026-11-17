@@ -1,7 +1,7 @@
 # Validação — Etapa 6: Modbus TCP por planta com pareamento
 
 - Branch: `etapa-06-modbus`
-- Pull request: (a abrir)
+- Pull request: (link acrescentado depois de aberto)
 - Data: 17/11/2026
 
 ## Ambiente
@@ -61,7 +61,7 @@ Pacote novo: **FluentModbus 5.3.2** (MIT), só em `IndustrialSim.Modbus.Tests` e
 | 3 | Numa planta autorizada só para 127.0.0.1, uma conexão de 127.0.0.2 é recusada | `PlantModbusTests.OnAPlantAuthorizedOnlyFor127001_AConnectionFrom127002IsRefused` (socket com origem 127.0.0.2) e `ModbusApiTests.Pairing_ThroughTheApi` | ✅ A conexão de 127.0.0.2 não recebe resposta, vira pedido pendente (prazo de 60 s) e é fechada ao ser recusada; por 60 s, novas conexões do IP são fechadas na hora. O mestre de 127.0.0.1 segue atendido. Também verificados: fechamento sem resposta em 60 s, aceitar, retirar autorização e limite de pedidos. Roda no Windows e no Linux do CI |
 | 4 | Leitura fora do mapa retorna a exceção 02 e a conexão continua válida | `ModbusTcpServerTests.ReadOutsideTheMap_ReturnsException02_AndTheConnectionStaysUsable` (FluentModbus e bytes) e `ModbusDeviceTests.AddressOutsideTheMap_ReturnsException02` (as 8 funções) | ✅ `0x84 0x02` para o input register 200, seguido de leitura normal na mesma conexão |
 | 5 | Testado com pelo menos dois mestres reais diferentes, com capturas | **`pymodbus`** (script `tools/modbus-master/level_loop.py`) e **CODESYS V3.5 SP22** (Control Win), os dois fechando a malha de nível LIC-101 e passando pelo pareamento | ✅ Detalhes abaixo |
-| 6 | Com CLP real ou PLCSIM Advanced: o `MB_CLIENT` lê o nível e comanda a válvula | Não há CLP nem PLCSIM Advanced disponível | ⏳ Pendente para a Etapa 9, como o plano prevê. Guia escrito: `docs/guias/tia-portal.md` |
+| 6 | ~~Com CLP real ou PLCSIM Advanced: o `MB_CLIENT` lê o nível e comanda a válvula~~ | Retirado do plano em 17/11/2026, por decisão do autor: o `MB_CLIENT` é um cliente Modbus TCP padrão, e o servidor já foi validado com dois mestres reais e com a FluentModbus (função 16 e Unit ID diferente incluídos) | — Retirado. O teste com CLP real também saiu da Etapa 9. Guia `docs/guias/tia-portal.md` sem teste |
 
 ### Mestre real 1: `pymodbus`
 
@@ -155,7 +155,7 @@ Invoke-RestMethod -Method Post "$api/plants/$($p.id)/modbus/pairing/$($m.pending
 
 ## Pendências e observações
 
-- **Critério 6** (`MB_CLIENT`): pendente para a Etapa 9, com CLP real ou PLCSIM Advanced. Guia escrito pela ajuda do TIA Portal, sem teste.
+- **Critério 6** (`MB_CLIENT`): retirado do plano; o guia do TIA Portal foi escrito pela ajuda do TIA Portal e não foi testado.
 - **OpenPLC Runtime v4** (Linux, WSL ou Docker): projeto pronto, não testado.
 - **Firewall do Windows:** a faixa 15000–15999 precisa de regra de entrada no PC do laboratório (Etapa 9). No desenvolvimento, o servidor escuta só em 127.0.0.1.
 - A tela de pareamento chega na Etapa 7; até lá, aceitar e recusar é pela API.

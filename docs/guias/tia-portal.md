@@ -1,6 +1,6 @@
 # Mestre Modbus no TIA Portal (`MB_CLIENT`)
 
-> **Situação:** guia escrito a partir da ajuda do TIA Portal; ainda não testado com CLP real nem com PLCSIM Advanced. Esse teste é critério da Etapa 6 e ficou pendente para a Etapa 9. Confira os nomes dos parâmetros na ajuda da sua versão da instrução `MB_CLIENT`.
+> **Situação:** guia escrito a partir da ajuda do TIA Portal e não testado com CLP real nem com PLCSIM Advanced (teste retirado do plano em 17/11/2026). O servidor da planta foi validado com `pymodbus`, CODESYS e FluentModbus, incluindo a função 16 que o `MB_CLIENT` usa nas escritas. Confira os nomes dos parâmetros na ajuda da sua versão da instrução `MB_CLIENT`.
 
 Antes, leia [Conectar um mestre Modbus à planta](modbus.md): criar a planta, porta e pareamento.
 

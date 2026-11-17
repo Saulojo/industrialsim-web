@@ -274,12 +274,14 @@ Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de
 
 **Validação**
 
-- [ ] Teste de integração: um cliente Modbus escreve em FV-101 e a posição real começa a mudar em até 2 passos; a leitura de LT-101 é coerente com a planta.
-- [ ] 30 plantas com 30 clientes simultâneos escrevendo valores distintos: nenhuma planta recebe valor de outra.
-- [ ] Numa planta autorizada só para 127.0.0.1, uma conexão de 127.0.0.2 é recusada (o Windows aceita conexões com origem 127.0.0.2, conferido em 16/11/2026).
-- [ ] Leitura fora do mapa retorna a exceção 02 e a conexão continua válida.
-- [ ] Testado com pelo menos dois mestres reais diferentes (ex.: CODESYS e `pymodbus`), com capturas de tela registradas.
-- [ ] Com CLP real ou PLCSIM Advanced disponível: o `MB_CLIENT` lê o nível e comanda a válvula. Se não houver, fica pendente para a Etapa 9.
+- [x] Teste de integração: um cliente Modbus escreve em FV-101 e a posição real começa a mudar em até 2 passos; a leitura de LT-101 é coerente com a planta.
+- [x] 30 plantas com 30 clientes simultâneos escrevendo valores distintos: nenhuma planta recebe valor de outra.
+- [x] Numa planta autorizada só para 127.0.0.1, uma conexão de 127.0.0.2 é recusada (o Windows aceita conexões com origem 127.0.0.2, conferido em 16/11/2026).
+- [x] Leitura fora do mapa retorna a exceção 02 e a conexão continua válida.
+- [x] Testado com pelo menos dois mestres reais diferentes (ex.: CODESYS e `pymodbus`), com capturas de tela registradas. *(`pymodbus` 3.16.2 e CODESYS V3.5 SP22.)*
+- ~~Com CLP real ou PLCSIM Advanced disponível: o `MB_CLIENT` lê o nível e comanda a válvula. Se não houver, fica pendente para a Etapa 9.~~ *(Retirado em 17/11/2026, por decisão do autor: o `MB_CLIENT` é um cliente Modbus TCP padrão, e o servidor da planta já foi validado com dois mestres reais (critério anterior) e com a FluentModbus nos testes automáticos, incluindo a função 16 e o Unit ID diferente. O guia do TIA Portal fica sem teste.)*
+
+Evidências: `docs/validacao/etapa-06.md`.
 
 ### Etapa 7 — WebSocket e IHM web
 
@@ -347,7 +349,7 @@ Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de
 **Validação**
 
 - [ ] O site abre por HTTPS, com certificado válido, a partir de outro PC da rede (e de fora, se liberado).
-- [ ] Ensaio completo com um mestre real (CLP, PLCSIM Advanced ou CODESYS) num PC do laboratório: pareamento, malha de nível fechada no mestre, distúrbio pela IHM e CSV exportado.
+- [ ] Ensaio completo com um mestre real (ex.: CODESYS) num PC do laboratório: pareamento, malha de nível fechada no mestre, distúrbio pela IHM e CSV exportado. *(Alterado em 17/11/2026: o teste com CLP real ou PLCSIM Advanced foi retirado do plano.)*
 - [ ] Após reiniciar o PC do laboratório, o serviço volta sozinho em menos de 2 minutos.
 - [ ] Teste de carga com 30 plantas e 30 clientes Modbus simulados por 30 minutos, sem erros e dentro das metas de tempo real.
 - [ ] Uma varredura de portas feita de fora mostra só as portas previstas.
