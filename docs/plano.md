@@ -240,18 +240,22 @@ Evidências: `docs/validacao/etapa-04.md`.
 **Escopo**
 
 - Laço de tempo real com `Stopwatch` e passo fixo de 10 ms; recuperação limitada após atraso; métricas de jitter, sobrecarga e deriva.
+- Espera de alta resolução no Windows, sistema do servidor do laboratório (D10); o laço continua funcionando no Linux, onde roda o CI.
 - Gerenciador de instâncias: criar, listar, encerrar e expirar por inatividade, com limite configurável. O modelo já prevê dono e participantes, usados a partir da Etapa 10.
 - API REST: listar cenários, criar planta, consultar estado, encerrar.
 - Gravação: comandos recebidos com o tempo simulado, mais medições amostradas, em CSV; reprodução a partir da gravação.
 - Logs estruturados.
+- CI: testes .NET também no Windows.
 
 **Validação**
 
-- [ ] 30 plantas da caldeira por 10 minutos: deriva entre tempo simulado e relógio < 0,1%; atraso do passo no percentil 99 < 5 ms; CPU total < 50% de um núcleo (números no relatório).
-- [ ] Reproduzir uma gravação gera CSV idêntico ao original (mesmo hash).
-- [ ] Uma planta sem cliente expira no tempo configurado e libera recursos (teste com tempo reduzido).
-- [ ] Testes de API com `WebApplicationFactory` cobrem criar, consultar e encerrar.
-- [ ] Encerrar o processo com plantas ativas não deixa threads penduradas.
+- [x] 30 plantas da caldeira por 10 minutos, no Windows: deriva entre tempo simulado e relógio < 0,1%; atraso do passo no percentil 99 < 5 ms; CPU total < 50% de um núcleo (números no relatório).
+- [x] Reproduzir uma gravação gera CSV idêntico ao original (mesmo hash).
+- [x] Uma planta sem cliente expira no tempo configurado e libera recursos (teste com tempo reduzido).
+- [x] Testes de API com `WebApplicationFactory` cobrem criar, consultar e encerrar.
+- [x] Encerrar o processo com plantas ativas (Ctrl+C ou parada do host, como na parada do serviço) não deixa threads penduradas.
+
+Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de desenvolvimento (Windows 11); repetir no PC do laboratório no teste de carga da Etapa 9.
 
 ### Etapa 6 — Modbus TCP por planta com pareamento
 
@@ -272,7 +276,7 @@ Evidências: `docs/validacao/etapa-04.md`.
 
 - [ ] Teste de integração: um cliente Modbus escreve em FV-101 e a posição real começa a mudar em até 2 passos; a leitura de LT-101 é coerente com a planta.
 - [ ] 30 plantas com 30 clientes simultâneos escrevendo valores distintos: nenhuma planta recebe valor de outra.
-- [ ] Numa planta autorizada só para 127.0.0.1, uma conexão de 127.0.0.2 (Linux) é recusada.
+- [ ] Numa planta autorizada só para 127.0.0.1, uma conexão de 127.0.0.2 é recusada (o Windows aceita conexões com origem 127.0.0.2, conferido em 16/11/2026).
 - [ ] Leitura fora do mapa retorna a exceção 02 e a conexão continua válida.
 - [ ] Testado com pelo menos dois mestres reais diferentes (ex.: CODESYS e `pymodbus`), com capturas de tela registradas.
 - [ ] Com CLP real ou PLCSIM Advanced disponível: o `MB_CLIENT` lê o nível e comanda a válvula. Se não houver, fica pendente para a Etapa 9.
@@ -333,9 +337,9 @@ Evidências: `docs/validacao/etapa-04.md`.
 
 **Escopo**
 
-- Dockerfile multiestágio (build do web e do servidor), `docker-compose.yml` e Caddy com HTTPS.
+- Publicação do servidor com o web embutido (`dotnet publish`), instalado como serviço do Windows; Caddy para Windows com HTTPS (D10).
 - Serviço com reinício automático; logs persistidos com rotação.
-- Firewall: 443 e 15000–15999; todo o resto fechado. A faixa 16000–16999 só abre se o HART-IP for adotado (ver D09).
+- Firewall do Windows: 443 e 15000–15999; todo o resto fechado. A faixa 16000–16999 só abre se o HART-IP for adotado (ver D09).
 - Com a TI: DNS, certificado e IP público, ou acesso por VPN.
 - Opcional: arquivos estáticos em CDN se a banda do laboratório limitar.
 - Roteiro de implantação e atualização em `docs/implantacao.md`.

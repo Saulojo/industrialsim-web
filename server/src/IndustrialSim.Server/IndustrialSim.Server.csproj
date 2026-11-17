@@ -2,6 +2,12 @@
   <ItemGroup>
     <ProjectReference Include="..\IndustrialSim.Core\IndustrialSim.Core.csproj" />
     <ProjectReference Include="..\IndustrialSim.IO\IndustrialSim.IO.csproj" />
+    <ProjectReference Include="..\IndustrialSim.Sessions\IndustrialSim.Sessions.csproj" />
     <ProjectReference Include="..\IndustrialSim.Contracts\IndustrialSim.Contracts.csproj" />
+  </ItemGroup>
+
+  <!-- Pacotes de cenário (D04), copiados para a pasta do programa: o servidor os lê de scenarios/. -->
+  <ItemGroup>
+    <None Include="..\..\..\scenarios\**\scenario.json" Link="scenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

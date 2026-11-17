@@ -14,8 +14,13 @@ concurrency:
 
 jobs:
   dotnet:
-    name: .NET (build e testes)
-    runs-on: ubuntu-latest
+    # Windows é o sistema do servidor do laboratório (D10); Linux continua para manter o código multiplataforma.
+    name: .NET (build e testes, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v7
 
@@ -34,6 +39,18 @@ jobs:
       - name: Testes
         working-directory: server
         run: dotnet test --no-build --configuration Release
+
+  # A proteção da main exige um check chamado ".NET (build e testes)". Este job resume a matriz acima e só
+  # passa se o .NET passou no Windows e no Linux (com "always", uma falha na matriz vira falha aqui, e não
+  # um job pulado, que contaria como aprovado).
+  dotnet-summary:
+    name: .NET (build e testes)
+    runs-on: ubuntu-latest
+    needs: [dotnet]
+    if: always()
+    steps:
+      - name: Windows e Linux passaram
+        run: test "${{ needs.dotnet.result }}" = "success"
 
   hart-poc:
     name: Prova HART da Etapa 2 (build e testes)
@@ -98,9 +115,17 @@ jobs:
         working-directory: web
         run: npm ci && npm run build
 
-      - name: Sobe o servidor e confere /api/health e a página
+      - name: Build do servidor
+        run: dotnet build server/src/IndustrialSim.Server --configuration Release
+
+      # Roda a DLL direto (e não por "dotnet run"), para o sinal chegar ao próprio servidor. O encerramento é
+      # por SIGTERM, o sinal de um gerenciador de serviços: num bash não interativo, um processo iniciado com
+      # "&" ignora o SIGINT (POSIX, sem controle de jobs). O Ctrl+C foi verificado no Windows (Etapa 5).
+      - name: Sobe o servidor, confere a página e a API e encerra com plantas ativas (Etapa 5)
+        working-directory: server/src/IndustrialSim.Server
         run: |
-          dotnet run --project server/src/IndustrialSim.Server --no-launch-profile --urls http://127.0.0.1:5080 > server.log 2>&1 &
+          dotnet bin/Release/net10.0/IndustrialSim.Server.dll --urls http://127.0.0.1:5080 > "$GITHUB_WORKSPACE/server.log" 2>&1 &
+          SERVER_PID=$!
           for i in $(seq 1 60); do
             curl -sf http://127.0.0.1:5080/api/health > health.json && break
             sleep 1
@@ -109,6 +134,35 @@ jobs:
           grep -q '"version":"0.1.0' health.json
           curl -sf http://127.0.0.1:5080/ | grep -q '<div id="root">'
           echo "Servidor respondeu /api/health e serviu a página."
+
+          curl -sf http://127.0.0.1:5080/api/scenarios | grep -q '"id":"caldeira"'
+          for i in $(seq 1 5); do
+            curl -sf -X POST -H 'Content-Type: application/json' -d '{"scenarioId":"caldeira","record":true}' http://127.0.0.1:5080/api/plants > /dev/null
+          done
+          sleep 2
+          curl -sf http://127.0.0.1:5080/api/simulation/metrics | tee metrics.json
+          grep -q '"plantCount":5' metrics.json
+          echo
+
+          kill -TERM "$SERVER_PID"
+          for i in $(seq 1 50); do
+            kill -0 "$SERVER_PID" 2>/dev/null || break
+            sleep 0.1
+          done
+          if kill -0 "$SERVER_PID" 2>/dev/null; then
+            echo "O servidor não terminou 5 s depois do SIGTERM."
+            exit 1
+          fi
+          set +e
+          wait "$SERVER_PID"
+          EXIT_CODE=$?
+          set -e
+          echo "Código de saída do servidor: $EXIT_CODE"
+          test "$EXIT_CODE" -eq 0
+          grep -q 'Application is shutting down' "$GITHUB_WORKSPACE/server.log"
+          grep -q 'encerrada (Shutdown)' "$GITHUB_WORKSPACE/server.log"
+          grep -q 'threads ainda vivas: 0' "$GITHUB_WORKSPACE/server.log"
+          echo "Servidor encerrado com 5 plantas ativas, sem threads do laço penduradas."
 
       - name: Log do servidor
         if: always()

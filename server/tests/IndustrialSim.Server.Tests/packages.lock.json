@@ -226,14 +226,6 @@
           "Microsoft.Extensions.Options": "10.0.15"
         }
       },
-      "Microsoft.Extensions.Logging.Abstractions": {
-        "type": "Transitive",
-        "resolved": "10.0.15",
-        "contentHash": "s5xzXGWqqlmmThMnQ1rnmL7QLwbluB2JqX9NaK8C9HPuHzN7kfmiddTRbwts5rQssATkh2B18RrofjeUD8g14A==",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.15"
-        }
-      },
       "Microsoft.Extensions.Logging.Configuration": {
         "type": "Transitive",
         "resolved": "10.0.15",
@@ -451,7 +443,25 @@
         "dependencies": {
           "IndustrialSim.Contracts": "[0.1.0, )",
           "IndustrialSim.Core": "[0.1.0, )",
-          "IndustrialSim.IO": "[0.1.0, )"
+          "IndustrialSim.IO": "[0.1.0, )",
+          "IndustrialSim.Sessions": "[0.1.0, )"
+        }
+      },
+      "industrialsim.sessions": {
+        "type": "Project",
+        "dependencies": {
+          "IndustrialSim.Core": "[0.1.0, )",
+          "IndustrialSim.IO": "[0.1.0, )",
+          "Microsoft.Extensions.Logging.Abstractions": "[10.0.15, )"
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.15, )",
+        "resolved": "10.0.15",
+        "contentHash": "s5xzXGWqqlmmThMnQ1rnmL7QLwbluB2JqX9NaK8C9HPuHzN7kfmiddTRbwts5rQssATkh2B18RrofjeUD8g14A==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.15"
         }
       }
     }

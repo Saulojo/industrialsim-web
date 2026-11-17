@@ -1,0 +1,33 @@
+Rodando 30 plantas de 'caldeira' por 10 min em 2 threads ...
+  t =    30 s  deriva máx. = 0.0045 %  atraso p99 = 0.78 ms  CPU = 2.1 % de um núcleo
+  t =    60 s  deriva máx. = 0.0091 %  atraso p99 = 0.75 ms  CPU = 1.8 % de um núcleo
+  t =    90 s  deriva máx. = 0.0079 %  atraso p99 = 0.74 ms  CPU = 1.8 % de um núcleo
+  t =   120 s  deriva máx. = 0.0054 %  atraso p99 = 0.75 ms  CPU = 1.6 % de um núcleo
+  t =   150 s  deriva máx. = 0.0017 %  atraso p99 = 0.75 ms  CPU = 1.5 % de um núcleo
+  t =   180 s  deriva máx. = 0.0012 %  atraso p99 = 0.75 ms  CPU = 1.3 % de um núcleo
+  t =   210 s  deriva máx. = 0.0015 %  atraso p99 = 0.74 ms  CPU = 1.2 % de um núcleo
+  t =   240 s  deriva máx. = 0.0027 %  atraso p99 = 0.74 ms  CPU = 1.2 % de um núcleo
+  t =   270 s  deriva máx. = 0.0021 %  atraso p99 = 0.74 ms  CPU = 1.2 % de um núcleo
+  t =   300 s  deriva máx. = 0.0006 %  atraso p99 = 0.75 ms  CPU = 1.2 % de um núcleo
+  t =   330 s  deriva máx. = 0.0019 %  atraso p99 = 0.75 ms  CPU = 1.2 % de um núcleo
+  t =   360 s  deriva máx. = 0.0012 %  atraso p99 = 0.75 ms  CPU = 1.1 % de um núcleo
+  t =   390 s  deriva máx. = 0.0014 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   420 s  deriva máx. = 0.0022 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   450 s  deriva máx. = 0.0016 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   480 s  deriva máx. = 0.0012 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   510 s  deriva máx. = 0.0014 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   540 s  deriva máx. = 0.0005 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+  t =   570 s  deriva máx. = 0.0013 %  atraso p99 = 0.76 ms  CPU = 1.1 % de um núcleo
+
+Máquina: SAULO, 24 processadores lógicos, Microsoft Windows 10.0.26300, .NET 10.0.15
+Plantas: 30 de 'caldeira' em 2 threads; espera: windows-high-resolution-timer
+Duração: 600.0 s de relógio; 1800150 passos (60005 a 60005 por planta); 5497 varreduras do mestre
+Atraso do passo: média 0.326 ms, p50 0.31 ms, p99 0.76 ms, máx. 3.36 ms
+Custo do passo: média 3.7 µs, p99 20 µs, máx. 3.07 ms
+Ciclos atrasados: 0; descartados: 0; estouros: 0; memória: 50 MB
+
+[OK] deriva máxima 0.0008 % (meta < 0.1 %)
+[OK] atraso do passo p99 0.76 ms (meta < 5 ms)
+[OK] CPU do processo 1.1 % de um núcleo (meta < 50 %)
+Relatório gravado em docs/validacao/etapa-05/carga-30-plantas-10-min.json.
+saida=0
