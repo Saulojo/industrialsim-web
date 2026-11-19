@@ -27,7 +27,7 @@ Pacote novo: **`@playwright/test` 1.65.1** (Apache-2.0), só como dependência d
 | C | `web/src/net`, `web/src/ui` | Cliente WebSocket com reconexão automática (espera de 0,25 s, dobrando até 2 s; conexão sem mensagens por 3 s é refeita) que volta à mesma planta. Estado da IHM e telas: escolha de cenário, dados de conexão (servidor, porta, Unit ID, "Mestre conectado"), diálogo de pareamento, sinóptico 2D da caldeira, tendências (120 s, em % da faixa), alarmes, distúrbio FV-103, reinício e download do CSV. Textos só em `locales/pt-BR`; cores só por tokens (novos: equipamento, água, quatro cores de tendência). |
 | D | `web/e2e`, `web/playwright.config.ts`, CI | Um teste Playwright por critério, com o servidor .NET de verdade (porta 5180, Modbus 15500–15599) e um mestre Modbus TCP mínimo em Node (`e2e/modbusMaster.ts`). Job "Ponta a ponta (Playwright)" no CI. |
 
-### Decisões propostas (a registrar no descritivo)
+### Decisões novas (registradas no descritivo: D39 a D41)
 
 - **D39 (Etapa 7):** seção opcional `hmi` no `scenario.json`, com os distúrbios que a IHM pode mudar e as saídas que viram alarme. O watchdog disparado é sempre alarme. Um distúrbio não pode estar numa entrada comandada pelo mapa Modbus.
   - *Motivo:* cenário novo sem código novo (D04); o servidor sabe o que a IHM pode comandar.

@@ -299,12 +299,14 @@ Evidências: `docs/validacao/etapa-06.md`.
 
 **Validação**
 
-- [ ] Playwright: abrir uma planta, ver os valores mudarem, mover o distúrbio e ver vazão de vapor e pressão responderem na tendência.
-- [ ] Playwright: um cliente Modbus de teste conecta, o diálogo de pareamento aparece, aceitar mostra “Mestre conectado” e recusar fecha a conexão.
-- [ ] Após uma queda do WebSocket, a IHM reconecta sozinha em menos de 5 s, sem perder a planta.
-- [ ] Um cliente com versão de protocolo diferente recebe mensagem clara de incompatibilidade.
-- [ ] O CSV baixado tem os mesmos dados da gravação do servidor.
-- [ ] Banda medida por cliente ≤ 100 kbit/s.
+- [x] Playwright: abrir uma planta, ver os valores mudarem, mover o distúrbio e ver vazão de vapor e pressão responderem na tendência.
+- [x] Playwright: um cliente Modbus de teste conecta, o diálogo de pareamento aparece, aceitar mostra “Mestre conectado” e recusar fecha a conexão.
+- [x] Após uma queda do WebSocket, a IHM reconecta sozinha em menos de 5 s, sem perder a planta.
+- [x] Um cliente com versão de protocolo diferente recebe mensagem clara de incompatibilidade.
+- [x] O CSV baixado tem os mesmos dados da gravação do servidor.
+- [x] Banda medida por cliente ≤ 100 kbit/s. *(33,3 kbit/s com o estado a 20 Hz.)*
+
+Evidências: `docs/validacao/etapa-07.md`.
 
 ### Etapa 8 — Configurações da planta e monitor de comunicação
 
