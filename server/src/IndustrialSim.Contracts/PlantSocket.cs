@@ -96,6 +96,7 @@ public static class SocketErrorCodes
     public const string InvalidMessage = "invalid-message";
     public const string DisturbanceNotFound = "disturbance-not-found";
     public const string PairingRequestNotFound = "pairing-request-not-found";
+    public const string PlantNotRunning = "plant-not-running";
 }
 
 /// <summary>Estado da planta num passo; valores em SI (D06), na ordem do <see cref="WelcomeMessage"/>.</summary>

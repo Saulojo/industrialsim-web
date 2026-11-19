@@ -108,4 +108,12 @@ internal static partial class SessionsLog
     [LoggerMessage(EventId = 1407, Level = LogLevel.Information,
         Message = "Planta {InstanceId}: autorização do mestre {Address} retirada; {ClosedConnections} conexões fechadas.")]
     public static partial void MasterRevoked(ILogger logger, Guid instanceId, IPAddress address, int closedConnections);
+
+    [LoggerMessage(EventId = 1500, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: reiniciada no estado inicial do cenário (reinício {Run}), depois de {StepCount} passos.")]
+    public static partial void InstanceRestarted(ILogger logger, Guid instanceId, int run, long stepCount);
+
+    [LoggerMessage(EventId = 1501, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: distúrbio {Input} = {Value}.")]
+    public static partial void DisturbanceChanged(ILogger logger, Guid instanceId, string input, double value);
 }

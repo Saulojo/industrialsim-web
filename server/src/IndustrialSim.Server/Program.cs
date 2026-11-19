@@ -15,6 +15,9 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// WebSocket da planta (Etapa 7), na mesma porta do site: /api/plants/{id}/ws.
+app.UseWebSockets();
+
 app.MapGet("/api/health", (TimeProvider time) =>
     new HealthResponse(ServerVersion.Current, time.GetUtcNow()));
 

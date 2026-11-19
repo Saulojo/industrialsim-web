@@ -18,6 +18,7 @@ internal static class SimulationServices
         IConfigurationSection section = configuration.GetSection(SectionName);
 
         services.AddSingleton(_ => section.GetSection("Loop").Get<RealTimeLoopOptions>() ?? new RealTimeLoopOptions());
+        services.AddSingleton(_ => section.GetSection("Socket").Get<PlantSocketOptions>() ?? new PlantSocketOptions());
 
         services.AddSingleton(_ =>
         {

@@ -262,6 +262,7 @@ export const SocketErrorCodes = {
   invalidMessage: 'invalid-message',
   disturbanceNotFound: 'disturbance-not-found',
   pairingRequestNotFound: 'pairing-request-not-found',
+  plantNotRunning: 'plant-not-running',
 } as const;
 
 export interface SocketErrorMessage {

@@ -24,6 +24,12 @@ public sealed record InstanceManagerOptions
     /// <summary>Uma linha de medição na gravação a cada tantos passos (padrão: 10, ou seja, 100 ms).</summary>
     public int RecordingSampleEverySteps { get; init; } = 10;
 
+    /// <summary>
+    /// Estado publicado para a IHM a cada tantos passos (padrão: 5, ou seja, 20 Hz com o passo de 10 ms; RNF04
+    /// pede de 20 a 30 Hz).
+    /// </summary>
+    public int StatePublishEverySteps { get; init; } = 5;
+
     /// <summary>Servidor Modbus das plantas (seção <c>Simulation:Modbus</c>).</summary>
     public ModbusEndpointOptions Modbus { get; init; } = new();
 
@@ -34,6 +40,7 @@ public sealed record InstanceManagerOptions
         ArgumentOutOfRangeException.ThrowIfLessThan(MaxInstances, 1, nameof(MaxInstances));
         ArgumentException.ThrowIfNullOrWhiteSpace(RecordingDirectory, nameof(RecordingDirectory));
         ArgumentOutOfRangeException.ThrowIfLessThan(RecordingSampleEverySteps, 1, nameof(RecordingSampleEverySteps));
+        ArgumentOutOfRangeException.ThrowIfLessThan(StatePublishEverySteps, 1, nameof(StatePublishEverySteps));
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(IdleTimeout, TimeSpan.Zero, nameof(IdleTimeout));
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(ExpiryCheckInterval, TimeSpan.Zero, nameof(ExpiryCheckInterval));
     }
@@ -158,7 +165,7 @@ public sealed class InstanceManager : IDisposable
                 : null;
             try
             {
-                instance = new PlantInstance(id, scenario, seed, request.OwnerId, recording, StartModbus, _time, _logger);
+                instance = new PlantInstance(id, scenario, seed, request.OwnerId, recording, Options.StatePublishEverySteps, StartModbus, _time, _logger);
             }
             catch (ModbusPortsExhaustedException)
             {
