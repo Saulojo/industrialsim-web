@@ -117,7 +117,7 @@ internal sealed partial class PlantSocketSession(
                 await SendFatalAsync(SocketErrorCodes.PlantEnded, stop.Token);
             }
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
         {
             // O cliente fechou ou caiu.
         }
@@ -139,7 +139,7 @@ internal sealed partial class PlantSocketSession(
         {
             message = await ReceiveAsync(timeout.Token);
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
         {
             if (!aborted.IsCancellationRequested && socket.State == WebSocketState.Open)
             {
@@ -221,7 +221,7 @@ internal sealed partial class PlantSocketSession(
                 }
             }
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
         {
         }
         finally
@@ -304,7 +304,7 @@ internal sealed partial class PlantSocketSession(
             await CloseAsync(WebSocketCloseStatus.NormalClosure, code, cancel);
             await WaitForCloseAsync(cancel);
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
         {
         }
     }
@@ -329,7 +329,7 @@ internal sealed partial class PlantSocketSession(
                 }
             }
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
         {
         }
         finally
