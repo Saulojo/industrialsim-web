@@ -19,6 +19,7 @@ Cada subpasta é um pacote de cenário (D04): `scenario.json` e, a partir da Eta
 | `outputs` | Saídas externas (medições e estados): `name` e `from`. |
 
 | `io` | Mapa Modbus (opcional): ver abaixo. |
+| `hmi` | Distúrbios e alarmes da IHM web (opcional, D39): ver abaixo. |
 
 As seções de instrumentos HART e `visual` entram nas Etapas 16 e 14.
 
@@ -41,6 +42,15 @@ Regras:
 - A medição vira corrente pela faixa e satura em 3,8 e 20,5 mA; 3,6 e 21 mA só aparecem com o transmissor em falha (NAMUR NE 43).
 - Nos formatos inteiros (0–27648, 0–10000, 0–32767), o sinal de endereço `a` fica no registrador `a`. No formato `float32`, ele ocupa `2a` e `2a+1`. Por isso o heartbeat e o bloco de diagnóstico precisam ficar acima de `2 × (maior endereço) + 1`, e o endereço de um sinal analógico vai até 32767.
 - Uma entrada externa só pode ser comandada por um ponto (coil ou holding register).
+
+## Seção `hmi` (IHM web)
+
+Diz o que a IHM pode comandar e o que ela mostra como alarme (D39). Os nomes de tela vêm dos arquivos de idioma (`web/src/locales`), pela tag.
+
+| Campo | Conteúdo |
+| --- | --- |
+| `disturbances` | Entradas externas que o operador muda pela IHM: `input`, `min` e `max` (na unidade da planta; padrão 0 e 1), `unit` e `unitFactor` (como no mapa Modbus). A entrada não pode ser comandada por um coil ou holding register, porque o comando do mestre a sobrescreveria a cada passo. O valor pedido é limitado a [`min`, `max`] e vale no passo seguinte. |
+| `alarms` | Saídas externas que, ativas (≥ 0,5), aparecem como alarme: `{ "signal" }`. O watchdog disparado é sempre alarme, sem precisar estar na lista. |
 
 ## Tipos de componente
 

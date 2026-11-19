@@ -292,7 +292,7 @@ Evidências: `docs/validacao/etapa-06.md`.
 **Escopo**
 
 - Contrato em `IndustrialSim.Contracts` e geração automática dos tipos TypeScript; mensagem inicial com a versão do protocolo.
-- WebSocket: estado da planta a 20–30 Hz; eventos (pedido de pareamento, alarmes, watchdog); comandos (distúrbio em FV-103, reset, aceitar ou recusar pareamento).
+- WebSocket: estado da planta a 20–30 Hz; eventos (pedido de pareamento, alarmes, watchdog); comandos (distúrbio em FV-103, reset, aceitar ou recusar pareamento). *(19/11/2026: “reset” é reiniciar a planta no estado inicial do cenário, com a mesma semente; o reinício sai da Etapa 8, que fica com pausar e retomar.)*
 - IHM em React: escolha de cenário, dados de conexão (IP, porta, Unit ID), diálogo de pareamento, sinóptico 2D simples da caldeira com valores, tendências, alarmes, controle do distúrbio e exportação de CSV.
 - Todos os textos vindos dos arquivos de idioma.
 - Reconexão automática do WebSocket.
@@ -319,7 +319,7 @@ Evidências: `docs/validacao/etapa-06.md`.
 - Log de comunicação: conexões, pareamentos, requisições por segundo, exceções Modbus, mudanças de configuração.
 - Forçar e liberar entradas pela IHM.
 - Exportar o mapa de I/O do cenário em CSV e PDF.
-- Pausar, retomar e reiniciar a planta.
+- Pausar e retomar a planta. *(O reinício foi feito na Etapa 7, em 19/11/2026.)*
 - As configurações valem enquanto a planta existir; a persistência vem com as contas, na Etapa 10.
 
 **Validação**

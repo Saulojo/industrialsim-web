@@ -140,5 +140,9 @@
         { "input": "FV-102_command", "value": 0.0 }
       ]
     }
+  },
+  "hmi": {
+    "disturbances": [{ "input": "FV-103_command", "min": 0.0, "max": 1.0, "unit": "%", "unitFactor": 100.0 }],
+    "alarms": [{ "signal": "LSLL-101" }, { "signal": "LSHH-101" }, { "signal": "PSH-101" }, { "signal": "PSV-101_open" }]
   }
 }

@@ -59,6 +59,7 @@ public static partial class ScenarioSchemaWriter
             WriteArrayOf(writer, "inputs", "input", "Entradas externas da planta: comandos e cargas.");
             WriteArrayOf(writer, "outputs", "output", "Saídas externas da planta: medições e estados.");
             WriteIoProperty(writer);
+            WriteHmiProperty(writer);
             writer.WriteEndObject();
 
             writer.WriteStartObject("$defs");
@@ -67,6 +68,7 @@ public static partial class ScenarioSchemaWriter
             WriteInputDefinition(writer);
             WriteOutputDefinition(writer);
             WriteIoDefinitions(writer);
+            WriteHmiDefinitions(writer);
 
             writer.WriteStartObject("component");
             writer.WriteStartArray("oneOf");

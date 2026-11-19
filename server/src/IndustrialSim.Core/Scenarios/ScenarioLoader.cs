@@ -14,7 +14,7 @@ public static partial class ScenarioLoader
     public const int CurrentSchemaVersion = 1;
 
     private static readonly string[] RootProperties =
-        ["$schema", "schemaVersion", "id", "description", "stepSeconds", "noiseSeed", "components", "connections", "inputs", "outputs", "io"];
+        ["$schema", "schemaVersion", "id", "description", "stepSeconds", "noiseSeed", "components", "connections", "inputs", "outputs", "io", "hmi"];
 
     private static readonly string[] ComponentProperties = ["id", "type", "params", "initial"];
     private static readonly string[] ConnectionProperties = ["from", "to"];
@@ -130,6 +130,13 @@ public static partial class ScenarioLoader
             outputs.Contains(null) ? null : [.. outputs.Select(o => o!.Name)],
             errors);
 
+        HmiDefinition? hmi = ReadHmi(
+            root,
+            inputs.Contains(null) ? null : [.. inputs.Select(i => i!.Name)],
+            outputs.Contains(null) ? null : [.. outputs.Select(o => o!.Name)],
+            io,
+            errors);
+
         if (errors.Count > 0)
         {
             return null;
@@ -145,7 +152,8 @@ public static partial class ScenarioLoader
             connections.Select(c => c!).ToList(),
             inputs.Select(i => i!).ToList(),
             outputs.Select(o => o!).ToList(),
-            io);
+            io,
+            hmi);
     }
 
     private static int? ReadSchemaVersion(JsonElement root, List<ScenarioError> errors)
