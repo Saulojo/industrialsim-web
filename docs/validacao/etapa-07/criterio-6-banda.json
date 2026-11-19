@@ -1,0 +1,13 @@
+{
+  "seconds": 60.228,
+  "framesReceived": 1204,
+  "statesPerSecond": 19.9907019990702,
+  "messagesByType": {
+    "state": 1204
+  },
+  "payloadBytes": 245651,
+  "payloadKbitPerSecond": 32.629474662947466,
+  "withFrameHeadersKbitPerSecond": 33.26917712691771,
+  "sentFrames": 70,
+  "sentKbitPerSecond": 0.6594939230922494
+}

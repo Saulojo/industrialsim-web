@@ -13,7 +13,9 @@
     "preview": "vite preview",
     "lint": "eslint . && stylelint \"src/**/*.css\" && prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "contracts": "dotnet run --project ../server/src/IndustrialSim.SimRun -- --contratos src/net/contracts.generated.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "i18next": "27.1.1",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.1",
     "@testing-library/dom": "10.4.2",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

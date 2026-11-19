@@ -40,6 +40,25 @@
   --color-accent: #2c5a85;
   --color-alarm: #b3261e;
   --color-alarm-surface: #fbe9e7;
+
+  /* IHM (ISA-101): equipamento em cinza; água e "em operação" em tons discretos; cor forte só no alarme. */
+  --color-equipment: #8a9299;
+  --color-equipment-on: #50575e;
+  --color-water: #b9c7d4;
+  --color-overlay: rgb(0 0 0 / 40%);
+
+  /* Tendências: quatro séries distinguíveis, sem o vermelho do alarme. */
+  --color-trend-1: #2c5a85;
+  --color-trend-2: #6b4c9a;
+  --color-trend-3: #2e7d6b;
+  --color-trend-4: #8a6d1f;
+
+  /* Traços, texto pequeno e sombra do diálogo */
+  --border-width: 1px;
+  --line-width-pipe: 3px;
+  --line-width-trend: 2px;
+  --font-size-xs: 0.75rem;
+  --shadow-dialog: 0 8px 24px rgb(0 0 0 / 25%);
 }
 
 /* Tema escuro: segue o sistema, salvo escolha explícita de tema claro. */
@@ -53,6 +72,13 @@
     --color-accent: #8fb8e0;
     --color-alarm: #ff8a80;
     --color-alarm-surface: #3b1c1a;
+    --color-equipment: #6b737b;
+    --color-equipment-on: #c4cbd2;
+    --color-water: #34475a;
+    --color-trend-1: #8fb8e0;
+    --color-trend-2: #b9a3dc;
+    --color-trend-3: #7fc8b5;
+    --color-trend-4: #d9bd6a;
   }
 }
 
@@ -65,4 +91,11 @@
   --color-accent: #8fb8e0;
   --color-alarm: #ff8a80;
   --color-alarm-surface: #3b1c1a;
+  --color-equipment: #6b737b;
+  --color-equipment-on: #c4cbd2;
+  --color-water: #34475a;
+  --color-trend-1: #8fb8e0;
+  --color-trend-2: #b9a3dc;
+  --color-trend-3: #7fc8b5;
+  --color-trend-4: #d9bd6a;
 }

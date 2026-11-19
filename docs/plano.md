@@ -292,19 +292,21 @@ Evidências: `docs/validacao/etapa-06.md`.
 **Escopo**
 
 - Contrato em `IndustrialSim.Contracts` e geração automática dos tipos TypeScript; mensagem inicial com a versão do protocolo.
-- WebSocket: estado da planta a 20–30 Hz; eventos (pedido de pareamento, alarmes, watchdog); comandos (distúrbio em FV-103, reset, aceitar ou recusar pareamento).
+- WebSocket: estado da planta a 20–30 Hz; eventos (pedido de pareamento, alarmes, watchdog); comandos (distúrbio em FV-103, reset, aceitar ou recusar pareamento). *(19/11/2026: “reset” é reiniciar a planta no estado inicial do cenário, com a mesma semente; o reinício sai da Etapa 8, que fica com pausar e retomar.)*
 - IHM em React: escolha de cenário, dados de conexão (IP, porta, Unit ID), diálogo de pareamento, sinóptico 2D simples da caldeira com valores, tendências, alarmes, controle do distúrbio e exportação de CSV.
 - Todos os textos vindos dos arquivos de idioma.
 - Reconexão automática do WebSocket.
 
 **Validação**
 
-- [ ] Playwright: abrir uma planta, ver os valores mudarem, mover o distúrbio e ver vazão de vapor e pressão responderem na tendência.
-- [ ] Playwright: um cliente Modbus de teste conecta, o diálogo de pareamento aparece, aceitar mostra “Mestre conectado” e recusar fecha a conexão.
-- [ ] Após uma queda do WebSocket, a IHM reconecta sozinha em menos de 5 s, sem perder a planta.
-- [ ] Um cliente com versão de protocolo diferente recebe mensagem clara de incompatibilidade.
-- [ ] O CSV baixado tem os mesmos dados da gravação do servidor.
-- [ ] Banda medida por cliente ≤ 100 kbit/s.
+- [x] Playwright: abrir uma planta, ver os valores mudarem, mover o distúrbio e ver vazão de vapor e pressão responderem na tendência.
+- [x] Playwright: um cliente Modbus de teste conecta, o diálogo de pareamento aparece, aceitar mostra “Mestre conectado” e recusar fecha a conexão.
+- [x] Após uma queda do WebSocket, a IHM reconecta sozinha em menos de 5 s, sem perder a planta.
+- [x] Um cliente com versão de protocolo diferente recebe mensagem clara de incompatibilidade.
+- [x] O CSV baixado tem os mesmos dados da gravação do servidor.
+- [x] Banda medida por cliente ≤ 100 kbit/s. *(33,3 kbit/s com o estado a 20 Hz.)*
+
+Evidências: `docs/validacao/etapa-07.md`.
 
 ### Etapa 8 — Configurações da planta e monitor de comunicação
 
@@ -319,7 +321,7 @@ Evidências: `docs/validacao/etapa-06.md`.
 - Log de comunicação: conexões, pareamentos, requisições por segundo, exceções Modbus, mudanças de configuração.
 - Forçar e liberar entradas pela IHM.
 - Exportar o mapa de I/O do cenário em CSV e PDF.
-- Pausar, retomar e reiniciar a planta.
+- Pausar e retomar a planta. *(O reinício foi feito na Etapa 7, em 19/11/2026.)*
 - As configurações valem enquanto a planta existir; a persistência vem com as contas, na Etapa 10.
 
 **Validação**

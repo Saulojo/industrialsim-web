@@ -74,11 +74,17 @@ public sealed class PlantInstance : IRealTimeStepper
     private string? _faultMessage;
     private int _clientCount;
     private DateTimeOffset _lastActivityUtc;
-    private readonly RecordingFile? _recordingFile;
-    private readonly PlantRecorder? _recorder;
+    private readonly List<PlantSubscription> _subscribers = [];
+    private readonly PlantAlarms _alarms;
+    private readonly int _publishEverySteps;
+    private readonly (string Path, int SampleEverySteps)? _recording;
+    private RecordingFile? _recordingFile;
+    private PlantRecorder? _recorder;
     private LoopRegistration? _registration;
+    private int _run;
 
     /// <param name="recording">Onde gravar o ensaio e de quanto em quanto amostrar; nulo para não gravar.</param>
+    /// <param name="publishEverySteps">Um <see cref="PlantSnapshot"/> para os assinantes a cada tantos passos.</param>
     /// <param name="startModbus">
     /// Cria o Modbus da planta, já escutando numa porta; nulo se não houver porta livre, e então a planta não é
     /// criada (<see cref="ModbusPortsExhaustedException"/>). Roda antes de a gravação abrir o arquivo.
@@ -89,6 +95,7 @@ public sealed class PlantInstance : IRealTimeStepper
         ulong noiseSeed,
         string? ownerId,
         (string Path, int SampleEverySteps)? recording,
+        int publishEverySteps,
         Func<PlantInstance, PlantModbus?> startModbus,
         TimeProvider time,
         ILogger logger)
@@ -99,21 +106,50 @@ public sealed class PlantInstance : IRealTimeStepper
         OwnerId = ownerId;
         _time = time;
         _logger = logger;
+        ArgumentOutOfRangeException.ThrowIfLessThan(publishEverySteps, 1);
+        _publishEverySteps = publishEverySteps;
         Io = new PlantIo(ScenarioPlant.Create(scenario.Definition, noiseSeed: noiseSeed));
+        _alarms = new PlantAlarms(Io.Plant);
         CreatedUtc = time.GetUtcNow();
         _lastActivityUtc = CreatedUtc;
         Modbus = startModbus(this) ?? throw new ModbusPortsExhaustedException();
 
-        if (recording is var (path, sampleEverySteps))
+        _recording = recording;
+        StartRecording();
+    }
+
+    /// <summary>
+    /// Arquivo CSV da gravação do ensaio (RF07) desde o último reinício; nulo se a planta não grava. Cada reinício
+    /// fecha o arquivo e começa outro (<c>{id}-{reinício}.csv</c>), porque a gravação recomeça do passo 0 (D41).
+    /// </summary>
+    public string? RecordingPath
+    {
+        get
         {
-            _recordingFile = new RecordingFile(path, logger);
-            var header = new RecordingHeader(scenario.Id, noiseSeed, scenario.Definition.StepSeconds, sampleEverySteps);
-            _recorder = new PlantRecorder(Io, header, _recordingFile.WriteLine);
+            lock (_sync)
+            {
+                return _recordingFile?.Path;
+            }
         }
     }
 
-    /// <summary>Arquivo CSV da gravação do ensaio (RF07); nulo se a planta não grava.</summary>
-    public string? RecordingPath => _recordingFile?.Path;
+    /// <summary>Número do reinício (0 até o primeiro).</summary>
+    public int Run
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _run;
+            }
+        }
+    }
+
+    /// <summary>Sinais que podem virar alarme: os da seção <c>hmi</c> do cenário e o watchdog, por último.</summary>
+    public IReadOnlyList<string> AlarmSignals => _alarms.Signals;
+
+    /// <summary>Intervalo de tempo simulado entre dois <see cref="PlantSnapshot"/> publicados.</summary>
+    public double PublishPeriodSeconds => _publishEverySteps * Scenario.Definition.StepSeconds;
 
     public Guid Id { get; }
 
@@ -307,6 +343,160 @@ public sealed class PlantInstance : IRealTimeStepper
 
             Io.Step();
             _recorder?.OnStepCompleted();
+            _alarms.Evaluate(Io.Plant, Io.WatchdogTripped, _time);
+            if (_subscribers.Count > 0 && Io.Plant.Clock.StepCount % _publishEverySteps == 0)
+            {
+                PublishLocked();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Assina o estado da planta: o estado atual chega logo, e depois um a cada <see cref="PublishPeriodSeconds"/>
+    /// de tempo simulado. Numa planta encerrada, a assinatura já vem completada.
+    /// </summary>
+    public PlantSubscription Subscribe()
+    {
+        var subscription = new PlantSubscription(RemoveSubscriber);
+        lock (_sync)
+        {
+            if (_status != InstanceStatus.Ended)
+            {
+                _subscribers.Add(subscription);
+                subscription.Publish(CreateSnapshotLocked());
+                return subscription;
+            }
+        }
+
+        subscription.Complete();
+        return subscription;
+    }
+
+    /// <summary>
+    /// Muda um distúrbio da seção <c>hmi</c> do cenário (D39). O valor é limitado à faixa do cenário e vale no
+    /// passo seguinte (D06); a gravação o registra junto com as entradas da planta. Falso se a entrada não for
+    /// um distúrbio do cenário, se o valor não for finito ou se a planta não estiver rodando.
+    /// </summary>
+    public bool SetDisturbance(string input, double value)
+    {
+        DisturbanceDefinition? disturbance = Scenario.Definition.Hmi?.Disturbances.FirstOrDefault(d => d.Input == input);
+        if (disturbance is null || !double.IsFinite(value))
+        {
+            return false;
+        }
+
+        double clamped = Math.Clamp(value, disturbance.Min, disturbance.Max);
+        lock (_sync)
+        {
+            if (_status != InstanceStatus.Running)
+            {
+                return false;
+            }
+
+            Io.Plant.SetInput(input, clamped);
+        }
+
+        SessionsLog.DisturbanceChanged(_logger, Id, input, clamped);
+        return true;
+    }
+
+    /// <summary>
+    /// Reinicia a planta no estado inicial do cenário, com a mesma semente (D41): a imagem de I/O, o Modbus e os
+    /// mestres continuam como estão, e os comandos do mestre valem já no primeiro passo. Os distúrbios voltam
+    /// ao valor inicial. Se a planta grava, o arquivo atual é fechado e outro começa. Falso se a planta não
+    /// estiver rodando.
+    /// </summary>
+    public bool Restart()
+    {
+        RecordingFile? previousFile;
+        long stepCount;
+        int run;
+        lock (_sync)
+        {
+            if (_status != InstanceStatus.Running)
+            {
+                return false;
+            }
+
+            stepCount = Io.Plant.Clock.StepCount;
+            Io.ReplacePlant(ScenarioPlant.Create(Scenario.Definition, noiseSeed: NoiseSeed));
+            _alarms.Clear();
+            run = ++_run;
+
+            previousFile = _recordingFile;
+            if (previousFile is not null)
+            {
+                Io.LatchObserver = null;
+                StartRecording();
+            }
+
+            PublishLocked();
+        }
+
+        CompleteRecording(previousFile);
+        SessionsLog.InstanceRestarted(_logger, Id, run, stepCount);
+        return true;
+    }
+
+    /// <summary>Abre o arquivo de gravação do reinício atual. Chamado no construtor ou sob a trava.</summary>
+    private void StartRecording()
+    {
+        if (_recording is not var (path, sampleEverySteps))
+        {
+            return;
+        }
+
+        string runPath = _run == 0 ? path : System.IO.Path.ChangeExtension(path, null) + $"-{_run}.csv";
+        _recordingFile = new RecordingFile(runPath, _logger);
+        var header = new RecordingHeader(Scenario.Id, NoiseSeed, Scenario.Definition.StepSeconds, sampleEverySteps);
+        _recorder = new PlantRecorder(Io, header, _recordingFile.WriteLine);
+    }
+
+    private void CompleteRecording(RecordingFile? file)
+    {
+        if (file is not null && !file.Complete(RecordingFlushTimeout))
+        {
+            SessionsLog.RecordingNotFlushed(_logger, file.Path, RecordingFlushTimeout.TotalSeconds);
+        }
+    }
+
+    private PlantSnapshot CreateSnapshotLocked()
+    {
+        ScenarioPlant plant = Io.Plant;
+        var inputs = new double[plant.InputNames.Count];
+        for (int i = 0; i < inputs.Length; i++)
+        {
+            inputs[i] = plant.GetInput(i);
+        }
+
+        var outputs = new double[plant.OutputNames.Count];
+        for (int i = 0; i < outputs.Length; i++)
+        {
+            outputs[i] = plant.GetOutput(i);
+        }
+
+        return new PlantSnapshot(plant.Clock.StepCount, plant.Clock.TimeSeconds, _run, _status, Io.WatchdogTripped, inputs, outputs, _alarms.Current);
+    }
+
+    private void PublishLocked()
+    {
+        if (_subscribers.Count == 0)
+        {
+            return;
+        }
+
+        PlantSnapshot snapshot = CreateSnapshotLocked();
+        foreach (PlantSubscription subscriber in _subscribers)
+        {
+            subscriber.Publish(snapshot);
+        }
+    }
+
+    private void RemoveSubscriber(PlantSubscription subscription)
+    {
+        lock (_sync)
+        {
+            _subscribers.Remove(subscription);
         }
     }
 
@@ -321,6 +511,7 @@ public sealed class PlantInstance : IRealTimeStepper
 
             _status = InstanceStatus.Faulted;
             _faultMessage = exception.Message;
+            PublishLocked();
         }
 
         SessionsLog.InstanceFaulted(_logger, Id, exception.Message);
@@ -336,11 +527,14 @@ public sealed class PlantInstance : IRealTimeStepper
 
     /// <summary>
     /// Fecha o Modbus, tira a planta do laço e fecha a gravação. Ao retornar, nenhum mestre está conectado,
-    /// nenhum passo novo começa e o arquivo da gravação está completo. Falso se já estava encerrada.
+    /// nenhum passo novo começa, o arquivo da gravação está completo e as assinaturas receberam o estado final e
+    /// foram completadas. Falso se já estava encerrada.
     /// </summary>
     internal bool End(EndReason reason)
     {
         LoopRegistration? registration;
+        RecordingFile? recordingFile;
+        PlantSubscription[] subscribers;
         lock (_sync)
         {
             if (_status == InstanceStatus.Ended)
@@ -351,13 +545,18 @@ public sealed class PlantInstance : IRealTimeStepper
             _status = InstanceStatus.Ended;
             _endReason = reason;
             registration = _registration;
+            recordingFile = _recordingFile;
+            PublishLocked();
+            subscribers = [.. _subscribers];
+            _subscribers.Clear();
         }
 
         Modbus.Dispose();
         registration?.Dispose();
-        if (_recordingFile is not null && !_recordingFile.Complete(RecordingFlushTimeout))
+        CompleteRecording(recordingFile);
+        foreach (PlantSubscription subscriber in subscribers)
         {
-            SessionsLog.RecordingNotFlushed(_logger, _recordingFile.Path, RecordingFlushTimeout.TotalSeconds);
+            subscriber.Complete();
         }
 
         return true;

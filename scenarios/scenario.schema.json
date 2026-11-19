@@ -71,6 +71,10 @@
     "io": {
       "$ref": "#/$defs/io",
       "description": "Mapa Modbus da planta: endereços (base 0) ligados às entradas e saídas externas."
+    },
+    "hmi": {
+      "$ref": "#/$defs/hmi",
+      "description": "IHM web: distúrbios que o operador comanda e saídas que viram alarme."
     }
   },
   "$defs": {
@@ -334,6 +338,71 @@
             }
           },
           "description": "Entradas externas e os valores que recebem no estado seguro; as demais ficam como estavam."
+        }
+      }
+    },
+    "hmi": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "disturbances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/disturbance"
+          },
+          "description": "Entradas externas que o operador muda pela IHM. Não podem ser comandadas pelo mapa Modbus."
+        },
+        "alarms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alarm"
+          },
+          "description": "Saídas externas que, ativas (≥ 0,5), aparecem como alarme."
+        }
+      }
+    },
+    "disturbance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input"
+      ],
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Nome da entrada externa."
+        },
+        "min": {
+          "type": "number",
+          "default": 0,
+          "description": "Menor valor, na unidade da planta."
+        },
+        "max": {
+          "type": "number",
+          "default": 1,
+          "description": "Maior valor, na unidade da planta. Maior que min."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unidade de engenharia mostrada na IHM."
+        },
+        "unitFactor": {
+          "type": "number",
+          "default": 1,
+          "description": "Valor de engenharia = valor do sinal × fator. Diferente de 0."
+        }
+      }
+    },
+    "alarm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signal"
+      ],
+      "properties": {
+        "signal": {
+          "type": "string",
+          "description": "Nome da saída externa."
         }
       }
     },

@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "IndustrialSim Web",
-    "subtitle": "Simulador de plantas industriais de processo contínuo"
+    "subtitle": "Simulador de plantas industriais de processo contínuo",
+    "home": "Início"
   },
   "health": {
     "heading": "Servidor",
@@ -9,5 +10,137 @@
     "version": "Versão: <value>{{version}}</value>",
     "serverTime": "Hora do servidor: <value>{{time}}</value>",
     "error": "Não foi possível falar com o servidor."
+  },
+  "scenarios": {
+    "heading": "Abrir uma planta",
+    "intro": "Escolha um cenário. A planta roda no servidor e é controlada pelo seu mestre Modbus (CLP, CODESYS, OpenPLC, SCADA ou script).",
+    "loading": "Carregando os cenários…",
+    "empty": "Nenhum cenário disponível no servidor.",
+    "open": "Abrir planta",
+    "opening": "Abrindo…",
+    "names": {
+      "caldeira": "Caldeira com tubulão"
+    },
+    "descriptions": {
+      "caldeira": "Controle de nível (LT-101 → FV-101) e de pressão (PT-101 → FV-102) no seu CLP; a carga é a válvula de vapor FV-103."
+    }
+  },
+  "errors": {
+    "unknown": "Erro inesperado ({{code}}).",
+    "api": {
+      "scenario-not-found": "Cenário não encontrado no servidor.",
+      "plant-not-found": "Planta não encontrada. Ela pode ter sido encerrada.",
+      "instance-limit-reached": "O servidor está com o máximo de plantas abertas. Tente de novo em alguns minutos.",
+      "modbus-ports-exhausted": "Não há porta Modbus livre no servidor. Tente de novo em alguns minutos.",
+      "invalid-request": "Pedido inválido.",
+      "network": "Não foi possível falar com o servidor."
+    },
+    "socket": {
+      "plant-not-found": "Planta não encontrada. Ela pode ter expirado ou sido encerrada.",
+      "plant-ended": "A planta foi encerrada no servidor.",
+      "hello-expected": "O servidor não reconheceu esta página. Recarregue a página.",
+      "invalid-message": "O servidor não entendeu o último comando.",
+      "disturbance-not-found": "Este distúrbio não existe no cenário.",
+      "pairing-request-not-found": "O pedido de conexão já foi respondido ou expirou.",
+      "plant-not-running": "A planta não está rodando; o comando foi ignorado."
+    }
+  },
+  "connection": {
+    "status": {
+      "connecting": "Conectando…",
+      "connected": "Conectado",
+      "reconnecting": "Conexão perdida; reconectando…",
+      "incompatible": "Versão incompatível",
+      "failed": "Desconectado",
+      "closed": "Desconectado"
+    },
+    "incompatible": "Esta página usa a versão {{client}} do protocolo, mas o servidor usa a versão {{server}}. Recarregue a página (Ctrl+F5) para carregar a versão atual.",
+    "backHome": "Abrir outra planta"
+  },
+  "plant": {
+    "heading": "Planta {{scenario}}",
+    "simulatedTime": "Tempo simulado",
+    "run": "Reinícios",
+    "statusLabel": "Situação",
+    "status": {
+      "running": "Rodando",
+      "faulted": "Parada por erro",
+      "ended": "Encerrada"
+    },
+    "restart": "Reiniciar planta",
+    "restartConfirm": "Reiniciar a planta no estado inicial do cenário? O mestre Modbus continua conectado e os comandos dele continuam valendo.",
+    "downloadCsv": "Baixar ensaio (CSV)",
+    "values": "Valores",
+    "seconds": "{{value}} s"
+  },
+  "modbus": {
+    "heading": "Mestre Modbus",
+    "server": "Servidor",
+    "port": "Porta",
+    "unitId": "Unit ID",
+    "masterConnected": "Mestre conectado",
+    "noMaster": "Nenhum mestre conectado",
+    "waiting": "Aguardando resposta ao pedido de conexão",
+    "authorized": "IPs autorizados",
+    "none": "nenhum",
+    "hint": "Configure no seu mestre o servidor, a porta e o Unit ID acima. Na primeira conexão, esta página pede para você aceitar o IP do mestre."
+  },
+  "pairing": {
+    "title": "Pedido de conexão Modbus",
+    "question": "Aceitar conexão de {{address}}?",
+    "hint": "Aceite só se for o seu mestre. Sem resposta, a conexão é fechada às {{time}}.",
+    "accept": "Aceitar",
+    "refuse": "Recusar"
+  },
+  "alarms": {
+    "heading": "Alarmes",
+    "none": "Nenhum alarme ativo",
+    "since": "desde t = {{time}} s"
+  },
+  "disturbances": {
+    "heading": "Distúrbios"
+  },
+  "trends": {
+    "heading": "Tendências",
+    "window": "Últimos {{seconds}} s, em % da faixa de cada instrumento",
+    "empty": "Aguardando dados…"
+  },
+  "values": {
+    "on": "Ligado",
+    "off": "Desligado",
+    "active": "Ativo",
+    "inactive": "Normal"
+  },
+  "signals": {
+    "watchdog": "Watchdog disparado (estado seguro)",
+    "caldeira": {
+      "P-101_run": "P-101 · Comando da bomba",
+      "FV-101_command": "FV-101 · Comando da válvula de água",
+      "FV-102_command": "FV-102 · Comando da válvula de combustível",
+      "FV-103_command": "FV-103 · Válvula de saída de vapor (carga)",
+      "LT-101": "LT-101 · Nível do tubulão",
+      "PT-101": "PT-101 · Pressão do vapor",
+      "FT-101": "FT-101 · Vazão de água",
+      "FT-102": "FT-102 · Vazão de vapor",
+      "FV-101_position": "FV-101 · Posição da válvula de água",
+      "FV-102_position": "FV-102 · Posição da válvula de combustível",
+      "FV-103_position": "FV-103 · Posição da válvula de vapor",
+      "P-101_running": "P-101 · Bomba em operação",
+      "LSLL-101": "LSLL-101 · Nível muito baixo",
+      "LSHH-101": "LSHH-101 · Nível muito alto",
+      "PSH-101": "PSH-101 · Pressão alta",
+      "PSV-101_open": "PSV-101 · Válvula de alívio aberta"
+    }
+  },
+  "synoptic": {
+    "caldeira": {
+      "title": "Sinóptico da caldeira",
+      "drum": "Tubulão TB-101",
+      "pump": "P-101",
+      "burner": "Queimador",
+      "feedwater": "Água de alimentação",
+      "fuel": "Combustível",
+      "steam": "Vapor"
+    }
   }
 }

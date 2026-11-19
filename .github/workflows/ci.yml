@@ -1,4 +1,4 @@
-# CI da Etapa 0: build e testes do .NET e do web a cada push e pull request.
+# CI: build e testes do .NET e do web a cada push e pull request; ponta a ponta com Playwright desde a Etapa 7.
 name: CI
 
 on:
@@ -93,6 +93,36 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  e2e:
+    # Etapa 7: a IHM no Chromium contra o servidor de verdade (laço, Modbus e WebSocket); um teste por
+    # critério de validação da etapa.
+    name: Ponta a ponta (Playwright)
+    runs-on: ubuntu-latest
+    needs: [dotnet, web]
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+      - name: Build do web para o wwwroot do servidor
+        run: npm run build
+      - name: Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Testes de ponta a ponta
+        run: npm run e2e
 
   integration:
     name: Integração (servidor servindo o web)

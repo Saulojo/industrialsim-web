@@ -142,7 +142,9 @@ public class SimulationApiTests
         Assert.Equal(3, metrics.ThreadCount);
         Assert.Equal(1, metrics.PlantCount);
         Assert.True(metrics.Steps > 0);
-        Assert.Equal(metrics.Steps, metrics.StepLateness.Count);
+        // O atraso é registrado antes do passo e o contador de passos sobe depois dele; as métricas leem os
+        // contadores antes dos histogramas. Com o laço rodando, o histograma pode estar alguns passos à frente.
+        Assert.InRange(metrics.StepLateness.Count, metrics.Steps, metrics.Steps + 100);
         Assert.NotEqual("not-started", metrics.WaiterKind);
     }
 

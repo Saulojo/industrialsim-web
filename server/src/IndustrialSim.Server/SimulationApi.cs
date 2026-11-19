@@ -22,6 +22,7 @@ internal static class SimulationApi
         plants.MapDelete("/{id:guid}", End);
         plants.MapGet("/{id:guid}/recording", GetRecording);
         plants.MapModbusApi();
+        plants.MapPlantSocket();
 
         app.MapGet("/api/simulation/metrics", (RealTimeLoop loop) => ToResponse(loop.GetMetrics()));
     }
@@ -96,16 +97,18 @@ internal static class SimulationApi
         [.. entry.Definition.Inputs.Select(i => i.Name)],
         [.. entry.Definition.Outputs.Select(o => o.Name)]);
 
-    private static PlantSummary ToSummary(PlantInstance instance) => new(
+    internal static string ToStatus(InstanceStatus status) => status switch
+    {
+        InstanceStatus.Running => PlantStatuses.Running,
+        InstanceStatus.Faulted => PlantStatuses.Faulted,
+        _ => PlantStatuses.Ended,
+    };
+
+    internal static PlantSummary ToSummary(PlantInstance instance) => new(
         instance.Id,
         instance.ScenarioId,
         instance.NoiseSeed,
-        instance.Status switch
-        {
-            InstanceStatus.Running => PlantStatuses.Running,
-            InstanceStatus.Faulted => PlantStatuses.Faulted,
-            _ => PlantStatuses.Ended,
-        },
+        ToStatus(instance.Status),
         instance.CreatedUtc,
         instance.LastActivityUtc,
         instance.ClientCount,

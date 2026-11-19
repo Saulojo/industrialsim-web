@@ -99,7 +99,8 @@ public sealed class PlantIo
         PublishInputs();
     }
 
-    public ScenarioPlant Plant { get; }
+    /// <summary>Planta ligada à imagem; muda só em <see cref="ReplacePlant"/> (reinício).</summary>
+    public ScenarioPlant Plant { get; private set; }
 
     public IoMap Map { get; }
 
@@ -259,6 +260,35 @@ public sealed class PlantIo
         {
             _faults[InputRegisterIndex(address)] = fault;
         }
+    }
+
+    /// <summary>
+    /// Troca a planta por outra montada do mesmo cenário, no estado inicial (reinício da planta, D41). A imagem
+    /// de I/O continua a mesma: os comandos que o mestre escreveu valem no passo seguinte, e as configurações,
+    /// faixas, falhas e valores forçados ficam como estavam. O watchdog volta a contar do zero e as medições são
+    /// publicadas já com o estado inicial.
+    /// </summary>
+    /// <remarks>
+    /// A planta só é tocada pela thread do passo: chame entre dois passos, na mesma thread ou sob a mesma trava
+    /// que protege <see cref="Step"/>.
+    /// </remarks>
+    /// <param name="plant">Planta nova, montada da mesma definição de cenário que a atual.</param>
+    public void ReplacePlant(ScenarioPlant plant)
+    {
+        ArgumentNullException.ThrowIfNull(plant);
+        if (!ReferenceEquals(plant.Definition, Plant.Definition))
+        {
+            throw new ArgumentException("A planta nova precisa vir da mesma definição de cenário da atual.", nameof(plant));
+        }
+
+        lock (_sync)
+        {
+            Plant = plant;
+            _staleSteps = 0;
+            _watchdogTripped = false;
+        }
+
+        PublishInputs();
     }
 
     /// <summary>

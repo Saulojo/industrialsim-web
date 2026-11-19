@@ -120,6 +120,8 @@ Abra o endereço que o Vite mostrar (normalmente <http://localhost:5173>). As ch
 | `npm run format` | Formata o código com o Prettier |
 | `npm test` | Testes com Vitest |
 | `npm run build` | Checagem de tipos e build para o `wwwroot` do servidor |
+| `npm run e2e` | Testes de ponta a ponta (Playwright, Chromium) contra o servidor de verdade; rode `npm run build` antes. Na primeira vez: `npx playwright install chromium` |
+| `npm run contracts` | Regera `src/net/contracts.generated.ts` a partir do contrato C# (um teste .NET acusa se ficar desatualizado) |
 
 | Comando (em `server/`) | O que faz |
 | --- | --- |
@@ -155,6 +157,7 @@ industrialsim-web/
 | `npm ci` reclama da versão do Node | Instale o Node 24 ou mais novo. |
 | A página mostra "Não foi possível falar com o servidor." | O servidor não está rodando em `localhost:5080`, ou você abriu o Vite sem subir o servidor. |
 | Página em branco em `localhost:5080` | Falta o build do web: rode `npm run build` em `web/` e recarregue a página. |
+| "Uma política de Controle de Aplicativo bloqueou este arquivo" ao rodar o servidor ou um teste | O Controle Inteligente de Aplicativos do Windows às vezes bloqueia um `.exe` ou `.dll` recém-compilado. Recompile (`dotnet build --no-incremental`) ou rode a DLL com `dotnet`, como fazem o CI e o `npm run e2e`. |
 | Prettier acusa diferença de fim de linha | O repositório usa LF (`.gitattributes`). Rode `git add --renormalize .` ou faça um clone novo. |
 
 ## Licença

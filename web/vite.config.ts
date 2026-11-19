@@ -14,7 +14,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': devServerUrl,
+      // ws: o WebSocket da planta também passa pelo proxy (Etapa 7).
+      '/api': { target: devServerUrl, ws: true },
     },
   },
   build: {

@@ -18,6 +18,8 @@ server/src/IndustrialSim.Server/recordings/
 node_modules/
 web/dist/
 web/coverage/
+web/test-results/
+web/playwright-report/
 *.tsbuildinfo
 
 # Editores e sistema

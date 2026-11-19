@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using IndustrialSim.Contracts;
 using IndustrialSim.Core.Scenarios;
 
 namespace IndustrialSim.SimRun;
@@ -19,6 +20,7 @@ public static class SimRunApp
           simrun <cenario.json> --saida <resultado.csv> [--entradas <roteiro.csv>] [--duracao <s>] [--intervalo <s>] [--semente <n>]
           simrun <cenario.json>                 confere o cenário e mostra entradas, saídas e ordem de execução
           simrun --esquema <arquivo.json>       grava o esquema JSON do scenario.json
+          simrun --contratos <arquivo.ts>       grava os tipos TypeScript do contrato cliente–servidor
           simrun reproduzir <gravacao.csv> --cenario <scenario.json> --saida <copia.csv>
                                                 reproduz uma gravação de ensaio do servidor e compara os SHA-256
           simrun carga --cenario <scenario.json> [--plantas 30] [--minutos 10] [--threads 2] [--relatorio <rel.json>]
@@ -62,6 +64,13 @@ public static class SimRunApp
             {
                 File.WriteAllText(options.SchemaPath, ScenarioSchemaWriter.Write(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 stdout.WriteLine($"Esquema gravado em {options.SchemaPath}.");
+                return ExitOk;
+            }
+
+            if (options.ContractsPath is not null)
+            {
+                File.WriteAllText(options.ContractsPath, TypeScriptWriter.Write(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                stdout.WriteLine($"Tipos TypeScript gravados em {options.ContractsPath}.");
                 return ExitOk;
             }
 
@@ -146,6 +155,8 @@ public static class SimRunApp
 
         public string? SchemaPath { get; private set; }
 
+        public string? ContractsPath { get; private set; }
+
         public double? DurationSeconds { get; private set; }
 
         public double? IntervalSeconds { get; private set; }
@@ -191,6 +202,9 @@ public static class SimRunApp
                     case "--esquema":
                         parsed.SchemaPath = value;
                         break;
+                    case "--contratos":
+                        parsed.ContractsPath = value;
+                        break;
                     case "--duracao":
                         if (!TryPositive(value, out double duration))
                         {
@@ -224,7 +238,7 @@ public static class SimRunApp
                 }
             }
 
-            if (parsed.SchemaPath is null && parsed.ScenarioPath is null)
+            if (parsed.SchemaPath is null && parsed.ContractsPath is null && parsed.ScenarioPath is null)
             {
                 error = "Falta o arquivo do cenário.";
                 return false;

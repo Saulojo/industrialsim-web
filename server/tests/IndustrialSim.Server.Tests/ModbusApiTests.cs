@@ -136,16 +136,22 @@ public class ModbusApiTests(ITestOutputHelper output)
 
     /// <summary>
     /// Critério 1, de ponta a ponta: com a planta em tempo real, um mestre independente (FluentModbus) escreve
-    /// "fechar" em FV-101 e a posição real publicada muda em até 2 passos depois de a escrita chegar ao servidor
+    /// "fechar" em FV-101 e a posição real começa a mudar em até 2 passos depois de a escrita chegar ao servidor
     /// (o servidor só responde depois de gravar na imagem, então a referência é o passo publicado logo depois da
     /// resposta); a leitura de LT-101 é coerente com a planta.
     /// </summary>
+    /// <remarks>
+    /// O passo em que o comando entrou e a posição nesse passo vêm da gravação do ensaio, que a própria planta
+    /// escreve passo a passo (D34). Observar a imagem pelo relógio do teste dependia do agendamento da máquina:
+    /// numa VM do CI carregada, o teste chegou a perder passos entre duas leituras (Etapa 7).
+    /// </remarks>
     [Fact]
     public async Task AMasterWritesFV101_ThePositionStartsMovingWithinTwoSteps_AndLT101IsCoherent()
     {
         using var factory = new SimulationFactory();
         using HttpClient client = factory.CreateClient();
-        PlantSummary summary = await CreatePlant(client);
+        HttpResponseMessage created = await client.PostAsJsonAsync("/api/plants", new PlantCreateRequest("caldeira", Record: true), Cancel);
+        PlantSummary summary = (await created.Content.ReadFromJsonAsync<PlantSummary>(Cancel))!;
         await client.PostAsJsonAsync($"/api/plants/{summary.Id}/modbus/masters", new MasterAuthorizeRequest("127.0.0.1"), Cancel);
         Assert.True(factory.Services.GetRequiredService<InstanceManager>().TryGet(summary.Id, out PlantInstance? plant));
         using var master = new ModbusTcpClient { ReadTimeout = 5000, WriteTimeout = 5000 };
@@ -157,22 +163,31 @@ public class ModbusApiTests(ITestOutputHelper output)
         master.WriteSingleRegister(1, 0, (short)0);
         long stepAfterWrite = plant.Io.Image.Snapshot().StepCount;
 
-        // Acompanha a imagem até a posição publicada mudar.
-        IoSnapshot snapshot;
+        // Na gravação, a primeira linha com hr_0 = 0 é o passo em que o comando entrou na planta; a linha traz a
+        // posição no fim desse passo, e a linha anterior, a posição antes dele.
+        (long Step, double Position, double PreviousPosition)? latched = null;
         var watch = Stopwatch.StartNew();
-        do
+        while (latched is null && watch.Elapsed < TimeSpan.FromSeconds(5))
         {
-            snapshot = plant.Io.Image.Snapshot();
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), "A posição de FV-101 não mudou em 2 s.");
+            await Task.Delay(100, Cancel);
+            latched = FindLatch(await client.GetStringAsync($"/api/plants/{summary.Id}/recording", Cancel));
         }
-        while (AnalogCodec.FromRegister(snapshot.InputRegisters[4]) >= positionBefore);
 
-        long steps = snapshot.StepCount - stepAfterWrite;
+        Assert.True(latched is not null, "O comando de FV-101 não apareceu na gravação em 5 s.");
+        var (latchStep, position, previousPosition) = latched.Value;
+        long steps = latchStep - stepAfterWrite;
         output.WriteLine(
-            $"Escrita enviada no passo {stepBeforeWrite} e já na imagem no passo {stepAfterWrite}; posição publicada mudou no passo {snapshot.StepCount} ({steps} passo(s) depois).");
-        Assert.True(snapshot.StepCount > stepBeforeWrite, $"A posição mudou no passo {snapshot.StepCount}, antes da escrita ({stepBeforeWrite}).");
-        Assert.True(steps <= 2, $"A posição mudou {steps} passos depois de a escrita chegar (passos {stepAfterWrite} e {snapshot.StepCount}).");
-        Assert.True(master.ReadInputRegisters<short>(1, 4, 1)[0] < positionBefore);
+            $"Escrita enviada no passo {stepBeforeWrite} e já na imagem no passo {stepAfterWrite}; o comando entrou no passo {latchStep} ({steps} passo(s) depois), e FV-101 foi de {previousPosition:R} para {position:R}.");
+        Assert.True(latchStep > stepBeforeWrite, $"O comando entrou no passo {latchStep}, antes da escrita ({stepBeforeWrite}).");
+        Assert.True(steps <= 2, $"O comando entrou {steps} passos depois de a escrita chegar (passos {stepAfterWrite} e {latchStep}).");
+        Assert.True(position < previousPosition, "A posição de FV-101 não começou a mudar no passo do comando.");
+
+        // O mestre também vê a posição mudar.
+        while (master.ReadInputRegisters<short>(1, 4, 1)[0] >= positionBefore)
+        {
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(10), "O mestre não viu a posição de FV-101 mudar.");
+            await Task.Delay(10, Cancel);
+        }
 
         // LT-101 lido pelo mestre e a saída da planta no mesmo instante (entre dois passos), com até 1 contagem
         // de diferença; tenta de novo se um passo cair no meio das duas leituras.
@@ -194,6 +209,36 @@ public class ModbusApiTests(ITestOutputHelper output)
         }
 
         Assert.True(coherent, "Não foi possível ler LT-101 e a planta no mesmo passo.");
+    }
+
+    /// <summary>Primeira linha da gravação com o comando de FV-101 (<c>hr_0</c>) em 0; nulo se ainda não houver.</summary>
+    private static (long Step, double Position, double PreviousPosition)? FindLatch(string csv)
+    {
+        string[] lines = csv.Split('\n');
+        string[] columns = lines.First(l => l.StartsWith("step,", StringComparison.Ordinal)).Split(',');
+        int command = Array.IndexOf(columns, "hr_0");
+        int position = Array.IndexOf(columns, "FV-101_position");
+        string[]? previous = null;
+        foreach (string line in lines)
+        {
+            // Só linhas completas: a última pode estar sendo escrita.
+            if (line.Length == 0 || !char.IsDigit(line[0]) || line.Split(',') is not { } fields || fields.Length != columns.Length)
+            {
+                continue;
+            }
+
+            if (fields[command] == "0" && previous is not null)
+            {
+                return (
+                    long.Parse(fields[0], System.Globalization.CultureInfo.InvariantCulture),
+                    double.Parse(fields[position], System.Globalization.CultureInfo.InvariantCulture),
+                    double.Parse(previous[position], System.Globalization.CultureInfo.InvariantCulture));
+            }
+
+            previous = fields;
+        }
+
+        return null;
     }
 
     /// <summary>
