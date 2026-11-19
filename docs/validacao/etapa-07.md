@@ -1,7 +1,7 @@
 # Validação — Etapa 7: WebSocket e IHM web
 
 - Branch: `etapa-07-websocket-ihm`
-- Pull request: (a abrir depois da confirmação)
+- Pull request: [Saulojo/industrialsim-web#8](https://github.com/Saulojo/industrialsim-web/pull/8)
 - Data: 19/11/2026
 
 ## Ambiente
