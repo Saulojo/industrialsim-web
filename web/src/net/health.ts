@@ -1,12 +1,6 @@
-/**
- * Espelho de IndustrialSim.Contracts.HealthResponse.
- * Escrito à mão na Etapa 0; passa a ser gerado do contrato C# na Etapa 7 (D05).
- */
-export interface HealthResponse {
-  version: string;
-  /** Hora do servidor em UTC, ISO 8601. */
-  serverTimeUtc: string;
-}
+import type { HealthResponse } from './contracts.generated';
+
+export type { HealthResponse };
 
 export const healthUrl = '/api/health';
 

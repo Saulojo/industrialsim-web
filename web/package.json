@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "lint": "eslint . && stylelint \"src/**/*.css\" && prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "contracts": "dotnet run --project ../server/src/IndustrialSim.SimRun -- --contratos src/net/contracts.generated.ts"
   },
   "dependencies": {
     "i18next": "27.1.1",

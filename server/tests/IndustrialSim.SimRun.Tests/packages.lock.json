@@ -134,6 +134,9 @@
           "xunit.v3.runner.common": "[4.0.3]"
         }
       },
+      "industrialsim.contracts": {
+        "type": "Project"
+      },
       "industrialsim.core": {
         "type": "Project"
       },
@@ -162,6 +165,7 @@
       "simrun": {
         "type": "Project",
         "dependencies": {
+          "IndustrialSim.Contracts": "[0.1.0, )",
           "IndustrialSim.Core": "[0.1.0, )",
           "IndustrialSim.Sessions": "[0.1.0, )"
         }

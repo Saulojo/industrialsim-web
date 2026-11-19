@@ -34,11 +34,13 @@ public sealed record ModbusInfoResponse(
     long Requests,
     long ExceptionResponses);
 
-/// <summary>Áreas Modbus escritas pelo mestre, em <see cref="ModbusWriteResponse"/>.</summary>
+/// <summary>Áreas Modbus, em <see cref="ModbusWriteResponse"/> (só as que o mestre escreve) e em <see cref="ModbusPointInfo"/>.</summary>
 public static class ModbusAreas
 {
     public const string Coil = "coil";
+    public const string DiscreteInput = "discrete-input";
     public const string HoldingRegister = "holding-register";
+    public const string InputRegister = "input-register";
 }
 
 /// <summary>Última escrita num endereço (<c>GET /api/plants/{id}/modbus/writes</c>).</summary>

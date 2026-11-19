@@ -2,3 +2,5 @@ dist
 coverage
 node_modules
 package-lock.json
+# Gerado do contrato C# (npm run contracts); um teste .NET confere que está em dia.
+src/net/contracts.generated.ts
