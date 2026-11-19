@@ -1,0 +1,19 @@
+{
+  "simulatedTime": [
+    0.1,
+    1.2
+  ],
+  "distinctLevelReadings": 10,
+  "steamFlowKgPerS": [
+    2.0047724,
+    3.2994928
+  ],
+  "pressureBar": [
+    9.9961106,
+    9.2751775
+  ],
+  "trendPoints": [
+    84,
+    263
+  ]
+}

@@ -8,11 +8,11 @@ type Anchor = 'start' | 'middle' | 'end';
 /** Onde cada valor aparece no desenho (tags do cenário, não texto de interface). */
 const READINGS: readonly { signal: string; x: number; y: number; anchor: Anchor }[] = [
   { signal: 'FV-101_position', x: 180, y: 262, anchor: 'middle' },
-  { signal: 'FT-101', x: 240, y: 220, anchor: 'middle' },
+  { signal: 'FT-101', x: 225, y: 218, anchor: 'middle' },
   { signal: 'LT-101', x: 510, y: 150, anchor: 'start' },
   { signal: 'FV-103_position', x: 560, y: 70, anchor: 'middle' },
   { signal: 'FT-102', x: 460, y: 30, anchor: 'middle' },
-  { signal: 'PT-101', x: 300, y: 60, anchor: 'start' },
+  { signal: 'PT-101', x: 385, y: 64, anchor: 'end' },
   { signal: 'FV-102_position', x: 180, y: 325, anchor: 'middle' },
 ];
 
@@ -20,7 +20,7 @@ const READINGS: readonly { signal: string; x: number; y: number; anchor: Anchor 
 const SWITCHES: readonly { signal: string; x: number; y: number }[] = [
   { signal: 'LSHH-101', x: 510, y: 110 },
   { signal: 'LSLL-101', x: 510, y: 190 },
-  { signal: 'PSH-101', x: 300, y: 30 },
+  { signal: 'PSH-101', x: 300, y: 36 },
   { signal: 'PSV-101_open', x: 446, y: 72 },
 ];
 
@@ -101,7 +101,7 @@ export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
         </defs>
 
         {/* Água de alimentação: P-101 → FV-101 → tubulão */}
-        <text x={10} y={215} className="synoptic__label">
+        <text x={10} y={200} className="synoptic__label">
           {t('synoptic.caldeira.feedwater')}
         </text>
         <polyline className="synoptic__pipe" points="10,230 300,230 330,195" />
@@ -137,7 +137,7 @@ export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
           className="synoptic__water"
           clipPath="url(#drum-clip)"
         />
-        <text x={400} y={drumTop + drumHeight / 2} textAnchor="middle" className="synoptic__label">
+        <text x={400} y={drumTop + 28} textAnchor="middle" className="synoptic__label">
           {t('synoptic.caldeira.drum')}
         </text>
 
