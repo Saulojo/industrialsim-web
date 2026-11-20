@@ -1,0 +1,14 @@
+{
+  "countsBefore": 13828,
+  "levelBeforeM": 0.6001736111111111,
+  "float32AfterMs": 17,
+  "levelFloat32M": 0.6010100245475769,
+  "oldUnitIdException": 11,
+  "oldUnitIdRefusedAfterMs": 1,
+  "levelReadWithUnitId17M": 0.6003276109695435,
+  "run": 0,
+  "simulatedTime": [
+    0.3,
+    0.45
+  ]
+}

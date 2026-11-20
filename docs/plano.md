@@ -326,12 +326,14 @@ Evidências: `docs/validacao/etapa-07.md`.
 
 **Validação**
 
-- [ ] Mudar o formato analógico ou o Unit ID na tela altera o que o mestre lê no passo seguinte, sem reiniciar.
-- [ ] Uma escrita de um cliente de teste aparece no monitor em até 200 ms, com o IP de origem.
-- [ ] Um valor forçado aparece destacado na IHM e no monitor, e deixa de valer ao ser liberado.
-- [ ] O mapa de I/O exportado bate com o `scenario.json` (teste automático).
-- [ ] Pausar congela a planta e o monitor mostra “pausada”; retomar continua do mesmo estado (mesmo hash).
-- [ ] Toda mudança de configuração aparece no log.
+- [x] Mudar o formato analógico ou o Unit ID na tela altera o que o mestre lê no passo seguinte, sem reiniciar. *(O mestre lê o formato novo 1 passo depois da troca; pela tela, 17 ms depois de "Aplicar".)*
+- [x] Uma escrita de um cliente de teste aparece no monitor em até 200 ms, com o IP de origem. *(Mediana de 91 ms e máximo de 93 ms em 20 escritas.)*
+- [x] Um valor forçado aparece destacado na IHM e no monitor, e deixa de valer ao ser liberado.
+- [x] O mapa de I/O exportado bate com o `scenario.json` (teste automático). *(CSV nos 4 formatos; PDF pela impressão do navegador, D45.)*
+- [x] Pausar congela a planta e o monitor mostra “pausada”; retomar continua do mesmo estado (mesmo hash).
+- [x] Toda mudança de configuração aparece no log.
+
+Evidências: `docs/validacao/etapa-08.md`.
 
 ### Etapa 9 — Implantação no laboratório (Marco 1: MVP)
 

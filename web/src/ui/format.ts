@@ -18,6 +18,7 @@ export function translateDynamic(
 /** Nome de tela de um sinal: `signals.<cenário>.<tag>` nos arquivos de idioma, ou a própria tag. */
 export function signalLabel(t: TFunction, scenarioId: string, name: string): string {
   if (name === 'watchdog') return t('signals.watchdog');
+  if (name === 'heartbeat') return t('signals.heartbeat');
   return translateDynamic(t, `signals.${scenarioId}.${name}`, name);
 }
 

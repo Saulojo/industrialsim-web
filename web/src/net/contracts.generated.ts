@@ -21,6 +21,13 @@ export interface AlarmsMessage {
   active: ActiveAlarm[];
 }
 
+export const AnalogFormats = {
+  counts27648: 'counts27648',
+  counts10000: 'counts10000',
+  counts32767: 'counts32767',
+  float32: 'float32',
+} as const;
+
 export interface ApiError {
   code: string;
 }
@@ -41,7 +48,14 @@ export type ClientMessage =
   | SetDisturbanceCommand
   | RestartCommand
   | AcceptPairingCommand
-  | RefusePairingCommand;
+  | RefusePairingCommand
+  | RevokeMasterCommand
+  | UpdateSettingsCommand
+  | ForceInputCommand
+  | ReleaseInputCommand
+  | PauseCommand
+  | ResumeCommand
+  | SubscribeMonitorCommand;
 
 export interface DisturbanceInfo {
   input: string;
@@ -59,6 +73,24 @@ export interface DurationStats {
   maxMs: number;
 }
 
+export interface ForceInputCommand {
+  type: 'forceInput';
+  area: string;
+  signal: string;
+  value: number;
+}
+
+export interface ForcedInputInfo {
+  area: string;
+  signal: string;
+  value: number;
+}
+
+export interface ForcedMessage {
+  type: 'forced';
+  inputs: ForcedInputInfo[];
+}
+
 export interface HealthResponse {
   version: string;
   serverTimeUtc: string;
@@ -73,6 +105,74 @@ export interface IncompatibleMessage {
   type: 'incompatible';
   serverProtocolVersion: number;
   clientProtocolVersion: number;
+}
+
+export interface IoMapResponse {
+  plantId: string;
+  scenarioId: string;
+  format: string;
+  wordOrder: string;
+  unitId: number;
+  port: number;
+  rows: IoMapRow[];
+}
+
+export interface IoMapRow {
+  area: string;
+  address: number;
+  classicAddress: number;
+  length: number;
+  signal: string;
+  kind: string;
+  access: string;
+  dataType: string;
+  rawMin: number | null;
+  rawMax: number | null;
+  unit: string;
+  lrv: number | null;
+  urv: number | null;
+}
+
+export interface LogArgumentInfo {
+  name: string;
+  value: string;
+}
+
+export interface LogEntryInfo {
+  id: number;
+  sequence: number;
+  kind: string;
+  firstUtc: string;
+  timeUtc: string;
+  count: number;
+  arguments: LogArgumentInfo[];
+}
+
+export const LogEventKinds = {
+  connectionAuthorized: 'connection-authorized',
+  connectionRefused: 'connection-refused',
+  connectionClosed: 'connection-closed',
+  connectionLimit: 'connection-limit',
+  pairingRequested: 'pairing-requested',
+  pairingAccepted: 'pairing-accepted',
+  pairingRefused: 'pairing-refused',
+  pairingExpired: 'pairing-expired',
+  masterAuthorized: 'master-authorized',
+  masterRevoked: 'master-revoked',
+  masterReplaced: 'master-replaced',
+  modbusException: 'modbus-exception',
+  settingChanged: 'setting-changed',
+  inputForced: 'input-forced',
+  inputReleased: 'input-released',
+  paused: 'paused',
+  resumed: 'resumed',
+  restarted: 'restarted',
+} as const;
+
+export interface LogMessage {
+  type: 'log';
+  entries: LogEntryInfo[];
+  reset: boolean;
 }
 
 export interface LoopMetricsResponse {
@@ -99,6 +199,11 @@ export interface MasterConnectionInfo {
   connectedUtc: string;
   authorized: boolean;
 }
+
+export const MasterPolicies = {
+  multiple: 'multiple',
+  single: 'single',
+} as const;
 
 export const ModbusAreas = {
   coil: 'coil',
@@ -139,12 +244,55 @@ export interface ModbusStatusMessage {
   authorizedMasters: string[];
   pendingRequests: PairingRequestResponse[];
   connections: MasterConnectionInfo[];
+  requestsPerSecond: number;
+  requests: number;
+  exceptionResponses: number;
 }
 
 export interface ModbusWriteResponse {
   area: string;
   address: number;
   classicAddress: number;
+  author: string;
+  timeUtc: string;
+}
+
+export interface MonitorLayoutMessage {
+  type: 'monitorLayout';
+  format: string;
+  wordOrder: string;
+  points: MonitorPointInfo[];
+}
+
+export interface MonitorMessage {
+  type: 'monitor';
+  step: number;
+  raw: number[];
+  values: number[];
+  forced: number[];
+  writes: MonitorWriteInfo[] | null;
+}
+
+export interface MonitorPointInfo {
+  area: string;
+  address: number;
+  classicAddress: number;
+  length: number;
+  signal: string;
+  unit: string;
+  kind: string;
+}
+
+export const MonitorPointKinds = {
+  digital: 'digital',
+  analog: 'analog',
+  diagnostic: 'diagnostic',
+  heartbeat: 'heartbeat',
+  watchdogStatus: 'watchdog-status',
+} as const;
+
+export interface MonitorWriteInfo {
+  point: number;
   author: string;
   timeUtc: string;
 }
@@ -157,14 +305,28 @@ export interface PairingRequestResponse {
   waitingConnections: number;
 }
 
+export interface PauseCommand {
+  type: 'pause';
+}
+
 export interface PlantCreateRequest {
   scenarioId: string;
   noiseSeed: number | null;
   record: boolean;
 }
 
+export interface PlantSettingsInfo {
+  format: string;
+  wordOrder: string;
+  watchdogEnabled: boolean;
+  watchdogTimeoutSeconds: number;
+  diagnosticsEnabled: boolean;
+  unitId: number;
+  masterPolicy: string;
+}
+
 export const PlantSocketProtocol = {
-  version: 1,
+  version: 2,
   path: '/api/plants/{id}/ws',
 } as const;
 
@@ -181,6 +343,7 @@ export interface PlantStateResponse {
 
 export const PlantStatuses = {
   running: 'running',
+  paused: 'paused',
   faulted: 'faulted',
   ended: 'ended',
 } as const;
@@ -209,8 +372,23 @@ export interface RefusePairingCommand {
   requestId: string;
 }
 
+export interface ReleaseInputCommand {
+  type: 'releaseInput';
+  area: string;
+  signal: string;
+}
+
 export interface RestartCommand {
   type: 'restart';
+}
+
+export interface ResumeCommand {
+  type: 'resume';
+}
+
+export interface RevokeMasterCommand {
+  type: 'revokeMaster';
+  address: string;
 }
 
 export interface ScenarioSummary {
@@ -227,12 +405,23 @@ export type ServerMessage =
   | SocketErrorMessage
   | StateMessage
   | ModbusStatusMessage
-  | AlarmsMessage;
+  | AlarmsMessage
+  | SettingsMessage
+  | ForcedMessage
+  | MonitorLayoutMessage
+  | MonitorMessage
+  | LogMessage;
 
 export interface SetDisturbanceCommand {
   type: 'setDisturbance';
   input: string;
   value: number;
+}
+
+export interface SettingsMessage {
+  type: 'settings';
+  settings: PlantSettingsInfo;
+  maxWatchdogTimeoutSeconds: number;
 }
 
 export interface SignalInfo {
@@ -263,6 +452,11 @@ export const SocketErrorCodes = {
   disturbanceNotFound: 'disturbance-not-found',
   pairingRequestNotFound: 'pairing-request-not-found',
   plantNotRunning: 'plant-not-running',
+  plantNotPaused: 'plant-not-paused',
+  invalidSettings: 'invalid-settings',
+  severalMastersAuthorized: 'several-masters-authorized',
+  inputNotFound: 'input-not-found',
+  masterNotFound: 'master-not-found',
 } as const;
 
 export interface SocketErrorMessage {
@@ -282,8 +476,24 @@ export interface StateMessage {
   outputs: number[];
 }
 
+export interface SubscribeMonitorCommand {
+  type: 'subscribeMonitor';
+  enabled: boolean;
+}
+
 export interface UnitIdRequest {
   unitId: number;
+}
+
+export interface UpdateSettingsCommand {
+  type: 'updateSettings';
+  format: string | null;
+  wordOrder: string | null;
+  watchdogEnabled: boolean | null;
+  watchdogTimeoutSeconds: number | null;
+  diagnosticsEnabled: boolean | null;
+  unitId: number | null;
+  masterPolicy: string | null;
 }
 
 export interface WelcomeMessage {
@@ -299,3 +509,8 @@ export interface WelcomeMessage {
   disturbances: DisturbanceInfo[];
   alarms: string[];
 }
+
+export const WordOrders = {
+  highWordFirst: 'highWordFirst',
+  lowWordFirst: 'lowWordFirst',
+} as const;

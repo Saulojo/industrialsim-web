@@ -1,14 +1,19 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { recordingUrl } from '../../net/api';
+import { ioMapCsvUrl, recordingUrl } from '../../net/api';
 import { PlantStore, type PlantStoreOptions } from '../../net/plantStore';
 import { formatNumber, socketErrorText, translateDynamic } from '../format';
-import { navigate } from '../navigation';
+import { ioMapPath, navigate } from '../navigation';
 import { AlarmPanel } from './AlarmPanel';
 import { CaldeiraSynoptic } from './CaldeiraSynoptic';
 import { ConnectionPanel } from './ConnectionPanel';
 import { DisturbancePanel } from './DisturbancePanel';
+import { ForcedPanel } from './ForcedPanel';
+import { LogPanel } from './LogPanel';
+import { MastersPanel } from './MastersPanel';
+import { MonitorPanel } from './MonitorPanel';
 import { PairingDialog } from './PairingDialog';
+import { SettingsPanel } from './SettingsPanel';
 import { SignalTable } from './SignalTable';
 import { TrendChart } from './TrendChart';
 
@@ -21,11 +26,29 @@ export interface PlantPageProps {
 /** Sinais mostrados na tendência, quando o cenário os tem. */
 const trendSignals = ['LT-101', 'PT-101', 'FT-101', 'FT-102'];
 
-/** IHM de uma planta: conexão, pareamento, sinóptico, tendências, alarmes, distúrbios e ensaio. */
+/** Seções da página da planta; a escolhida fica no fragmento da URL (#monitor, #log…). */
+const TABS = ['process', 'communication', 'monitor', 'log'] as const;
+export type PlantTab = (typeof TABS)[number];
+
+function tabFromHash(): PlantTab {
+  const hash = window.location.hash.replace('#', '');
+  return (TABS as readonly string[]).includes(hash) ? (hash as PlantTab) : 'process';
+}
+
+/**
+ * IHM de uma planta: na seção do processo, sinóptico, tendências, alarmes, distúrbios e valores forçados; na
+ * de comunicação, as configurações e os mestres; o monitor de registradores e o log de comunicação (Etapa 8).
+ */
 export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
   const { t, i18n } = useTranslation();
   const [store] = useState(() => new PlantStore(plantId, storeOptions));
   const view = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const [tab, setTab] = useState<PlantTab>(tabFromHash);
+  const subscribeMonitor = useCallback((enabled: boolean) => store.setMonitor(enabled), [store]);
+  const release = useCallback(
+    (area: string, signal: string) => store.releaseInput(area, signal),
+    [store],
+  );
 
   useEffect(() => {
     store.start();
@@ -35,7 +58,16 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
   const { welcome, state, status } = view;
   const scenarioId = welcome?.plant.scenarioId ?? '';
   const fatal = status === 'failed' || status === 'incompatible';
+  const connected = status === 'connected';
+  const paused = state?.status === 'paused';
   const pending = view.modbus?.pendingRequests[0] ?? null;
+  const replaces =
+    view.settings?.settings.masterPolicy === 'single' ? (view.modbus?.authorizedMasters ?? []) : [];
+
+  function chooseTab(next: PlantTab) {
+    setTab(next);
+    window.history.replaceState(null, '', `#${next}`);
+  }
 
   function restart() {
     if (window.confirm(t('plant.restartConfirm'))) {
@@ -52,7 +84,7 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
           })}
         </h2>
         <span
-          className={`chip ${status === 'connected' ? '' : 'chip--abnormal'}`}
+          className={`chip ${connected ? '' : 'chip--abnormal'}`}
           data-testid="connection-status"
           data-status={status}
           role="status"
@@ -62,7 +94,14 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
         {state && (
           <>
             <span className="plant__fact">
-              {t('plant.statusLabel')}: {t(`plant.status.${state.status as 'running'}`)}
+              {t('plant.statusLabel')}:{' '}
+              <span
+                className={paused ? 'chip chip--abnormal' : ''}
+                data-testid="plant-status"
+                data-status={state.status}
+              >
+                {t(`plant.status.${state.status as 'running'}`)}
+              </span>
             </span>
             <span className="plant__fact">
               {t('plant.simulatedTime')}:{' '}
@@ -82,12 +121,28 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
           <a className="button" href={recordingUrl(plantId)} download data-testid="download-csv">
             {t('plant.downloadCsv')}
           </a>
+          <a className="button" href={ioMapCsvUrl(plantId)} download data-testid="io-map-csv">
+            {t('plant.ioMapCsv')}
+          </a>
+          <a
+            className="button"
+            href={ioMapPath(plantId)}
+            target="_blank"
+            rel="noopener"
+            data-testid="io-map-pdf"
+          >
+            {t('plant.ioMapPdf')}
+          </a>
           <button
             type="button"
             className="button"
-            disabled={status !== 'connected'}
-            onClick={restart}
+            disabled={!connected || !state}
+            data-testid="pause"
+            onClick={() => (paused ? store.resume() : store.pause())}
           >
+            {paused ? t('plant.resume') : t('plant.pause')}
+          </button>
+          <button type="button" className="button" disabled={!connected} onClick={restart}>
             {t('plant.restart')}
           </button>
         </span>
@@ -106,6 +161,11 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
           {socketErrorText(t, view.errorCode)}
         </p>
       )}
+      {paused && (
+        <p role="status" className="panel__alarm" data-testid="paused-notice">
+          {t('plant.pausedNotice')}
+        </p>
+      )}
       {fatal && (
         <p className="panel__row">
           <button type="button" className="button" onClick={() => navigate('/')}>
@@ -115,35 +175,103 @@ export function PlantPage({ plantId, storeOptions }: PlantPageProps) {
       )}
 
       {welcome && state && (
-        <div className="plant__grid">
-          <div className="stack">
-            {scenarioId === 'caldeira' ? (
-              <CaldeiraSynoptic welcome={welcome} state={state} />
-            ) : (
-              <SignalTable welcome={welcome} state={state} />
+        <>
+          <div className="tabs" role="tablist" aria-label={t('plant.tabsLabel')}>
+            {TABS.map((name) => (
+              <button
+                key={name}
+                type="button"
+                role="tab"
+                id={`tab-${name}`}
+                aria-selected={tab === name}
+                aria-controls={`panel-${name}`}
+                className={tab === name ? 'tabs__tab tabs__tab--active' : 'tabs__tab'}
+                data-testid={`tab-${name}`}
+                onClick={() => chooseTab(name)}
+              >
+                {t(`plant.tabs.${name}`)}
+              </button>
+            ))}
+          </div>
+
+          <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+            {tab === 'process' && (
+              <div className="plant__grid">
+                <div className="stack">
+                  {scenarioId === 'caldeira' ? (
+                    <CaldeiraSynoptic welcome={welcome} state={state} forced={view.forced} />
+                  ) : (
+                    <SignalTable welcome={welcome} state={state} forced={view.forced} />
+                  )}
+                  <TrendChart
+                    welcome={welcome}
+                    trend={view.trend}
+                    signals={trendSignals.filter((name) =>
+                      welcome.outputs.some((o) => o.name === name),
+                    )}
+                  />
+                </div>
+                <div className="stack">
+                  <ForcedPanel
+                    welcome={welcome}
+                    forced={view.forced}
+                    disabled={!connected}
+                    onRelease={release}
+                  />
+                  <ConnectionPanel welcome={welcome} modbus={view.modbus} />
+                  <AlarmPanel scenarioId={scenarioId} alarms={view.alarms} />
+                  <DisturbancePanel
+                    welcome={welcome}
+                    state={state}
+                    disabled={!connected}
+                    onChange={(input, value) => store.setDisturbance(input, value)}
+                  />
+                </div>
+              </div>
             )}
-            <TrendChart
-              welcome={welcome}
-              trend={view.trend}
-              signals={trendSignals.filter((name) => welcome.outputs.some((o) => o.name === name))}
-            />
+
+            {tab === 'communication' && (
+              <div className="plant__grid">
+                {view.settings && (
+                  <SettingsPanel
+                    welcome={welcome}
+                    modbus={view.modbus}
+                    settings={view.settings}
+                    disabled={!connected}
+                    onApply={(changes) => store.updateSettings(changes)}
+                  />
+                )}
+                <MastersPanel
+                  modbus={view.modbus}
+                  disabled={!connected}
+                  onRevoke={(address) => store.revokeMaster(address)}
+                />
+              </div>
+            )}
+
+            {tab === 'monitor' && (
+              <MonitorPanel
+                scenarioId={scenarioId}
+                layout={view.monitorLayout}
+                monitor={view.monitor}
+                writes={view.monitorWrites}
+                paused={paused}
+                disabled={!connected}
+                onSubscribe={subscribeMonitor}
+                onForce={(area, signal, value) => store.forceInput(area, signal, value)}
+                onRelease={release}
+              />
+            )}
+
+            {tab === 'log' && <LogPanel scenarioId={scenarioId} log={view.log} />}
           </div>
-          <div className="stack">
-            <ConnectionPanel welcome={welcome} modbus={view.modbus} />
-            <AlarmPanel scenarioId={scenarioId} alarms={view.alarms} />
-            <DisturbancePanel
-              welcome={welcome}
-              state={state}
-              disabled={status !== 'connected'}
-              onChange={(input, value) => store.setDisturbance(input, value)}
-            />
-          </div>
-        </div>
+        </>
       )}
 
-      {pending && status === 'connected' && (
+      {pending && connected && (
         <PairingDialog
           request={pending}
+          replaces={replaces}
           onAccept={() => store.acceptPairing(pending.id)}
           onRefuse={() => store.refusePairing(pending.id)}
         />

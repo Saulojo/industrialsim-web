@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ServerMessage } from './contracts.generated';
+import { PlantSocketProtocol, type ServerMessage } from './contracts.generated';
 import { FakeSocket } from './fakeSocket';
 import { PlantSocket, plantSocketUrl, type ConnectionStatus } from './plantSocket';
 import { welcome } from './testData';
@@ -39,7 +39,9 @@ describe('PlantSocket', () => {
     const { statuses, messages } = start();
 
     FakeSocket.last.open();
-    expect(FakeSocket.last.sent).toEqual([{ type: 'hello', protocolVersion: 1 }]);
+    expect(FakeSocket.last.sent).toEqual([
+      { type: 'hello', protocolVersion: PlantSocketProtocol.version },
+    ]);
 
     FakeSocket.last.receive(welcome);
     expect(statuses).toEqual(['connected']);

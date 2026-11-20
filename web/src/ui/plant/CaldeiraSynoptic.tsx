@@ -1,5 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import type { SignalInfo, StateMessage, WelcomeMessage } from '../../net/contracts.generated';
+import type {
+  ForcedInputInfo,
+  SignalInfo,
+  StateMessage,
+  WelcomeMessage,
+} from '../../net/contracts.generated';
 import { fractionOfRange } from '../format';
 import { useSignalText } from './SignalTable';
 
@@ -30,13 +35,15 @@ const LEVEL = 'LT-101';
 export interface CaldeiraSynopticProps {
   welcome: WelcomeMessage;
   state: StateMessage;
+  /** Entradas forçadas: o valor lido pelo mestre não é o da planta, e o desenho o destaca. */
+  forced?: readonly ForcedInputInfo[];
 }
 
 /**
  * Sinóptico 2D simples da caldeira (Etapa 7), no estilo ISA-101: traço neutro, cor só para condição anormal.
  * O desenho é provisório; a trilha de design (D1, D2) e o 3D (Etapa 14) o substituem.
  */
-export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
+export function CaldeiraSynoptic({ welcome, state, forced = [] }: CaldeiraSynopticProps) {
   const { t } = useTranslation();
   const text = useSignalText();
 
@@ -47,6 +54,14 @@ export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
   };
 
   const active = (name: string) => (find(name)?.value ?? 0) >= 0.5;
+  const isForced = (name: string) => forced.some((f) => f.signal === name);
+  /** Aviso de valor forçado, numa linha abaixo da leitura (para não sair do desenho). */
+  const forcedMark = (name: string, x: number) =>
+    isForced(name) && (
+      <tspan className="synoptic__forced" x={x} dy={14}>
+        {t('monitor.forced')}
+      </tspan>
+    );
   const level = find(LEVEL);
   const levelFraction = Math.min(
     Math.max(level ? (fractionOfRange(level.value, level.info) ?? 0) : 0, 0),
@@ -62,12 +77,14 @@ export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
         x={x}
         y={y}
         textAnchor={anchor}
-        className="synoptic__value"
+        className={isForced(name) ? 'synoptic__value synoptic__value--forced' : 'synoptic__value'}
         data-signal={name}
         data-value={signal.value}
+        data-forced={isForced(name)}
       >
         <tspan className="synoptic__tag">{name.replace(/_.*$/, '')} </tspan>
         {text(signal.value, signal.info)}
+        {forcedMark(name, x)}
       </text>
     );
   };
@@ -79,8 +96,10 @@ export function CaldeiraSynoptic({ welcome, state }: CaldeiraSynopticProps) {
       className={active(name) ? 'synoptic__switch synoptic__switch--active' : 'synoptic__switch'}
       data-signal={name}
       data-value={active(name) ? 1 : 0}
+      data-forced={isForced(name)}
     >
       {name.replace(/_.*$/, '')}
+      {forcedMark(name, x)}
     </text>
   );
 

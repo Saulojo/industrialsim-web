@@ -16,6 +16,13 @@ public sealed record IoSettings(
     double WatchdogTimeoutSeconds = 2.0,
     bool DiagnosticsEnabled = true);
 
+/// <summary>Um valor forçado (D30).</summary>
+/// <param name="Area">Entrada discreta ou input register.</param>
+/// <param name="Address">Endereço do sinal no cenário (no <c>float32</c>, o registrador é <c>2a</c>).</param>
+/// <param name="Signal">Sinal (ou <c>watchdog</c>, para a entrada discreta do watchdog).</param>
+/// <param name="Value">Valor em unidade de engenharia; 0 ou 1 nas entradas discretas.</param>
+public sealed record ForcedInput(ModbusArea Area, int Address, string Signal, double Value);
+
 /// <summary>Falha de um transmissor, que leva a saída à corrente de falha da NAMUR NE 43.</summary>
 public enum TransmitterFault
 {

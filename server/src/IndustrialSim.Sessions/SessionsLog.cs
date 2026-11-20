@@ -116,4 +116,12 @@ internal static partial class SessionsLog
     [LoggerMessage(EventId = 1501, Level = LogLevel.Information,
         Message = "Planta {InstanceId}: distúrbio {Input} = {Value}.")]
     public static partial void DisturbanceChanged(ILogger logger, Guid instanceId, string input, double value);
+
+    [LoggerMessage(EventId = 1502, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: configuração {Setting} mudou de {OldValue} para {NewValue}.")]
+    public static partial void SettingChanged(ILogger logger, Guid instanceId, string setting, string oldValue, string newValue);
+
+    [LoggerMessage(EventId = 1503, Level = LogLevel.Information,
+        Message = "Planta {InstanceId}: situação {Status} no passo {StepCount}.")]
+    public static partial void RunStateChanged(ILogger logger, Guid instanceId, InstanceStatus status, long stepCount);
 }

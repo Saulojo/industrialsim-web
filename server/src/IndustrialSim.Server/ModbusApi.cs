@@ -32,13 +32,13 @@ internal static class ModbusApi
     private static IResult GetWrites(Guid id, InstanceManager manager) =>
         WithPlant(id, manager, plant => Results.Ok(plant.Modbus.Device.Writes.Entries().Select(ToResponse).ToArray()));
 
-    private static IResult Accept(Guid id, Guid requestId, InstanceManager manager) =>
-        WithPlant(id, manager, plant => plant.Modbus.Pairing.Accept(requestId) ? Results.NoContent() : PairingRequestNotFound());
+    private static IResult Accept(Guid id, Guid requestId, InstanceManager manager, HttpContext context) =>
+        WithPlant(id, manager, plant => plant.Modbus.Pairing.Accept(requestId, Author(context)) ? Results.NoContent() : PairingRequestNotFound());
 
-    private static IResult Refuse(Guid id, Guid requestId, InstanceManager manager) =>
-        WithPlant(id, manager, plant => plant.Modbus.Pairing.Refuse(requestId) ? Results.NoContent() : PairingRequestNotFound());
+    private static IResult Refuse(Guid id, Guid requestId, InstanceManager manager, HttpContext context) =>
+        WithPlant(id, manager, plant => plant.Modbus.Pairing.Refuse(requestId, Author(context)) ? Results.NoContent() : PairingRequestNotFound());
 
-    private static IResult Authorize(Guid id, MasterAuthorizeRequest? request, InstanceManager manager) =>
+    private static IResult Authorize(Guid id, MasterAuthorizeRequest? request, InstanceManager manager, HttpContext context) =>
         WithPlant(id, manager, plant =>
         {
             if (request is null || !TryParseAddress(request.Address, out IPAddress? address))
@@ -46,11 +46,11 @@ internal static class ModbusApi
                 return Results.BadRequest(new ApiError(ApiErrorCodes.InvalidRequest));
             }
 
-            plant.Modbus.Pairing.Authorize(address);
+            plant.Modbus.Pairing.Authorize(address, Author(context));
             return Results.NoContent();
         });
 
-    private static IResult Revoke(Guid id, string address, InstanceManager manager) =>
+    private static IResult Revoke(Guid id, string address, InstanceManager manager, HttpContext context) =>
         WithPlant(id, manager, plant =>
         {
             if (!TryParseAddress(address, out IPAddress? parsed))
@@ -58,12 +58,13 @@ internal static class ModbusApi
                 return Results.BadRequest(new ApiError(ApiErrorCodes.InvalidRequest));
             }
 
-            return plant.Modbus.Pairing.Revoke(parsed)
+            return plant.Modbus.Pairing.Revoke(parsed, Author(context))
                 ? Results.NoContent()
                 : Results.NotFound(new ApiError(ApiErrorCodes.MasterNotFound));
         });
 
-    private static IResult SetUnitId(Guid id, UnitIdRequest? request, InstanceManager manager) =>
+    /// <summary>Muda o Unit ID pela mesma regra da tela de configurações (vai para o log de comunicação).</summary>
+    private static IResult SetUnitId(Guid id, UnitIdRequest? request, InstanceManager manager, HttpContext context) =>
         WithPlant(id, manager, plant =>
         {
             if (request is null || request.UnitId is < 1 or > 255)
@@ -71,9 +72,14 @@ internal static class ModbusApi
                 return Results.BadRequest(new ApiError(ApiErrorCodes.InvalidRequest));
             }
 
-            plant.Modbus.UnitId = (byte)request.UnitId;
-            return Results.NoContent();
+            return plant.UpdateSettings(new PlantSettingsUpdate(UnitId: (byte)request.UnitId), Author(context)) == SettingsUpdateResult.Applied
+                ? Results.NoContent()
+                : Results.BadRequest(new ApiError(ApiErrorCodes.InvalidRequest));
         });
+
+    /// <summary>Autor das ações no log: até as contas (Etapa 10), o IP de quem chamou a API.</summary>
+    internal static string? Author(HttpContext context) =>
+        context.Connection.RemoteIpAddress is IPAddress remote ? ModbusTcpServer.Normalize(remote).ToString() : null;
 
     /// <summary>Executa a ação na planta, se ela existir, e marca atividade.</summary>
     private static IResult WithPlant(Guid id, InstanceManager manager, Func<PlantInstance, IResult> action)

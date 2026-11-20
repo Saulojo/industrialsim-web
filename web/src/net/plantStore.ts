@@ -1,9 +1,16 @@
 import type {
   ActiveAlarm,
+  ForcedInputInfo,
   IncompatibleMessage,
+  LogEntryInfo,
   ModbusStatusMessage,
+  MonitorLayoutMessage,
+  MonitorMessage,
+  MonitorWriteInfo,
   ServerMessage,
+  SettingsMessage,
   StateMessage,
+  UpdateSettingsCommand,
   WelcomeMessage,
 } from './contracts.generated';
 import {
@@ -31,7 +38,25 @@ export interface PlantView {
   incompatible: IncompatibleMessage | null;
   /** Pontos da tendência, do mais antigo ao mais novo (janela de `trendWindowSeconds`). */
   trend: readonly TrendPoint[];
+  /** Configurações de comunicação (Etapa 8). */
+  settings: SettingsMessage | null;
+  /** Entradas forçadas. */
+  forced: readonly ForcedInputInfo[];
+  /** Linhas do monitor de registradores (só com o monitor ligado). */
+  monitorLayout: MonitorLayoutMessage | null;
+  /** Valores mais recentes do monitor. */
+  monitor: MonitorMessage | null;
+  /** Última escrita conhecida em cada linha do monitor. */
+  monitorWrites: readonly MonitorWriteInfo[];
+  /** Log de comunicação, do mais antigo ao mais novo (até `logLimit` eventos). */
+  log: readonly LogEntryInfo[];
 }
+
+/** Campos de configuração que a tela pode mudar; os ausentes ficam como estão. */
+export type SettingsChanges = Partial<Omit<UpdateSettingsCommand, 'type'>>;
+
+/** Eventos do log guardados na IHM, no máximo (o servidor guarda os mesmos 500). */
+export const logLimit = 500;
 
 export interface PlantStoreOptions extends PlantSocketOptions {
   /** URL do WebSocket; por padrão, a da planta no host da página. */
@@ -49,6 +74,12 @@ const initialView: PlantView = {
   errorCode: null,
   incompatible: null,
   trend: [],
+  settings: null,
+  forced: [],
+  monitorLayout: null,
+  monitor: null,
+  monitorWrites: [],
+  log: [],
 };
 
 /**
@@ -62,6 +93,7 @@ export class PlantStore {
   private readonly trendWindowSeconds: number;
   private trend: TrendPoint[] = [];
   private run: number | null = null;
+  private monitorEnabled = false;
 
   constructor(
     readonly plantId: string,
@@ -109,10 +141,74 @@ export class PlantStore {
     return this.socket.send({ type: 'refusePairing', requestId });
   }
 
+  revokeMaster(address: string): boolean {
+    return this.socket.send({ type: 'revokeMaster', address });
+  }
+
+  /** Muda as configurações dadas; o servidor responde com `settings` (ou com um erro). */
+  updateSettings(changes: SettingsChanges): boolean {
+    return this.socket.send({
+      type: 'updateSettings',
+      format: changes.format ?? null,
+      wordOrder: changes.wordOrder ?? null,
+      watchdogEnabled: changes.watchdogEnabled ?? null,
+      watchdogTimeoutSeconds: changes.watchdogTimeoutSeconds ?? null,
+      diagnosticsEnabled: changes.diagnosticsEnabled ?? null,
+      unitId: changes.unitId ?? null,
+      masterPolicy: changes.masterPolicy ?? null,
+    });
+  }
+
+  forceInput(area: string, signal: string, value: number): boolean {
+    return this.socket.send({ type: 'forceInput', area, signal, value });
+  }
+
+  releaseInput(area: string, signal: string): boolean {
+    return this.socket.send({ type: 'releaseInput', area, signal });
+  }
+
+  pause(): boolean {
+    return this.socket.send({ type: 'pause' });
+  }
+
+  resume(): boolean {
+    return this.socket.send({ type: 'resume' });
+  }
+
+  /**
+   * Liga ou desliga o monitor de registradores. Fica ligado também depois de uma reconexão (o pedido é
+   * repetido a cada `welcome`).
+   */
+  setMonitor(enabled: boolean): void {
+    this.monitorEnabled = enabled;
+    this.socket.send({ type: 'subscribeMonitor', enabled });
+    if (!enabled) this.update({ monitorLayout: null, monitor: null, monitorWrites: [] });
+  }
+
   private handle(message: ServerMessage): void {
     switch (message.type) {
       case 'welcome':
         this.update({ welcome: message, errorCode: null });
+        if (this.monitorEnabled) this.socket.send({ type: 'subscribeMonitor', enabled: true });
+        break;
+      case 'settings':
+        this.update({ settings: message });
+        break;
+      case 'forced':
+        this.update({ forced: message.inputs });
+        break;
+      case 'monitorLayout':
+        this.update({ monitorLayout: message, monitor: null, monitorWrites: [] });
+        break;
+      case 'monitor':
+        this.update(
+          message.writes === null
+            ? { monitor: message }
+            : { monitor: message, monitorWrites: message.writes },
+        );
+        break;
+      case 'log':
+        this.update({ log: mergeLog(message.reset ? [] : this.view.log, message.entries) });
         break;
       case 'state':
         this.addState(message);
@@ -154,6 +250,30 @@ export class PlantStore {
     this.view = { ...this.view, ...changes };
     for (const listener of this.listeners) listener();
   }
+}
+
+/**
+ * Junta eventos novos ao log: um evento agrupado de novo (mesmo `id`) sai da posição antiga e vai para o fim.
+ * Guarda os `logLimit` mais recentes, em ordem de sequência.
+ */
+export function mergeLog(
+  current: readonly LogEntryInfo[],
+  entries: readonly LogEntryInfo[],
+): LogEntryInfo[] {
+  const ids = new Set(entries.map((e) => e.id));
+  const merged = [...current.filter((e) => !ids.has(e.id)), ...entries].sort(
+    (a, b) => a.sequence - b.sequence,
+  );
+  return merged.length > logLimit ? merged.slice(merged.length - logLimit) : merged;
+}
+
+/** Se a entrada está forçada. */
+export function isForced(
+  forced: readonly ForcedInputInfo[],
+  area: string,
+  signal: string,
+): ForcedInputInfo | undefined {
+  return forced.find((f) => f.area === area && f.signal === signal);
 }
 
 /** Se há mestre Modbus autorizado e conectado. */

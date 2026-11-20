@@ -19,10 +19,11 @@ public sealed record ScenarioSummary(
 /// <param name="Record">Gravar o ensaio em CSV desde o primeiro passo.</param>
 public sealed record PlantCreateRequest(string ScenarioId, ulong? NoiseSeed = null, bool Record = false);
 
-/// <summary>Situação de uma planta: <c>running</c>, <c>faulted</c> ou <c>ended</c>.</summary>
+/// <summary>Situação de uma planta: <c>running</c>, <c>paused</c>, <c>faulted</c> ou <c>ended</c>.</summary>
 public static class PlantStatuses
 {
     public const string Running = "running";
+    public const string Paused = "paused";
     public const string Faulted = "faulted";
     public const string Ended = "ended";
 }
@@ -121,3 +122,49 @@ public static class ApiErrorCodes
     public const string PairingRequestNotFound = "pairing-request-not-found";
     public const string MasterNotFound = "master-not-found";
 }
+
+/// <summary>Uma linha do mapa de I/O exportado (<c>GET /api/plants/{id}/io-map</c> e <c>io-map.csv</c>).</summary>
+/// <param name="Area">Área (<see cref="ModbusAreas"/>).</param>
+/// <param name="Address">Primeiro registrador, em base 0, no formato atual.</param>
+/// <param name="ClassicAddress">O mesmo endereço na notação clássica.</param>
+/// <param name="Length">Registradores ocupados (2 no <c>float32</c>).</param>
+/// <param name="Signal">Sinal (<c>heartbeat</c> e <c>watchdog</c> para os do watchdog).</param>
+/// <param name="Kind">O que o ponto representa (<see cref="MonitorPointKinds"/>).</param>
+/// <param name="Access"><c>read</c> (o mestre lê) ou <c>write</c> (o mestre escreve).</param>
+/// <param name="DataType"><c>bool</c>, <c>int16</c>, <c>uint16</c> ou <c>float32</c>.</param>
+/// <param name="RawMin">Valor bruto que corresponde a 4 mA (início da faixa); nulo se não se aplica.</param>
+/// <param name="RawMax">Valor bruto que corresponde a 20 mA (fim da faixa); nulo se não se aplica.</param>
+/// <param name="Unit">Unidade de engenharia; vazia se não se aplica.</param>
+/// <param name="Lrv">Início da faixa, em unidade de engenharia; nulo se não se aplica.</param>
+/// <param name="Urv">Fim da faixa, em unidade de engenharia; nulo se não se aplica.</param>
+public sealed record IoMapRow(
+    string Area,
+    int Address,
+    int ClassicAddress,
+    int Length,
+    string Signal,
+    string Kind,
+    string Access,
+    string DataType,
+    int? RawMin,
+    int? RawMax,
+    string Unit,
+    double? Lrv,
+    double? Urv);
+
+/// <summary>Mapa de I/O de uma planta, no formato e com as faixas atuais (<c>GET /api/plants/{id}/io-map</c>).</summary>
+/// <param name="PlantId">Planta.</param>
+/// <param name="ScenarioId">Cenário.</param>
+/// <param name="Format">Formato analógico (<see cref="AnalogFormats"/>).</param>
+/// <param name="WordOrder">Ordem das palavras do <c>float32</c> (<see cref="WordOrders"/>).</param>
+/// <param name="UnitId">Unit ID.</param>
+/// <param name="Port">Porta Modbus TCP.</param>
+/// <param name="Rows">Linhas do mapa.</param>
+public sealed record IoMapResponse(
+    Guid PlantId,
+    string ScenarioId,
+    string Format,
+    string WordOrder,
+    int UnitId,
+    int Port,
+    IReadOnlyList<IoMapRow> Rows);

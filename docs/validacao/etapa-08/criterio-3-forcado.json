@@ -1,0 +1,7 @@
+{
+  "forcedValueM": 0.3,
+  "masterReadWhileForced": 6912,
+  "forcedReadAfterMs": 0,
+  "masterReadAfterRelease": 13815,
+  "releasedReadAfterMs": 0
+}

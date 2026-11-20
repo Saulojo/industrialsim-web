@@ -41,6 +41,10 @@
   --color-alarm: #b3261e;
   --color-alarm-surface: #fbe9e7;
 
+  /* Valor forçado (Etapa 8): estado anormal que não é alarme; contraste AA com o fundo próprio e com a superfície. */
+  --color-forced: #8e2a7a;
+  --color-forced-surface: #f6e6f3;
+
   /* IHM (ISA-101): equipamento em cinza; água e "em operação" em tons discretos; cor forte só no alarme. */
   --color-equipment: #8a9299;
   --color-equipment-on: #50575e;
@@ -72,6 +76,8 @@
     --color-accent: #8fb8e0;
     --color-alarm: #ff8a80;
     --color-alarm-surface: #3b1c1a;
+    --color-forced: #e59ad6;
+    --color-forced-surface: #3a1d35;
     --color-equipment: #6b737b;
     --color-equipment-on: #c4cbd2;
     --color-water: #34475a;
@@ -91,6 +97,8 @@
   --color-accent: #8fb8e0;
   --color-alarm: #ff8a80;
   --color-alarm-surface: #3b1c1a;
+  --color-forced: #e59ad6;
+  --color-forced-surface: #3a1d35;
   --color-equipment: #6b737b;
   --color-equipment-on: #c4cbd2;
   --color-water: #34475a;

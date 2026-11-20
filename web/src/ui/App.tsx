@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthStatus } from './HealthStatus';
-import { navigate, plantIdFromPath, usePath } from './navigation';
+import { IoMapPrintPage } from './IoMapPrintPage';
+import { ioMapPlantIdFromPath, navigate, plantIdFromPath, usePath } from './navigation';
 import { PlantPage } from './plant/PlantPage';
 import { ScenarioPicker } from './ScenarioPicker';
 
@@ -9,10 +10,15 @@ export function App() {
   const { t } = useTranslation();
   const path = usePath();
   const plantId = plantIdFromPath(path);
+  const ioMapPlantId = ioMapPlantIdFromPath(path);
 
   useEffect(() => {
     document.title = t('app.title');
   }, [t]);
+
+  if (ioMapPlantId) {
+    return <IoMapPrintPage plantId={ioMapPlantId} />;
+  }
 
   return (
     <div className={plantId ? 'app app--wide' : 'app'}>

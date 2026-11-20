@@ -1,11 +1,20 @@
-import type { ModbusStatusMessage, StateMessage, WelcomeMessage } from './contracts.generated';
+import type {
+  LogEntryInfo,
+  ModbusStatusMessage,
+  MonitorLayoutMessage,
+  MonitorMessage,
+  PlantSettingsInfo,
+  SettingsMessage,
+  StateMessage,
+  WelcomeMessage,
+} from './contracts.generated';
 
 /** Mensagens de exemplo da caldeira, para os testes. */
 export const plantId = '7b5c0e0e-1d2a-4f39-9a51-0d6a3f1f2b11';
 
 export const welcome: WelcomeMessage = {
   type: 'welcome',
-  protocolVersion: 1,
+  protocolVersion: 2,
   serverVersion: '0.1.0',
   plant: {
     id: plantId,
@@ -107,6 +116,110 @@ export function modbus(changes: Partial<ModbusStatusMessage> = {}): ModbusStatus
     authorizedMasters: [],
     pendingRequests: [],
     connections: [],
+    requestsPerSecond: 0,
+    requests: 0,
+    exceptionResponses: 0,
+    ...changes,
+  };
+}
+
+export function settings(changes: Partial<PlantSettingsInfo> = {}): SettingsMessage {
+  return {
+    type: 'settings',
+    settings: {
+      format: 'counts27648',
+      wordOrder: 'highWordFirst',
+      watchdogEnabled: false,
+      watchdogTimeoutSeconds: 2,
+      diagnosticsEnabled: true,
+      unitId: 1,
+      masterPolicy: 'multiple',
+      ...changes,
+    },
+    maxWatchdogTimeoutSeconds: 600,
+  };
+}
+
+/** Linhas do monitor: um coil, uma entrada discreta, um holding register e duas medições de LT-101. */
+export const monitorLayout: MonitorLayoutMessage = {
+  type: 'monitorLayout',
+  format: 'counts27648',
+  wordOrder: 'highWordFirst',
+  points: [
+    {
+      area: 'coil',
+      address: 0,
+      classicAddress: 1,
+      length: 1,
+      signal: 'P-101_run',
+      unit: '',
+      kind: 'digital',
+    },
+    {
+      area: 'discrete-input',
+      address: 2,
+      classicAddress: 10003,
+      length: 1,
+      signal: 'LSHH-101',
+      unit: '',
+      kind: 'digital',
+    },
+    {
+      area: 'holding-register',
+      address: 0,
+      classicAddress: 40001,
+      length: 1,
+      signal: 'FV-101_command',
+      unit: '%',
+      kind: 'analog',
+    },
+    {
+      area: 'input-register',
+      address: 0,
+      classicAddress: 30001,
+      length: 1,
+      signal: 'LT-101',
+      unit: 'm',
+      kind: 'analog',
+    },
+    {
+      area: 'input-register',
+      address: 100,
+      classicAddress: 30101,
+      length: 2,
+      signal: 'LT-101',
+      unit: 'm',
+      kind: 'diagnostic',
+    },
+  ],
+};
+
+export function monitor(changes: Partial<MonitorMessage> = {}): MonitorMessage {
+  return {
+    type: 'monitor',
+    step: 1250,
+    raw: [1, 0, 22749, 13824, 0x3f19, 0x999a],
+    values: [1, 0, 82.28, 0.6, 0.6],
+    forced: [],
+    writes: [{ point: 2, author: '192.168.0.20', timeUtc: '2026-11-19T12:00:05Z' }],
+    ...changes,
+  };
+}
+
+export function logEntry(
+  id: number,
+  kind: string,
+  args: Record<string, string> = {},
+  changes: Partial<LogEntryInfo> = {},
+): LogEntryInfo {
+  return {
+    id,
+    sequence: id,
+    kind,
+    firstUtc: '2026-11-19T12:00:00Z',
+    timeUtc: '2026-11-19T12:00:00Z',
+    count: 1,
+    arguments: Object.entries(args).map(([name, value]) => ({ name, value })),
     ...changes,
   };
 }

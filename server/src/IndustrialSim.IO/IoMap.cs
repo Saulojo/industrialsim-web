@@ -14,6 +14,25 @@ public sealed record DiagnosticPoint(string Signal, int PlantIndex, string Unit,
 /// <summary>Entrada externa e o valor que ela recebe no estado seguro do watchdog.</summary>
 public sealed record SafeStatePoint(string Input, int PlantIndex, double Value);
 
+/// <summary>O que um ponto do mapa de I/O representa.</summary>
+public enum IoPointKind
+{
+    /// <summary>Coil ou entrada discreta ligada a um sinal da planta.</summary>
+    Digital,
+
+    /// <summary>Sinal analógico de instrumento (holding ou input register), no formato analógico da planta.</summary>
+    Analog,
+
+    /// <summary>Valor do bloco de diagnóstico: <c>float32</c> em unidade de engenharia, em qualquer formato.</summary>
+    Diagnostic,
+
+    /// <summary>Heartbeat do mestre (contador livre).</summary>
+    Heartbeat,
+
+    /// <summary>Entrada discreta do watchdog disparado.</summary>
+    WatchdogStatus,
+}
+
 /// <summary>Uma linha do mapa de I/O, para exibir ou exportar: endereço nas duas notações, sinal e unidade.</summary>
 /// <param name="Area">Área Modbus.</param>
 /// <param name="Address">Endereço em base 0 do primeiro registrador.</param>
@@ -21,7 +40,20 @@ public sealed record SafeStatePoint(string Input, int PlantIndex, double Value);
 /// <param name="Length">Quantos endereços o sinal ocupa (2 para <c>float32</c>).</param>
 /// <param name="Signal">Nome da entrada ou saída externa; <c>heartbeat</c> e <c>watchdog</c> para os sinais do watchdog.</param>
 /// <param name="Unit">Unidade de engenharia; vazio se não se aplica.</param>
-public sealed record IoMapEntry(ModbusArea Area, int Address, int ClassicAddress, int Length, string Signal, string Unit);
+/// <param name="Kind">O que o ponto representa.</param>
+/// <param name="Index">
+/// Posição do ponto na lista do mapa da sua área (<see cref="IoMap.Coils"/>, <see cref="IoMap.InputRegisters"/>,
+/// <see cref="IoMap.Diagnostics"/>…); -1 para heartbeat e watchdog.
+/// </param>
+public sealed record IoMapEntry(
+    ModbusArea Area,
+    int Address,
+    int ClassicAddress,
+    int Length,
+    string Signal,
+    string Unit,
+    IoPointKind Kind = IoPointKind.Analog,
+    int Index = -1);
 
 /// <summary>
 /// Mapa de I/O de uma planta: a seção <c>io</c> do cenário resolvida contra as entradas e saídas externas, com o
@@ -140,48 +172,52 @@ public sealed class IoMap
         var entries = new List<IoMapEntry>();
         int analogLength = format == AnalogFormat.Float32 ? 2 : 1;
 
-        foreach (DigitalPoint point in Coils)
+        for (int i = 0; i < Coils.Count; i++)
         {
-            entries.Add(Entry(ModbusArea.Coil, point.Address, 1, point.Signal, string.Empty));
+            DigitalPoint point = Coils[i];
+            entries.Add(Entry(ModbusArea.Coil, point.Address, 1, point.Signal, string.Empty, IoPointKind.Digital, i));
         }
 
-        foreach (DigitalPoint point in DiscreteInputs)
+        for (int i = 0; i < DiscreteInputs.Count; i++)
         {
-            entries.Add(Entry(ModbusArea.DiscreteInput, point.Address, 1, point.Signal, string.Empty));
+            DigitalPoint point = DiscreteInputs[i];
+            entries.Add(Entry(ModbusArea.DiscreteInput, point.Address, 1, point.Signal, string.Empty, IoPointKind.Digital, i));
         }
 
         if (WatchdogStatusDiscreteInput is int status)
         {
-            entries.Add(Entry(ModbusArea.DiscreteInput, status, 1, WatchdogSignal, string.Empty));
+            entries.Add(Entry(ModbusArea.DiscreteInput, status, 1, WatchdogSignal, string.Empty, IoPointKind.WatchdogStatus, -1));
         }
 
-        foreach (AnalogPoint point in HoldingRegisters)
+        for (int i = 0; i < HoldingRegisters.Count; i++)
         {
-            entries.Add(Entry(ModbusArea.HoldingRegister, RegisterAddress(point.Address, format), analogLength, point.Signal, point.Unit));
+            AnalogPoint point = HoldingRegisters[i];
+            entries.Add(Entry(ModbusArea.HoldingRegister, RegisterAddress(point.Address, format), analogLength, point.Signal, point.Unit, IoPointKind.Analog, i));
         }
 
         if (HeartbeatRegister is int heartbeat)
         {
-            entries.Add(Entry(ModbusArea.HoldingRegister, heartbeat, 1, HeartbeatSignal, string.Empty));
+            entries.Add(Entry(ModbusArea.HoldingRegister, heartbeat, 1, HeartbeatSignal, string.Empty, IoPointKind.Heartbeat, -1));
         }
 
-        foreach (AnalogPoint point in InputRegisters)
+        for (int i = 0; i < InputRegisters.Count; i++)
         {
-            entries.Add(Entry(ModbusArea.InputRegister, RegisterAddress(point.Address, format), analogLength, point.Signal, point.Unit));
+            AnalogPoint point = InputRegisters[i];
+            entries.Add(Entry(ModbusArea.InputRegister, RegisterAddress(point.Address, format), analogLength, point.Signal, point.Unit, IoPointKind.Analog, i));
         }
 
         if (DiagnosticsAddress is int diagnostics)
         {
             for (int k = 0; k < Diagnostics.Count; k++)
             {
-                entries.Add(Entry(ModbusArea.InputRegister, diagnostics + (2 * k), 2, Diagnostics[k].Signal, Diagnostics[k].Unit));
+                entries.Add(Entry(ModbusArea.InputRegister, diagnostics + (2 * k), 2, Diagnostics[k].Signal, Diagnostics[k].Unit, IoPointKind.Diagnostic, k));
             }
         }
 
         return entries;
 
-        static IoMapEntry Entry(ModbusArea area, int address, int length, string signal, string unit) =>
-            new(area, address, ModbusAddress.Classic(area, address), length, signal, unit);
+        static IoMapEntry Entry(ModbusArea area, int address, int length, string signal, string unit, IoPointKind kind, int index) =>
+            new(area, address, ModbusAddress.Classic(area, address), length, signal, unit, kind, index);
     }
 
     private static int AnalogLength(AnalogPoint[] points) => points.Length == 0 ? 0 : (2 * points.Max(p => p.Address)) + 2;

@@ -1,53 +1,13 @@
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
-import { expect, test, type Page, type TestInfo } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { expect, test, type Page } from '@playwright/test';
 import { recordingsDir } from '../playwright.config';
+import { PlantSocketProtocol } from '../src/net/contracts.generated';
+import { evidence, modbusPort, numberAttribute, openPlant, record } from './evidence';
 import { ModbusMaster } from './modbusMaster';
 
-/**
- * Critérios de validação da Etapa 7, com o servidor de verdade. Com EVIDENCE_DIR definido (ex.:
- * ../docs/validacao/etapa-07), as medidas são gravadas lá, em JSON, e as capturas em ../img, com o nome da
- * pasta como prefixo (ex.: img/etapa-07-criterio-1-tendencia.png).
- */
-const evidenceDir = process.env.EVIDENCE_DIR;
-
-async function evidence(page: Page, testInfo: TestInfo, name: string): Promise<void> {
-  const shot = await page.screenshot({ fullPage: true });
-  await testInfo.attach(name, { body: shot, contentType: 'image/png' });
-  if (evidenceDir) {
-    const images = join(evidenceDir, '..', 'img');
-    mkdirSync(images, { recursive: true });
-    writeFileSync(join(images, `${basename(evidenceDir)}-${name}.png`), shot);
-  }
-}
-
-async function record(testInfo: TestInfo, name: string, data: object): Promise<void> {
-  const text = JSON.stringify(data, null, 2);
-  console.log(`${name}: ${text}`);
-  await testInfo.attach(name, { body: text, contentType: 'application/json' });
-  if (evidenceDir) {
-    mkdirSync(evidenceDir, { recursive: true });
-    writeFileSync(join(evidenceDir, `${name}.json`), text + '\n');
-  }
-}
-
-/** Abre uma planta nova da caldeira pela tela inicial e espera a IHM conectar. */
-async function openPlant(page: Page): Promise<string> {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Abrir planta' }).click();
-  await page.waitForURL(/\/plants\/[0-9a-f-]+$/);
-  await expect(page.getByTestId('connection-status')).toHaveAttribute('data-status', 'connected');
-  return new URL(page.url()).pathname.split('/').at(-1) ?? '';
-}
-
-async function numberAttribute(page: Page, testId: string, name = 'data-value'): Promise<number> {
-  return Number(await page.getByTestId(testId).getAttribute(name));
-}
-
-async function modbusPort(page: Page): Promise<number> {
-  return Number(await page.getByTestId('modbus-port').textContent());
-}
+/** Critérios de validação da Etapa 7, com o servidor de verdade (evidências: ver `evidence.ts`). */
 
 /** Leva o distúrbio FV-103 a `percent` pelo teclado, como um operador faria. */
 async function moveSteamValve(page: Page, percent: number): Promise<void> {
@@ -207,7 +167,7 @@ test('critério 4: um cliente com outra versão do protocolo recebe a mensagem d
   await page.getByRole('button', { name: 'Abrir planta' }).click();
   await expect(page.getByTestId('connection-status')).toHaveText('Versão incompatível');
   await expect(page.getByTestId('incompatible')).toHaveText(
-    'Esta página usa a versão 99 do protocolo, mas o servidor usa a versão 1. Recarregue a página (Ctrl+F5) para carregar a versão atual.',
+    `Esta página usa a versão 99 do protocolo, mas o servidor usa a versão ${PlantSocketProtocol.version}. Recarregue a página (Ctrl+F5) para carregar a versão atual.`,
   );
   await page.waitForTimeout(3000);
   await expect(page.getByTestId('connection-status')).toHaveText('Versão incompatível'); // não insiste
