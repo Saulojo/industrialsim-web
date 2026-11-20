@@ -1,0 +1,13 @@
+{
+  "changesMade": 8,
+  "logEntries": [
+    "09:18:13Formato analógico: 0–10000 → float32 em unidades de engenharia.127.0.0.1",
+    "09:18:13Unit ID: 1 → 3.127.0.0.1",
+    "09:18:13Bloco de diagnóstico: ligado → desligado.127.0.0.1",
+    "09:18:13Tempo limite do watchdog: 2 s → 5 s.127.0.0.1",
+    "09:18:13Watchdog: desligado → ligado.127.0.0.1",
+    "09:18:13Ordem das palavras: Normal (big-endian) → Invertida (word swap).127.0.0.1",
+    "09:18:13Formato analógico: 0–27648 (Siemens) → 0–10000.127.0.0.1",
+    "09:18:13Mestres permitidos: Vários ao mesmo tempo → Um por vez.127.0.0.1"
+  ]
+}

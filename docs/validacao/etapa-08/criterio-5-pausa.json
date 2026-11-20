@@ -1,0 +1,23 @@
+{
+  "simulatedTimePaused": 1.16,
+  "simulatedTimeAfter1500msPaused": 1.16,
+  "masterReadsWhilePaused": [
+    [
+      13779,
+      17281,
+      13802,
+      11044,
+      22749,
+      13824
+    ],
+    [
+      13779,
+      17281,
+      13802,
+      11044,
+      22749,
+      13824
+    ]
+  ],
+  "simulatedTime1sAfterResume": 2.2
+}
