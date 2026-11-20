@@ -1,7 +1,7 @@
 # Validação — Etapa 8: Configurações da planta e monitor de comunicação
 
 - Branch: `etapa-08-config-monitor`
-- Pull request: (a abrir)
+- Pull request: [Saulojo/industrialsim-web#9](https://github.com/Saulojo/industrialsim-web/pull/9)
 - Data: 20/11/2026
 
 ## Ambiente
