@@ -54,6 +54,7 @@ public sealed class ModbusTcpServer : IDisposable
     private readonly ModbusServerOptions _options;
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
+    private readonly IModbusServerObserver? _observer;
     private readonly CancellationTokenSource _stopping = new();
     private readonly ConcurrentDictionary<long, Connection> _connections = new();
     private readonly Lock _gateLock = new();
@@ -66,7 +67,8 @@ public sealed class ModbusTcpServer : IDisposable
         IConnectionGate gate,
         ModbusServerOptions? options = null,
         TimeProvider? time = null,
-        ILogger? logger = null)
+        ILogger? logger = null,
+        IModbusServerObserver? observer = null)
     {
         ArgumentNullException.ThrowIfNull(device);
         ArgumentNullException.ThrowIfNull(gate);
@@ -76,6 +78,7 @@ public sealed class ModbusTcpServer : IDisposable
         _options.Validate();
         _time = time ?? TimeProvider.System;
         _logger = logger ?? NullLogger.Instance;
+        _observer = observer;
     }
 
     public ModbusDevice Device => _device;
@@ -224,6 +227,7 @@ public sealed class ModbusTcpServer : IDisposable
         if (_connections.Count >= _options.MaxConnections)
         {
             ModbusLog.ConnectionLimitReached(_logger, remote, LocalEndPoint!.Port, _options.MaxConnections);
+            _observer?.ConnectionLimitReached(remote);
             socket.Dispose();
             return;
         }
@@ -293,11 +297,13 @@ public sealed class ModbusTcpServer : IDisposable
             if (lease is null)
             {
                 ModbusLog.ConnectionRefused(_logger, connection.Id, connection.Remote);
+                _observer?.ConnectionRefused(connection.Id, connection.Remote);
                 return;
             }
 
             connection.Authorized = true;
             ModbusLog.ConnectionAuthorized(_logger, connection.Id, connection.Remote, discarded);
+            _observer?.ConnectionAuthorized(connection.Id, connection.Remote);
             string author = connection.Address.ToString();
             while (await read.ConfigureAwait(false))
             {
@@ -336,6 +342,10 @@ public sealed class ModbusTcpServer : IDisposable
             }
 
             ModbusLog.ConnectionClosed(_logger, connection.Id, connection.Remote, connection.Requests);
+            if (connection.Authorized)
+            {
+                _observer?.ConnectionClosed(connection.Id, connection.Remote, connection.Requests);
+            }
         }
     }
 
@@ -379,10 +389,29 @@ public sealed class ModbusTcpServer : IDisposable
         byte function = connection.Response.Span[MbapHeader.Size];
         if ((function & 0x80) != 0)
         {
-            ModbusLog.ExceptionResponse(_logger, connection.Id, connection.Response.Span[MbapHeader.Size + 1], (byte)(function & 0x7F));
+            byte code = connection.Response.Span[MbapHeader.Size + 1];
+            byte requested = (byte)(function & 0x7F);
+            ModbusLog.ExceptionResponse(_logger, connection.Id, code, requested);
+            _observer?.ExceptionResponse(
+                connection.Id,
+                connection.Remote,
+                requested,
+                code,
+                StartAddress(connection.Request.Span.Slice(MbapHeader.Size, header.PduLength)));
         }
 
         await connection.Stream.WriteAsync(connection.Response[..(MbapHeader.Size + pduLength)], token).ConfigureAwait(false);
+    }
+
+    /// <summary>Endereço inicial de uma requisição das funções 1 a 6, 15 e 16; nulo nas outras.</summary>
+    internal static int? StartAddress(ReadOnlySpan<byte> pdu)
+    {
+        if (pdu.Length < 3)
+        {
+            return null;
+        }
+
+        return pdu[0] is >= 1 and <= 6 or 15 or 16 ? (pdu[1] << 8) | pdu[2] : null;
     }
 
     private sealed class Connection

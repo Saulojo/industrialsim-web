@@ -12,6 +12,16 @@ namespace IndustrialSim.Sessions.Modbus;
 /// <param name="WaitingConnections">Conexões do IP seguradas pelo pedido.</param>
 public sealed record PairingRequestInfo(Guid Id, IPAddress Address, DateTimeOffset RequestedUtc, DateTimeOffset ExpiresUtc, int WaitingConnections);
 
+/// <summary>Quantos mestres podem ficar autorizados ao mesmo tempo numa planta (D42).</summary>
+public enum MasterPolicy
+{
+    /// <summary>Vários IPs autorizados ao mesmo tempo (padrão).</summary>
+    Multiple,
+
+    /// <summary>Um IP por vez: autorizar outro retira a autorização do anterior e fecha as conexões dele.</summary>
+    Single,
+}
+
 /// <summary>
 /// Pareamento por IP dos mestres Modbus de uma planta (D07, D38).
 /// </summary>
@@ -28,6 +38,10 @@ public sealed record PairingRequestInfo(Guid Id, IPAddress Address, DateTimeOffs
 /// <item>Retirar a autorização fecha as conexões do IP; a próxima conexão abre outro pedido.</item>
 /// </list>
 /// Até as contas (Etapa 10), quem pode aceitar e recusar é quem tem o identificador da planta.
+/// <para>
+/// Com <see cref="MasterPolicy.Single"/> (D42), aceitar um pedido ou autorizar um IP retira a autorização do
+/// mestre anterior e fecha as conexões dele. Cada decisão vai para o log de comunicação da planta.
+/// </para>
 /// </remarks>
 public sealed class MasterPairing : IConnectionGate
 {
@@ -40,12 +54,25 @@ public sealed class MasterPairing : IConnectionGate
     private readonly TimeProvider _time;
     private readonly ILogger _logger;
     private readonly Guid _plantId;
+    private readonly PlantEventLog _events;
+    private MasterPolicy _policy;
 
     /// <param name="plantId">Planta, para os logs.</param>
+    /// <param name="options">Tempos e limites do pareamento.</param>
     /// <param name="attachClient">Registra uma conexão autorizada como cliente da planta (a planta não expira).</param>
-    internal MasterPairing(Guid plantId, ModbusEndpointOptions options, Func<IDisposable> attachClient, TimeProvider time, ILogger logger)
+    /// <param name="events">Log de comunicação da planta.</param>
+    /// <param name="time">Relógio.</param>
+    /// <param name="logger">Log do servidor.</param>
+    internal MasterPairing(
+        Guid plantId,
+        ModbusEndpointOptions options,
+        Func<IDisposable> attachClient,
+        PlantEventLog events,
+        TimeProvider time,
+        ILogger logger)
     {
         _plantId = plantId;
+        _events = events;
         _options = options;
         _attachClient = attachClient;
         _time = time;
@@ -54,6 +81,41 @@ public sealed class MasterPairing : IConnectionGate
 
     /// <summary>Fecha as conexões de um IP; ligado ao servidor da planta.</summary>
     internal Func<IPAddress, int> CloseConnections { get; set; } = static _ => 0;
+
+    /// <summary>Quantos mestres podem ficar autorizados ao mesmo tempo.</summary>
+    public MasterPolicy Policy
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _policy;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Troca a política de mestres. Falso, sem mudar nada, ao pedir <see cref="MasterPolicy.Single"/> com mais de
+    /// um IP autorizado: quem configura escolhe qual retirar.
+    /// </summary>
+    public bool TrySetPolicy(MasterPolicy policy)
+    {
+        if (!Enum.IsDefined(policy))
+        {
+            throw new ArgumentOutOfRangeException(nameof(policy), policy, "Política de mestres desconhecida.");
+        }
+
+        lock (_gate)
+        {
+            if (policy == MasterPolicy.Single && _authorized.Count > 1)
+            {
+                return false;
+            }
+
+            _policy = policy;
+            return true;
+        }
+    }
 
     /// <summary>IPs autorizados, em ordem.</summary>
     public IReadOnlyList<IPAddress> Authorized
@@ -124,6 +186,7 @@ public sealed class MasterPairing : IConnectionGate
         if (created)
         {
             SessionsLog.PairingRequested(_logger, _plantId, request.Id, address);
+            _events.Add(PlantEventKinds.PairingRequested, Arg("address", address.ToString()));
         }
 
         try
@@ -144,10 +207,16 @@ public sealed class MasterPairing : IConnectionGate
         }
     }
 
-    /// <summary>Aceita um pedido: o IP passa a ser autorizado. Falso se o pedido não existir mais.</summary>
-    public bool Accept(Guid requestId)
+    /// <summary>
+    /// Aceita um pedido: o IP passa a ser autorizado (e, no modo de um mestre por vez, o anterior deixa de ser).
+    /// Falso se o pedido não existir mais.
+    /// </summary>
+    /// <param name="requestId">Pedido.</param>
+    /// <param name="author">Quem aceitou, para o log (até as contas, o IP do navegador).</param>
+    public bool Accept(Guid requestId, string? author = null)
     {
         PendingRequest? request;
+        IPAddress[] replaced;
         lock (_gate)
         {
             request = Take(requestId);
@@ -156,16 +225,20 @@ public sealed class MasterPairing : IConnectionGate
                 return false;
             }
 
-            _authorized.Add(request.Address);
+            replaced = AddAuthorizedLocked(request.Address);
         }
 
         SessionsLog.PairingAccepted(_logger, _plantId, request.Id, request.Address);
+        _events.Add(PlantEventKinds.PairingAccepted, WithAuthor(author, Arg("address", request.Address.ToString())));
+        CloseReplaced(replaced, request.Address);
         request.Decision.TrySetResult(true);
         return true;
     }
 
     /// <summary>Recusa um pedido: as conexões seguradas são fechadas. Falso se o pedido não existir mais.</summary>
-    public bool Refuse(Guid requestId)
+    /// <param name="requestId">Pedido.</param>
+    /// <param name="author">Quem recusou, para o log.</param>
+    public bool Refuse(Guid requestId, string? author = null)
     {
         PendingRequest? request;
         lock (_gate)
@@ -183,38 +256,46 @@ public sealed class MasterPairing : IConnectionGate
         }
 
         SessionsLog.PairingRefused(_logger, _plantId, request.Id, request.Address);
+        _events.Add(PlantEventKinds.PairingRefused, WithAuthor(author, Arg("address", request.Address.ToString())));
         request.Decision.TrySetResult(false);
         return true;
     }
 
     /// <summary>
-    /// Autoriza um IP antes de ele conectar (ou aceita o pedido pendente dele). Falso se já estava autorizado.
+    /// Autoriza um IP antes de ele conectar (ou aceita o pedido pendente dele); no modo de um mestre por vez, o
+    /// anterior deixa de ser autorizado. Falso se já estava autorizado.
     /// </summary>
-    public bool Authorize(IPAddress address)
+    /// <param name="address">IP do mestre.</param>
+    /// <param name="author">Quem autorizou, para o log.</param>
+    public bool Authorize(IPAddress address, string? author = null)
     {
         ArgumentNullException.ThrowIfNull(address);
         address = ModbusTcpServer.Normalize(address);
         PendingRequest? pending;
+        IPAddress[] replaced;
         lock (_gate)
         {
-            if (!_authorized.Add(address))
+            if (_authorized.Contains(address))
             {
                 return false;
             }
 
+            replaced = AddAuthorizedLocked(address);
             _refusedUntil.Remove(address);
-            if (_pending.Remove(address, out pending))
-            {
-                pending.Decision.TrySetResult(true);
-            }
+            _pending.Remove(address, out pending);
         }
 
         SessionsLog.MasterAuthorized(_logger, _plantId, address);
+        _events.Add(PlantEventKinds.MasterAuthorized, WithAuthor(author, Arg("address", address.ToString())));
+        CloseReplaced(replaced, address);
+        pending?.Decision.TrySetResult(true);
         return true;
     }
 
     /// <summary>Retira a autorização de um IP e fecha as conexões dele. Falso se ele não era autorizado.</summary>
-    public bool Revoke(IPAddress address)
+    /// <param name="address">IP do mestre.</param>
+    /// <param name="author">Quem retirou, para o log.</param>
+    public bool Revoke(IPAddress address, string? author = null)
     {
         ArgumentNullException.ThrowIfNull(address);
         address = ModbusTcpServer.Normalize(address);
@@ -228,6 +309,9 @@ public sealed class MasterPairing : IConnectionGate
 
         int closed = CloseConnections(address);
         SessionsLog.MasterRevoked(_logger, _plantId, address, closed);
+        _events.Add(
+            PlantEventKinds.MasterRevoked,
+            WithAuthor(author, Arg("address", address.ToString()), Arg("connections", Invariant(closed))));
         return true;
     }
 
@@ -254,6 +338,7 @@ public sealed class MasterPairing : IConnectionGate
         foreach (PendingRequest request in expired)
         {
             SessionsLog.PairingExpired(_logger, _plantId, request.Id, request.Address);
+            _events.Add(PlantEventKinds.PairingExpired, Arg("address", request.Address.ToString()));
             request.Decision.TrySetResult(false);
         }
 
@@ -273,6 +358,47 @@ public sealed class MasterPairing : IConnectionGate
         foreach (PendingRequest request in pending)
         {
             request.Decision.TrySetResult(false);
+        }
+    }
+
+    private static PlantEventArgument Arg(string name, string value) => new(name, value);
+
+    private static string Invariant(int value) => value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    private static PlantEventArgument[] WithAuthor(string? author, params PlantEventArgument[] arguments) =>
+        string.IsNullOrEmpty(author) ? arguments : [.. arguments, Arg("author", author)];
+
+    /// <summary>
+    /// Autoriza o IP; no modo de um mestre por vez, tira os outros da lista e os devolve, para as conexões deles
+    /// serem fechadas fora da trava.
+    /// </summary>
+    private IPAddress[] AddAuthorizedLocked(IPAddress address)
+    {
+        IPAddress[] replaced = [];
+        if (_policy == MasterPolicy.Single)
+        {
+            replaced = [.. _authorized.Where(a => !a.Equals(address))];
+            foreach (IPAddress old in replaced)
+            {
+                _authorized.Remove(old);
+            }
+        }
+
+        _authorized.Add(address);
+        return replaced;
+    }
+
+    private void CloseReplaced(IPAddress[] replaced, IPAddress replacement)
+    {
+        foreach (IPAddress old in replaced)
+        {
+            int closed = CloseConnections(old);
+            SessionsLog.MasterRevoked(_logger, _plantId, old, closed);
+            _events.Add(
+                PlantEventKinds.MasterReplaced,
+                Arg("address", old.ToString()),
+                Arg("replacement", replacement.ToString()),
+                Arg("connections", Invariant(closed)));
         }
     }
 

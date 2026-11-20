@@ -118,6 +118,21 @@ public sealed class PlantIo
         }
     }
 
+    /// <summary>
+    /// Configurações pedidas: as que valem a partir do passo seguinte (as em vigor, se nenhuma troca estiver
+    /// pendente). É o que a tela de configurações mostra logo depois de uma troca.
+    /// </summary>
+    public IoSettings RequestedSettings
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _pendingSettings ?? _settings;
+            }
+        }
+    }
+
     /// <summary>Se o watchdog está disparado (planta no estado seguro).</summary>
     public bool WatchdogTripped
     {
@@ -222,6 +237,75 @@ public sealed class PlantIo
             Array.Clear(_forcedDiscreteInputs);
             Array.Clear(_forcedInputRegisters);
         }
+    }
+
+    /// <summary>
+    /// Valores forçados: entradas discretas (valor 0 ou 1) e input registers (valor em unidade de engenharia),
+    /// com o endereço do cenário, em ordem de área e endereço.
+    /// </summary>
+    public IReadOnlyList<ForcedInput> GetForced()
+    {
+        var forced = new List<ForcedInput>();
+        lock (_sync)
+        {
+            for (int address = 0; address < _forcedDiscreteInputs.Length; address++)
+            {
+                if (_forcedDiscreteInputs[address] is bool value)
+                {
+                    forced.Add(new ForcedInput(ModbusArea.DiscreteInput, address, DiscreteInputSignal(address), value ? 1.0 : 0.0));
+                }
+            }
+
+            for (int i = 0; i < _forcedInputRegisters.Length; i++)
+            {
+                if (_forcedInputRegisters[i] is double value)
+                {
+                    AnalogPoint point = Map.InputRegisters[i];
+                    forced.Add(new ForcedInput(ModbusArea.InputRegister, point.Address, point.Signal, value));
+                }
+            }
+        }
+
+        return forced;
+    }
+
+    /// <summary>
+    /// Valor de engenharia de cada linha do mapa (<see cref="IoMap.Describe"/> no formato da cópia), lido de uma
+    /// cópia da imagem como o mestre o obteria ao escalar o registrador: contagens → mA → faixa × fator de unidade
+    /// (D29), ou o próprio <c>float32</c>. Bits valem 0 ou 1; o heartbeat vale o registrador sem sinal.
+    /// </summary>
+    /// <remarks>
+    /// Nas medições usa a faixa atual de cada transmissor (que o HART pode mudar); nos comandos, a do cenário.
+    /// </remarks>
+    public double[] DecodeEngineering(IReadOnlyList<IoMapEntry> entries, IoSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentNullException.ThrowIfNull(snapshot);
+        var values = new double[entries.Count];
+        (double Lrv, double Urv)[] ranges;
+        lock (_sync)
+        {
+            ranges = [.. _lrv.Zip(_urv)];
+        }
+
+        for (int k = 0; k < entries.Count; k++)
+        {
+            IoMapEntry entry = entries[k];
+            values[k] = entry.Kind switch
+            {
+                IoPointKind.Digital or IoPointKind.WatchdogStatus => Bit(entry, snapshot) ? 1.0 : 0.0,
+                IoPointKind.Heartbeat => snapshot.HoldingRegisters[entry.Address],
+                IoPointKind.Diagnostic => AnalogCodec.ReadFloat32(snapshot.InputRegisters.AsSpan(entry.Address, 2), snapshot.WordOrder),
+                _ when entry.Area == ModbusArea.HoldingRegister =>
+                    DecodeAnalog(Map.HoldingRegisters[entry.Index], Map.HoldingRegisters[entry.Index].Lrv, Map.HoldingRegisters[entry.Index].Urv, snapshot.HoldingRegisters.AsSpan(entry.Address, entry.Length), snapshot),
+                _ => DecodeAnalog(Map.InputRegisters[entry.Index], ranges[entry.Index].Lrv, ranges[entry.Index].Urv, snapshot.InputRegisters.AsSpan(entry.Address, entry.Length), snapshot),
+            };
+        }
+
+        return values;
+
+        static bool Bit(IoMapEntry entry, IoSnapshot snapshot) =>
+            entry.Area == ModbusArea.Coil ? snapshot.Coils[entry.Address] : snapshot.DiscreteInputs[entry.Address];
     }
 
     /// <summary>Faixa atual (LRV, URV) do sinal de endereço <paramref name="address"/>, na unidade da planta.</summary>
@@ -369,6 +453,12 @@ public sealed class PlantIo
             LatchObserver?.OnCommandsLatched(Plant.Clock.StepCount, _coils, _holdingRegisters, _settings);
         }
     }
+
+    /// <summary>
+    /// Publica de novo as medições da planta como estão, sem avançar (planta pausada): um valor forçado ou liberado
+    /// aparece já para o mestre. Chame entre dois passos, sob a mesma trava que protege <see cref="Step"/>.
+    /// </summary>
+    public void RepublishInputs() => PublishInputs();
 
     /// <summary>Fase 3 do passo: converte as saídas da planta e publica na imagem.</summary>
     internal void PublishInputs()
@@ -602,6 +692,22 @@ public sealed class PlantIo
 
         _lastHeartbeat = heartbeat;
     }
+
+    private static double DecodeAnalog(AnalogPoint point, double lrv, double urv, ReadOnlySpan<ushort> registers, IoSnapshot snapshot)
+    {
+        if (snapshot.Format == AnalogFormat.Float32)
+        {
+            return AnalogCodec.ReadFloat32(registers, snapshot.WordOrder);
+        }
+
+        double milliamps = AnalogCodec.CountsToMilliamps(AnalogCodec.FromRegister(registers[0]), snapshot.Format);
+        return CurrentLoop.FromMilliamps(milliamps, lrv, urv) * point.UnitFactor;
+    }
+
+    private string DiscreteInputSignal(int address) =>
+        address == Map.WatchdogStatusDiscreteInput
+            ? IoMap.WatchdogSignal
+            : Map.DiscreteInputs.First(p => p.Address == address).Signal;
 
     private void SetDiscreteInput(int address, bool plantValue)
     {

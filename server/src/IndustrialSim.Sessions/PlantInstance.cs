@@ -18,6 +18,12 @@ public enum InstanceStatus
 
     /// <summary>Encerrada: fora do laço e do gerenciador.</summary>
     Ended,
+
+    /// <summary>
+    /// Pausada: continua no laço, mas não avança (o tempo simulado e o watchdog param). Mestres e IHM continuam
+    /// conectados; os comandos escritos valem no primeiro passo depois de retomar (D43).
+    /// </summary>
+    Paused,
 }
 
 /// <summary>Por que uma planta foi encerrada.</summary>
@@ -82,6 +88,8 @@ public sealed class PlantInstance : IRealTimeStepper
     private PlantRecorder? _recorder;
     private LoopRegistration? _registration;
     private int _run;
+    private long _pausedTicks;
+    private readonly Lock _settingsGate = new();
 
     /// <param name="recording">Onde gravar o ensaio e de quanto em quanto amostrar; nulo para não gravar.</param>
     /// <param name="publishEverySteps">Um <see cref="PlantSnapshot"/> para os assinantes a cada tantos passos.</param>
@@ -108,6 +116,7 @@ public sealed class PlantInstance : IRealTimeStepper
         _logger = logger;
         ArgumentOutOfRangeException.ThrowIfLessThan(publishEverySteps, 1);
         _publishEverySteps = publishEverySteps;
+        Events = new PlantEventLog(time);
         Io = new PlantIo(ScenarioPlant.Create(scenario.Definition, noiseSeed: noiseSeed));
         _alarms = new PlantAlarms(Io.Plant);
         CreatedUtc = time.GetUtcNow();
@@ -170,6 +179,12 @@ public sealed class PlantInstance : IRealTimeStepper
 
     /// <summary>Servidor Modbus da planta: porta, Unit ID, pareamento e conexões dos mestres.</summary>
     public PlantModbus Modbus { get; }
+
+    /// <summary>Log de comunicação: conexões, pareamentos, exceções, configurações, forçados e pausa (RF05).</summary>
+    public PlantEventLog Events { get; }
+
+    /// <summary>Configurações de comunicação pedidas (as de I/O valem a partir do passo seguinte).</summary>
+    public PlantSettings Settings => new(Io.RequestedSettings, Modbus.UnitId, Modbus.Pairing.Policy);
 
     /// <summary>Nome nos logs do laço.</summary>
     public string Name => $"Planta {Id}";
@@ -336,6 +351,17 @@ public sealed class PlantInstance : IRealTimeStepper
     {
         lock (_sync)
         {
+            if (_status == InstanceStatus.Paused)
+            {
+                // Pausada: a planta não avança, mas a IHM continua recebendo o estado (e, com ele, o monitor).
+                if (_subscribers.Count > 0 && ++_pausedTicks % _publishEverySteps == 0)
+                {
+                    PublishLocked();
+                }
+
+                return;
+            }
+
             if (_status != InstanceStatus.Running)
             {
                 return;
@@ -388,7 +414,7 @@ public sealed class PlantInstance : IRealTimeStepper
         double clamped = Math.Clamp(value, disturbance.Min, disturbance.Max);
         lock (_sync)
         {
-            if (_status != InstanceStatus.Running)
+            if (_status is not (InstanceStatus.Running or InstanceStatus.Paused))
             {
                 return false;
             }
@@ -403,17 +429,18 @@ public sealed class PlantInstance : IRealTimeStepper
     /// <summary>
     /// Reinicia a planta no estado inicial do cenário, com a mesma semente (D41): a imagem de I/O, o Modbus e os
     /// mestres continuam como estão, e os comandos do mestre valem já no primeiro passo. Os distúrbios voltam
-    /// ao valor inicial. Se a planta grava, o arquivo atual é fechado e outro começa. Falso se a planta não
-    /// estiver rodando.
+    /// ao valor inicial. Se a planta grava, o arquivo atual é fechado e outro começa. Uma planta pausada continua
+    /// pausada. Falso se a planta não estiver rodando nem pausada.
     /// </summary>
-    public bool Restart()
+    /// <param name="author">Quem reiniciou, para o log de comunicação.</param>
+    public bool Restart(string? author = null)
     {
         RecordingFile? previousFile;
         long stepCount;
         int run;
         lock (_sync)
         {
-            if (_status != InstanceStatus.Running)
+            if (_status is not (InstanceStatus.Running or InstanceStatus.Paused))
             {
                 return false;
             }
@@ -435,8 +462,213 @@ public sealed class PlantInstance : IRealTimeStepper
 
         CompleteRecording(previousFile);
         SessionsLog.InstanceRestarted(_logger, Id, run, stepCount);
+        Events.Add(PlantEventKinds.Restarted, WithAuthor(author, new PlantEventArgument("run", SettingText.Of(run))));
         return true;
     }
+
+    /// <summary>
+    /// Pausa a planta: ela deixa de avançar, com o estado intacto, até <see cref="Resume"/> (D43). Falso se não
+    /// estiver rodando.
+    /// </summary>
+    /// <param name="author">Quem pausou, para o log de comunicação.</param>
+    public bool Pause(string? author = null) => ChangeRunState(InstanceStatus.Running, InstanceStatus.Paused, PlantEventKinds.Paused, author);
+
+    /// <summary>Retoma a planta pausada do mesmo estado. Falso se não estiver pausada.</summary>
+    /// <param name="author">Quem retomou, para o log de comunicação.</param>
+    public bool Resume(string? author = null) => ChangeRunState(InstanceStatus.Paused, InstanceStatus.Running, PlantEventKinds.Resumed, author);
+
+    /// <summary>
+    /// Muda as configurações de comunicação (só os campos dados). Tudo é conferido antes: ou todas as mudanças
+    /// valem, ou nenhuma. As de I/O valem a partir do passo seguinte (D31 regrava os comandos ao trocar o
+    /// formato); o Unit ID, na próxima requisição. Cada valor que de fato mudou vira uma linha no log, com o
+    /// valor antigo, o novo e o autor.
+    /// </summary>
+    /// <param name="update">Campos a mudar.</param>
+    /// <param name="author">Quem mudou (até as contas, o IP do navegador).</param>
+    public SettingsUpdateResult UpdateSettings(PlantSettingsUpdate update, string? author = null)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        if ((update.Format is { } format && !Enum.IsDefined(format))
+            || (update.WordOrder is { } order && !Enum.IsDefined(order))
+            || (update.MasterPolicy is { } policy && !Enum.IsDefined(policy))
+            || update.UnitId == 0
+            || (update.WatchdogTimeoutSeconds is double timeout && (!double.IsFinite(timeout) || timeout <= 0.0 || timeout > MaxWatchdogTimeoutSeconds)))
+        {
+            return SettingsUpdateResult.Invalid;
+        }
+
+        var changes = new List<(string Name, string Old, string New)>();
+        lock (_settingsGate)
+        {
+            InstanceStatus status = Status;
+            if (status is not (InstanceStatus.Running or InstanceStatus.Paused))
+            {
+                return SettingsUpdateResult.PlantNotRunning;
+            }
+
+            PlantSettings before = Settings;
+            if (update.MasterPolicy is { } newPolicy && newPolicy != before.MasterPolicy)
+            {
+                if (!Modbus.Pairing.TrySetPolicy(newPolicy))
+                {
+                    return SettingsUpdateResult.SeveralMastersAuthorized;
+                }
+
+                changes.Add((PlantSettingNames.MasterPolicy, SettingText.Of(before.MasterPolicy), SettingText.Of(newPolicy)));
+            }
+
+            IoSettings io = before.Io;
+            IoSettings next = io with
+            {
+                Format = update.Format ?? io.Format,
+                WordOrder = update.WordOrder ?? io.WordOrder,
+                WatchdogEnabled = update.WatchdogEnabled ?? io.WatchdogEnabled,
+                WatchdogTimeoutSeconds = update.WatchdogTimeoutSeconds ?? io.WatchdogTimeoutSeconds,
+                DiagnosticsEnabled = update.DiagnosticsEnabled ?? io.DiagnosticsEnabled,
+            };
+            if (next != io)
+            {
+                Io.UpdateSettings(next);
+                Compare(PlantSettingNames.Format, SettingText.Of(io.Format), SettingText.Of(next.Format));
+                Compare(PlantSettingNames.WordOrder, SettingText.Of(io.WordOrder), SettingText.Of(next.WordOrder));
+                Compare(PlantSettingNames.WatchdogEnabled, SettingText.Of(io.WatchdogEnabled), SettingText.Of(next.WatchdogEnabled));
+                Compare(PlantSettingNames.WatchdogTimeout, SettingText.Of(io.WatchdogTimeoutSeconds), SettingText.Of(next.WatchdogTimeoutSeconds));
+                Compare(PlantSettingNames.DiagnosticsEnabled, SettingText.Of(io.DiagnosticsEnabled), SettingText.Of(next.DiagnosticsEnabled));
+            }
+
+            if (update.UnitId is byte unitId && unitId != before.UnitId)
+            {
+                Modbus.UnitId = unitId;
+                changes.Add((PlantSettingNames.UnitId, SettingText.Of(before.UnitId), SettingText.Of(unitId)));
+            }
+
+            foreach ((string name, string old, string value) in changes)
+            {
+                Events.Add(
+                    PlantEventKinds.SettingChanged,
+                    WithAuthor(author, new("setting", name), new("old", old), new("new", value)));
+                SessionsLog.SettingChanged(_logger, Id, name, old, value);
+            }
+        }
+
+        return SettingsUpdateResult.Applied;
+
+        void Compare(string name, string old, string value)
+        {
+            if (!string.Equals(old, value, StringComparison.Ordinal))
+            {
+                changes.Add((name, old, value));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Força uma entrada que o mestre lê (D30): uma entrada discreta (valor diferente de zero = 1) ou o input
+    /// register de um sinal, em unidade de engenharia. Vale a partir do passo seguinte (com a planta pausada, já
+    /// na imagem). Falso se o sinal não estiver nessa área do mapa ou se o valor não for finito.
+    /// </summary>
+    /// <param name="area">Entrada discreta ou input register.</param>
+    /// <param name="signal">Sinal (ou <c>watchdog</c>, para a entrada discreta do watchdog).</param>
+    /// <param name="value">Valor em unidade de engenharia; nas entradas discretas, 0 ou 1.</param>
+    /// <param name="author">Quem forçou, para o log de comunicação.</param>
+    public bool Force(ModbusArea area, string signal, double value, string? author = null)
+    {
+        if (!double.IsFinite(value) || FindForceable(area, signal) is not int address)
+        {
+            return false;
+        }
+
+        bool done = area == ModbusArea.DiscreteInput
+            ? Io.ForceDiscreteInput(address, value != 0.0)
+            : Io.ForceInputRegister(address, value);
+        if (!done)
+        {
+            return false;
+        }
+
+        double logged = area == ModbusArea.DiscreteInput ? (value != 0.0 ? 1.0 : 0.0) : value;
+        RepublishInputsIfPaused();
+        Events.Add(
+            PlantEventKinds.InputForced,
+            WithAuthor(author, new("area", SettingText.Of(area)), new("signal", signal), new("value", SettingText.Of(logged))));
+        return true;
+    }
+
+    /// <summary>Libera uma entrada forçada. Falso se o sinal não estiver nessa área do mapa.</summary>
+    /// <param name="area">Entrada discreta ou input register.</param>
+    /// <param name="signal">Sinal.</param>
+    /// <param name="author">Quem liberou, para o log de comunicação.</param>
+    public bool Release(ModbusArea area, string signal, string? author = null)
+    {
+        if (FindForceable(area, signal) is not int address)
+        {
+            return false;
+        }
+
+        bool done = area == ModbusArea.DiscreteInput ? Io.ReleaseDiscreteInput(address) : Io.ReleaseInputRegister(address);
+        if (!done)
+        {
+            return false;
+        }
+
+        RepublishInputsIfPaused();
+        Events.Add(PlantEventKinds.InputReleased, WithAuthor(author, new("area", SettingText.Of(area)), new("signal", signal)));
+        return true;
+    }
+
+    /// <summary>Maior tempo limite do watchdog aceito pela tela de configurações, em segundos.</summary>
+    public const double MaxWatchdogTimeoutSeconds = 600.0;
+
+    private int? FindForceable(ModbusArea area, string signal)
+    {
+        IoMap map = Io.Map;
+        return area switch
+        {
+            ModbusArea.DiscreteInput when signal == IoMap.WatchdogSignal => map.WatchdogStatusDiscreteInput,
+            ModbusArea.DiscreteInput => map.DiscreteInputs.FirstOrDefault(p => p.Signal == signal)?.Address,
+            ModbusArea.InputRegister => map.InputRegisters.FirstOrDefault(p => p.Signal == signal)?.Address,
+            _ => null,
+        };
+    }
+
+    /// <summary>
+    /// Com a planta pausada, não há passo para publicar as medições: publica já, para o mestre ler o valor forçado
+    /// (ou liberado) e o monitor mostrar a marca.
+    /// </summary>
+    private void RepublishInputsIfPaused()
+    {
+        lock (_sync)
+        {
+            if (_status == InstanceStatus.Paused)
+            {
+                Io.RepublishInputs();
+            }
+        }
+    }
+
+    private bool ChangeRunState(InstanceStatus from, InstanceStatus to, string kind, string? author)
+    {
+        long step;
+        lock (_sync)
+        {
+            if (_status != from)
+            {
+                return false;
+            }
+
+            _status = to;
+            _pausedTicks = 0;
+            step = Io.Plant.Clock.StepCount;
+            PublishLocked();
+        }
+
+        SessionsLog.RunStateChanged(_logger, Id, to, step);
+        Events.Add(kind, WithAuthor(author, new PlantEventArgument("step", step.ToString(System.Globalization.CultureInfo.InvariantCulture))));
+        return true;
+    }
+
+    private static PlantEventArgument[] WithAuthor(string? author, params PlantEventArgument[] arguments) =>
+        string.IsNullOrEmpty(author) ? arguments : [.. arguments, new PlantEventArgument("author", author)];
 
     /// <summary>Abre o arquivo de gravação do reinício atual. Chamado no construtor ou sob a trava.</summary>
     private void StartRecording()
