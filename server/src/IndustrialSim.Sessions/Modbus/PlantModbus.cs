@@ -16,6 +16,7 @@ public sealed class PlantModbus : IDisposable
     private readonly TimeProvider _time;
     private readonly Lock _rateGate = new();
     private long _sampledRequests;
+    private long _sampledExceptions;
     private long _sampledTimestamp;
     private double _requestsPerSecond;
 
@@ -26,6 +27,21 @@ public sealed class PlantModbus : IDisposable
         Port = port;
         _time = time;
         _sampledTimestamp = time.GetTimestamp();
+    }
+
+    /// <summary>
+    /// Requisições atendidas e respostas de exceção na última amostra (mudam no máximo uma vez por amostra, para a
+    /// IHM não receber o estado do Modbus a cada requisição).
+    /// </summary>
+    public (long Requests, long ExceptionResponses) SampledCounters
+    {
+        get
+        {
+            lock (_rateGate)
+            {
+                return (_sampledRequests, _sampledExceptions);
+            }
+        }
     }
 
     /// <summary>
@@ -113,6 +129,7 @@ public sealed class PlantModbus : IDisposable
     public void SampleRequestRate()
     {
         long requests = Device.Requests;
+        long exceptions = Device.ExceptionResponses;
         long now = _time.GetTimestamp();
         lock (_rateGate)
         {
@@ -124,6 +141,7 @@ public sealed class PlantModbus : IDisposable
 
             _requestsPerSecond = (requests - _sampledRequests) / seconds;
             _sampledRequests = requests;
+            _sampledExceptions = exceptions;
             _sampledTimestamp = now;
         }
     }

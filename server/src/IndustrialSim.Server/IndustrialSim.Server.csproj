@@ -7,6 +7,10 @@
     <ProjectReference Include="..\IndustrialSim.Contracts\IndustrialSim.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialSim.Server.Tests" />
+  </ItemGroup>
+
   <!-- Pacotes de cenário (D04), copiados para a pasta do programa: o servidor os lê de scenarios/. -->
   <ItemGroup>
     <None Include="..\..\..\scenarios\**\scenario.json" Link="scenarios\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

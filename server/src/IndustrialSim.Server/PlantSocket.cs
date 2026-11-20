@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
 using IndustrialSim.Contracts;
@@ -48,7 +49,10 @@ internal static class PlantSocketEndpoint
 
         using WebSocket socket = await context.WebSockets.AcceptWebSocketAsync(
             new WebSocketAcceptContext { KeepAliveInterval = options.KeepAliveInterval });
-        var session = new PlantSocketSession(socket, id, manager, options, logger);
+
+        // Até as contas (Etapa 10), o autor das ações da IHM no log é o IP do navegador.
+        string? author = context.Connection.RemoteIpAddress is IPAddress remote ? ModbusTcpServer.Normalize(remote).ToString() : null;
+        var session = new PlantSocketSession(socket, id, manager, options, logger, author);
         await session.RunAsync(context.RequestAborted);
     }
 }
@@ -61,16 +65,32 @@ internal static class PlantSocketEndpoint
 /// Duas tarefas por conexão: a que envia (acordada pelo laço da planta a cada estado publicado) e a que recebe.
 /// Os envios passam por uma trava, porque o WebSocket aceita um envio por vez. Enquanto a conexão existe, ela
 /// conta como cliente da planta, que então não expira.
+/// <para>
+/// A cada estado, a tarefa que envia confere o que mudou e manda só isso: Modbus, configurações e forçados
+/// (comparando a mensagem serializada com a anterior), alarmes (pela versão), o log a cada
+/// <see cref="LogEverySnapshots"/> estados e, se o cliente ligou o monitor, o monitor a cada
+/// <see cref="MonitorEverySnapshots"/> estados (D44).
+/// </para>
 /// </remarks>
 internal sealed partial class PlantSocketSession(
     WebSocket socket,
     Guid plantId,
     InstanceManager manager,
     PlantSocketOptions options,
-    ILogger<PlantSocketSession> logger)
+    ILogger<PlantSocketSession> logger,
+    string? author)
 {
     /// <summary>Maior mensagem aceita do cliente.</summary>
     public const int MaxClientMessageBytes = 4096;
+
+    /// <summary>Monitor a cada 2 estados: 10 Hz com o estado a 20 Hz.</summary>
+    public const int MonitorEverySnapshots = 2;
+
+    /// <summary>Eventos novos do log a cada 5 estados: 4 vezes por segundo, no máximo.</summary>
+    public const int LogEverySnapshots = 5;
+
+    private int _monitorEnabled;
+    private int _monitorReset;
 
     internal static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { AllowOutOfOrderMetadataProperties = true };
 
@@ -171,8 +191,14 @@ internal sealed partial class PlantSocketSession(
     {
         long alarmsVersion = -1;
         byte[]? modbus = null;
+        byte[]? settings = null;
+        byte[]? forced = null;
+        long logSequence = -1;
+        long count = 0;
+        var monitor = new MonitorFeed(plant);
         await foreach (PlantSnapshot snapshot in subscription.Reader.ReadAllAsync(cancel))
         {
+            count++;
             await SendAsync(State(snapshot), cancel);
 
             if (snapshot.Alarms.Version != alarmsVersion)
@@ -181,14 +207,61 @@ internal sealed partial class PlantSocketSession(
                 await SendAsync(Alarms(snapshot.Alarms), cancel);
             }
 
-            // Pedidos e conexões não passam pelo laço: confere a cada estado e manda só quando muda.
-            byte[] status = Serialize(ModbusStatus(plant.Modbus));
-            if (modbus is null || !status.AsSpan().SequenceEqual(modbus))
+            // Pedidos, conexões, configurações e forçados não passam pelo laço: confere a cada estado e manda só
+            // quando muda.
+            modbus = await SendIfChangedAsync(ContractMapping.ModbusStatus(plant.Modbus), modbus, cancel);
+            settings = await SendIfChangedAsync(
+                new SettingsMessage(ContractMapping.Settings(plant.Settings), PlantInstance.MaxWatchdogTimeoutSeconds), settings, cancel);
+            forced = await SendIfChangedAsync(ContractMapping.Forced(plant.Io.GetForced()), forced, cancel);
+
+            if (logSequence < 0)
             {
-                modbus = status;
-                await SendBytesAsync(status, cancel);
+                IReadOnlyList<PlantEvent> all = plant.Events.All();
+                logSequence = all.Count > 0 ? all[^1].Sequence : 0;
+                await SendAsync(new LogMessage([.. all.Select(ContractMapping.LogEntry)], Reset: true), cancel);
+            }
+            else if (count % LogEverySnapshots == 0)
+            {
+                IReadOnlyList<PlantEvent> fresh = plant.Events.Since(logSequence);
+                if (fresh.Count > 0)
+                {
+                    logSequence = fresh[^1].Sequence;
+                    await SendAsync(new LogMessage([.. fresh.Select(ContractMapping.LogEntry)], Reset: false), cancel);
+                }
+            }
+
+            if (Volatile.Read(ref _monitorEnabled) != 0)
+            {
+                bool reset = Interlocked.Exchange(ref _monitorReset, 0) != 0;
+                if (reset)
+                {
+                    monitor.Reset();
+                }
+
+                if (reset || count % MonitorEverySnapshots == 0)
+                {
+                    (MonitorLayoutMessage? layout, MonitorMessage values) = monitor.Next();
+                    if (layout is not null)
+                    {
+                        await SendAsync(layout, cancel);
+                    }
+
+                    await SendAsync(values, cancel);
+                }
             }
         }
+    }
+
+    /// <summary>Manda a mensagem se ela mudou desde a última enviada; devolve a versão serializada atual.</summary>
+    private async Task<byte[]> SendIfChangedAsync(ServerMessage message, byte[]? previous, CancellationToken cancel)
+    {
+        byte[] bytes = Serialize(message);
+        if (previous is null || !bytes.AsSpan().SequenceEqual(previous))
+        {
+            await SendBytesAsync(bytes, cancel);
+        }
+
+        return bytes;
     }
 
     private async Task ReceiveCommandsAsync(PlantInstance plant, CancellationTokenSource stop)
@@ -231,16 +304,57 @@ internal sealed partial class PlantSocketSession(
     }
 
     /// <summary>Executa um comando; devolve o código de erro, ou nulo se deu certo.</summary>
-    private static string? Execute(PlantInstance plant, ClientMessage message) => message switch
+    private string? Execute(PlantInstance plant, ClientMessage message) => message switch
     {
         SetDisturbanceCommand c when plant.Scenario.Definition.Hmi?.Disturbances.Any(d => d.Input == c.Input) != true =>
             SocketErrorCodes.DisturbanceNotFound,
         SetDisturbanceCommand c => plant.SetDisturbance(c.Input, c.Value) ? null : SocketErrorCodes.PlantNotRunning,
-        RestartCommand => plant.Restart() ? null : SocketErrorCodes.PlantNotRunning,
-        AcceptPairingCommand c => plant.Modbus.Pairing.Accept(c.RequestId) ? null : SocketErrorCodes.PairingRequestNotFound,
-        RefusePairingCommand c => plant.Modbus.Pairing.Refuse(c.RequestId) ? null : SocketErrorCodes.PairingRequestNotFound,
+        RestartCommand => plant.Restart(author) ? null : SocketErrorCodes.PlantNotRunning,
+        AcceptPairingCommand c => plant.Modbus.Pairing.Accept(c.RequestId, author) ? null : SocketErrorCodes.PairingRequestNotFound,
+        RefusePairingCommand c => plant.Modbus.Pairing.Refuse(c.RequestId, author) ? null : SocketErrorCodes.PairingRequestNotFound,
+        RevokeMasterCommand c => IPAddress.TryParse(c.Address, out IPAddress? address) && plant.Modbus.Pairing.Revoke(address, author)
+            ? null
+            : SocketErrorCodes.MasterNotFound,
+        UpdateSettingsCommand c => UpdateSettings(plant, c),
+        ForceInputCommand c => SettingText.TryParseArea(c.Area, out ModbusArea area) && plant.Force(area, c.Signal, c.Value, author)
+            ? null
+            : SocketErrorCodes.InputNotFound,
+        ReleaseInputCommand c => SettingText.TryParseArea(c.Area, out ModbusArea area) && plant.Release(area, c.Signal, author)
+            ? null
+            : SocketErrorCodes.InputNotFound,
+        PauseCommand => plant.Pause(author) ? null : SocketErrorCodes.PlantNotRunning,
+        ResumeCommand => plant.Resume(author) ? null : SocketErrorCodes.PlantNotPaused,
+        SubscribeMonitorCommand c => SubscribeMonitor(c.Enabled),
         _ => SocketErrorCodes.InvalidMessage,
     };
+
+    private string? UpdateSettings(PlantInstance plant, UpdateSettingsCommand command)
+    {
+        if (ContractMapping.Update(command) is not { } update)
+        {
+            return SocketErrorCodes.InvalidSettings;
+        }
+
+        return plant.UpdateSettings(update, author) switch
+        {
+            SettingsUpdateResult.Applied => null,
+            SettingsUpdateResult.SeveralMastersAuthorized => SocketErrorCodes.SeveralMastersAuthorized,
+            SettingsUpdateResult.PlantNotRunning => SocketErrorCodes.PlantNotRunning,
+            _ => SocketErrorCodes.InvalidSettings,
+        };
+    }
+
+    /// <summary>Liga ou desliga o monitor desta conexão; ao ligar, as linhas e os valores vão no próximo estado.</summary>
+    private string? SubscribeMonitor(bool enabled)
+    {
+        if (enabled)
+        {
+            Volatile.Write(ref _monitorReset, 1);
+        }
+
+        Volatile.Write(ref _monitorEnabled, enabled ? 1 : 0);
+        return null;
+    }
 
     /// <summary>Lê uma mensagem de texto inteira; nulo quando o cliente fecha. Lança <see cref="JsonException"/>.</summary>
     private async Task<ClientMessage?> ReceiveAsync(CancellationToken cancel)
@@ -304,7 +418,7 @@ internal sealed partial class PlantSocketSession(
             await CloseAsync(WebSocketCloseStatus.NormalClosure, code, cancel);
             await WaitForCloseAsync(cancel);
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException or ObjectDisposedException)
         {
         }
     }
@@ -329,7 +443,7 @@ internal sealed partial class PlantSocketSession(
                 }
             }
         }
-        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException)
+        catch (Exception ex) when (ex is OperationCanceledException or WebSocketException or IOException or ObjectDisposedException)
         {
         }
         finally
@@ -441,18 +555,6 @@ internal sealed partial class PlantSocketSession(
 
     private static AlarmsMessage Alarms(AlarmSet alarms) =>
         new([.. alarms.Active.Select(a => new ActiveAlarm(a.Signal, a.SinceSeconds, a.SinceUtc))]);
-
-    private static ModbusStatusMessage ModbusStatus(PlantModbus modbus) => new(
-        modbus.Port,
-        modbus.UnitId,
-        [.. modbus.Pairing.Authorized.Select(a => a.ToString())],
-        [.. modbus.Pairing.Pending.Select(p => new PairingRequestResponse(p.Id, p.Address.ToString(), p.RequestedUtc, p.ExpiresUtc, p.WaitingConnections))],
-        [.. modbus.Connections.Select(c => new MasterConnectionInfo(
-            c.Id,
-            ModbusTcpServer.Normalize(c.Remote.Address).ToString(),
-            c.Remote.Port,
-            c.ConnectedUtc,
-            c.Authorized))]);
 
     [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Planta {PlantId}: IHM conectada pelo WebSocket.")]
     private static partial void LogOpened(ILogger logger, Guid plantId);

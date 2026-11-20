@@ -590,7 +590,7 @@ public sealed class PlantInstance : IRealTimeStepper
         RepublishInputsIfPaused();
         Events.Add(
             PlantEventKinds.InputForced,
-            WithAuthor(author, new("area", SettingText.Of(area)), new("signal", signal), new("value", SettingText.Of(logged))));
+            WithAuthor(author, new("area", SettingText.OfArea(area)), new("signal", signal), new("value", SettingText.Of(logged))));
         return true;
     }
 
@@ -612,7 +612,7 @@ public sealed class PlantInstance : IRealTimeStepper
         }
 
         RepublishInputsIfPaused();
-        Events.Add(PlantEventKinds.InputReleased, WithAuthor(author, new("area", SettingText.Of(area)), new("signal", signal)));
+        Events.Add(PlantEventKinds.InputReleased, WithAuthor(author, new("area", SettingText.OfArea(area)), new("signal", signal)));
         return true;
     }
 

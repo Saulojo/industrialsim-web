@@ -56,6 +56,25 @@ public static class SettingText
 
     public static string Of(int value) => value.ToString(CultureInfo.InvariantCulture);
 
+    /// <summary>Área Modbus em kebab-case, como no contrato: <c>coil</c>, <c>discrete-input</c>, <c>input-register</c>…</summary>
+    public static string OfArea(ModbusArea area) => JsonNamingPolicy.KebabCaseLower.ConvertName(area.ToString());
+
+    /// <summary>Área Modbus a partir do texto de <see cref="OfArea"/>; falso se não houver.</summary>
+    public static bool TryParseArea(string? text, out ModbusArea area)
+    {
+        foreach (ModbusArea candidate in Enum.GetValues<ModbusArea>())
+        {
+            if (string.Equals(OfArea(candidate), text, StringComparison.Ordinal))
+            {
+                area = candidate;
+                return true;
+            }
+        }
+
+        area = default;
+        return false;
+    }
+
     /// <summary>Valor do enum a partir do texto de <see cref="Of{TEnum}(TEnum)"/>; falso se não houver.</summary>
     public static bool TryParse<TEnum>(string? text, out TEnum value)
         where TEnum : struct, Enum

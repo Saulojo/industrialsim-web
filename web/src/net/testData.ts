@@ -5,7 +5,7 @@ export const plantId = '7b5c0e0e-1d2a-4f39-9a51-0d6a3f1f2b11';
 
 export const welcome: WelcomeMessage = {
   type: 'welcome',
-  protocolVersion: 1,
+  protocolVersion: 2,
   serverVersion: '0.1.0',
   plant: {
     id: plantId,
@@ -107,6 +107,9 @@ export function modbus(changes: Partial<ModbusStatusMessage> = {}): ModbusStatus
     authorizedMasters: [],
     pendingRequests: [],
     connections: [],
+    requestsPerSecond: 0,
+    requests: 0,
+    exceptionResponses: 0,
     ...changes,
   };
 }

@@ -22,6 +22,7 @@ internal static class SimulationApi
         plants.MapDelete("/{id:guid}", End);
         plants.MapGet("/{id:guid}/recording", GetRecording);
         plants.MapModbusApi();
+        plants.MapIoMapApi();
         plants.MapPlantSocket();
 
         app.MapGet("/api/simulation/metrics", (RealTimeLoop loop) => ToResponse(loop.GetMetrics()));
@@ -100,6 +101,7 @@ internal static class SimulationApi
     internal static string ToStatus(InstanceStatus status) => status switch
     {
         InstanceStatus.Running => PlantStatuses.Running,
+        InstanceStatus.Paused => PlantStatuses.Paused,
         InstanceStatus.Faulted => PlantStatuses.Faulted,
         _ => PlantStatuses.Ended,
     };

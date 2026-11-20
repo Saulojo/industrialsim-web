@@ -234,7 +234,7 @@ public sealed class PlantCommunicationTests : IDisposable
             actions.Select(e => e.Kind));
         PlantEvent forced = actions[1];
         Assert.Equal(
-            [new("area", "inputRegister"), new("signal", "LT-101"), new("value", "0.9"), new("author", "ihm")],
+            [new("area", "input-register"), new("signal", "LT-101"), new("value", "0.9"), new("author", "ihm")],
             forced.Arguments);
     }
 
