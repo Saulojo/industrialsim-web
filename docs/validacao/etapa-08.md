@@ -47,7 +47,7 @@ Nenhuma dependência nova, nem no servidor nem no web. O PDF do mapa de I/O sai 
   - *Motivo:* retomar continua do mesmo estado, bit a bit (mesmo hash de uma planta que nunca pausou); a IHM e o monitor continuam vivos durante a pausa.
   - *Descartado:* tirar a planta do laço (perderia a thread e a publicação do estado).
 - **D44 (Etapa 8):** o monitor de registradores e o log vão pelo WebSocket da planta (protocolo versão 2).
-  - O monitor vai só para as conexões que o ligaram, a cada 2 estados (10 Hz). Leva as linhas do mapa quando o formato muda, os valores brutos e de engenharia (calculados no servidor), as marcas de forçado e a última escrita de cada linha (reenviada quando muda o autor ou a cada 1 s).
+  - O monitor vai só para as conexões que o ligaram, a cada 100 ms de relógio (10 Hz), e não a cada tantos estados: num servidor atrasado, a fila de 1 posição descarta estados, e o monitor cairia junto. Leva as linhas do mapa quando o formato muda, os valores brutos e de engenharia (calculados no servidor), as marcas de forçado e a última escrita de cada linha (reenviada quando muda o autor ou a cada 1 s).
   - O log vai a cada 250 ms, só com os eventos novos. Os eventos levam tipo e argumentos estáveis, traduzidos pela IHM (RNF11); exceções e recusas repetidas são agrupadas.
   - O log guarda os últimos 500 eventos por planta, em memória (a persistência vem com a Etapa 10).
   - *Motivo:* a escrita aparece em cerca de 90 ms; com o monitor ligado e um mestre escrevendo, a banda fica em 61 kbit/s; a IHM não converte contagens (sem cálculo no cliente, D01).
@@ -154,3 +154,4 @@ Os 6 testes da Etapa 7 também passaram (6 passed, 1,5 min), incluindo a banda d
 - **"Dono" das configurações.** O descritivo diz que o dono altera Unit ID, formato, watchdog e mestres permitidos. Até as contas, quem tem o identificador da planta pode alterar, como no pareamento (D38).
 - **Persistência.** Configurações e log valem enquanto a planta existir, como pede o escopo; a persistência vem na Etapa 10.
 - **Rede.** Nenhuma porta nova: o monitor e o log usam o WebSocket da planta, e o mapa de I/O usa a API do site.
+- **Teste que falhou no CI corrigido.** Na primeira execução do PR, `ContractConstantsTests.WithTheMonitorOn_TheBandwidthStaysUnder100kbps` falhou no Windows do CI: o monitor saiu a 5,5 Hz, quando o teste esperava de 8 a 12 Hz. O monitor saía "a cada 2 estados recebidos". Numa VM lenta, o laço recupera passos em rajada e a fila de 1 posição descarta estados, então o monitor caía junto. Agora ele segue o relógio (a cada 100 ms, D44), e o teste confere só o teto de 12 Hz e a banda. Depois da correção, localmente: 9,9 Hz e 59,9 kbit/s; escrita → monitor com mediana de 79 ms e máximo de 94 ms no Playwright.

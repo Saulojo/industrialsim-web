@@ -69,7 +69,8 @@ internal static class PlantSocketEndpoint
 /// A cada estado, a tarefa que envia confere o que mudou e manda só isso: Modbus, configurações e forçados
 /// (comparando a mensagem serializada com a anterior), alarmes (pela versão), o log a cada
 /// <see cref="LogEverySnapshots"/> estados e, se o cliente ligou o monitor, o monitor a cada
-/// <see cref="MonitorEverySnapshots"/> estados (D44).
+/// <see cref="MonitorPeriod"/> de relógio (D44). O monitor segue o relógio, e não a contagem de estados: num
+/// servidor atrasado, o laço recupera passos em rajada e a fila de 1 posição descarta estados.
 /// </para>
 /// </remarks>
 internal sealed partial class PlantSocketSession(
@@ -83,8 +84,11 @@ internal sealed partial class PlantSocketSession(
     /// <summary>Maior mensagem aceita do cliente.</summary>
     public const int MaxClientMessageBytes = 4096;
 
-    /// <summary>Monitor a cada 2 estados: 10 Hz com o estado a 20 Hz.</summary>
-    public const int MonitorEverySnapshots = 2;
+    /// <summary>Intervalo do monitor: 10 Hz.</summary>
+    public static readonly TimeSpan MonitorPeriod = TimeSpan.FromMilliseconds(100);
+
+    /// <summary>Folga no intervalo do monitor, para o estado que chega um pouco antes dos 100 ms não ser pulado.</summary>
+    private static readonly TimeSpan MonitorSlack = TimeSpan.FromMilliseconds(10);
 
     /// <summary>Eventos novos do log a cada 5 estados: 4 vezes por segundo, no máximo.</summary>
     public const int LogEverySnapshots = 5;
@@ -196,6 +200,7 @@ internal sealed partial class PlantSocketSession(
         long logSequence = -1;
         long count = 0;
         var monitor = new MonitorFeed(plant);
+        var sinceMonitor = new Stopwatch();
         await foreach (PlantSnapshot snapshot in subscription.Reader.ReadAllAsync(cancel))
         {
             count++;
@@ -238,8 +243,9 @@ internal sealed partial class PlantSocketSession(
                     monitor.Reset();
                 }
 
-                if (reset || count % MonitorEverySnapshots == 0)
+                if (reset || !sinceMonitor.IsRunning || sinceMonitor.Elapsed >= MonitorPeriod - MonitorSlack)
                 {
+                    sinceMonitor.Restart();
                     (MonitorLayoutMessage? layout, MonitorMessage values) = monitor.Next();
                     if (layout is not null)
                     {
