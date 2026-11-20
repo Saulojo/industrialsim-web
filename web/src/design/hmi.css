@@ -382,3 +382,224 @@
   justify-content: flex-end;
   margin-top: var(--space-4);
 }
+
+/* Abas da página da planta (Etapa 8) */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tabs__tab {
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font: inherit;
+  color: var(--color-text-muted);
+  background: none;
+  cursor: pointer;
+}
+
+.tabs__tab--active {
+  border-color: var(--color-border);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.panel__heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+}
+
+.panel__heading-row .panel__title {
+  margin-bottom: 0;
+}
+
+.panel__subtitle {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.plain-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plain-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+/* Configurações */
+.settings__field {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.settings__group {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: none;
+}
+
+.settings__check {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-right: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+.settings__input {
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.settings__input--short {
+  width: 7rem;
+}
+
+.settings__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Valores forçados: estado anormal (ISA-101), com cor própria, diferente da do alarme */
+.chip--forced {
+  border-color: var(--color-forced);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-forced);
+  background: var(--color-forced-surface);
+}
+
+.panel--forced {
+  border-color: var(--color-forced);
+}
+
+.synoptic__value--forced {
+  fill: var(--color-forced);
+}
+
+.synoptic__forced {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  fill: var(--color-forced);
+}
+
+/* Monitor de registradores */
+.segmented {
+  display: inline-flex;
+  gap: var(--space-3);
+  align-items: center;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: none;
+  font-size: var(--font-size-sm);
+}
+
+.segmented__legend {
+  float: left;
+  margin-right: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.segmented__option {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.monitor,
+.log,
+.io-map {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.monitor th,
+.monitor td,
+.log th,
+.log td,
+.io-map th,
+.io-map td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: var(--border-width) solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.monitor thead th,
+.log thead th,
+.io-map thead th {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+.monitor__area {
+  padding-top: var(--space-3);
+  font-weight: var(--font-weight-bold);
+}
+
+.monitor__row--forced td {
+  background: var(--color-forced-surface);
+}
+
+.monitor__flag {
+  margin-left: var(--space-2);
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.monitor__write {
+  color: var(--color-text-muted);
+}
+
+.force {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+  margin: 0;
+}
+
+/* Log de comunicação */
+.log__row--abnormal td {
+  color: var(--color-alarm);
+}
+
+.log__count {
+  margin-left: var(--space-2);
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+/* Mapa de I/O para impressão (PDF) */
+@media print {
+  .no-print {
+    display: none;
+  }
+
+  .io-map-page {
+    max-width: none;
+    padding: 0;
+  }
+}

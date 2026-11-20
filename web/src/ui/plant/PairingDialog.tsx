@@ -4,12 +4,14 @@ import type { PairingRequestResponse } from '../../net/contracts.generated';
 
 export interface PairingDialogProps {
   request: PairingRequestResponse;
+  /** Mestres que aceitar o pedido vai desconectar (modo um mestre por vez, D42). */
+  replaces?: readonly string[];
   onAccept(): void;
   onRefuse(): void;
 }
 
 /** Pergunta se o IP do mestre pode conectar à planta (D38). */
-export function PairingDialog({ request, onAccept, onRefuse }: PairingDialogProps) {
+export function PairingDialog({ request, replaces = [], onAccept, onRefuse }: PairingDialogProps) {
   const { t, i18n } = useTranslation();
   const acceptRef = useRef<HTMLButtonElement>(null);
 
@@ -37,6 +39,11 @@ export function PairingDialog({ request, onAccept, onRefuse }: PairingDialogProp
         <p id="pairing-question" className="panel__row">
           {t('pairing.question', { address: request.address })}
         </p>
+        {replaces.length > 0 && (
+          <p className="panel__alarm" data-testid="pairing-replaces">
+            {t('pairing.replaceWarning', { address: replaces.join(', ') })}
+          </p>
+        )}
         <p className="panel__hint">{t('pairing.hint', { time: expires })}</p>
         <div className="dialog__actions">
           <button type="button" className="button" onClick={onRefuse}>

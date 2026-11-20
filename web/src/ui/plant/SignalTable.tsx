@@ -1,10 +1,17 @@
 import { useTranslation } from 'react-i18next';
-import type { SignalInfo, StateMessage, WelcomeMessage } from '../../net/contracts.generated';
+import type {
+  ForcedInputInfo,
+  SignalInfo,
+  StateMessage,
+  WelcomeMessage,
+} from '../../net/contracts.generated';
 import { formatSignal, signalLabel } from '../format';
 
 export interface SignalTableProps {
   welcome: WelcomeMessage;
   state: StateMessage;
+  /** Entradas forçadas, destacadas na tabela. */
+  forced?: readonly ForcedInputInfo[];
 }
 
 /** Valor de um sinal para leitura: digital como ligado/desligado, analógico com unidade. */
@@ -19,7 +26,7 @@ export function useSignalText() {
 }
 
 /** Tabela das saídas da planta; é o sinóptico dos cenários que ainda não têm um desenho próprio. */
-export function SignalTable({ welcome, state }: SignalTableProps) {
+export function SignalTable({ welcome, state, forced = [] }: SignalTableProps) {
   const { t } = useTranslation();
   const text = useSignalText();
 
@@ -33,8 +40,16 @@ export function SignalTable({ welcome, state }: SignalTableProps) {
           {welcome.outputs.map((signal, i) => (
             <tr key={signal.name}>
               <th scope="row">{signalLabel(t, welcome.plant.scenarioId, signal.name)}</th>
-              <td className="value" data-signal={signal.name} data-value={state.outputs[i]}>
+              <td
+                className="value"
+                data-signal={signal.name}
+                data-value={state.outputs[i]}
+                data-forced={forced.some((f) => f.signal === signal.name)}
+              >
                 {text(state.outputs[i] ?? 0, signal)}
+                {forced.some((f) => f.signal === signal.name) && (
+                  <span className="chip chip--forced monitor__flag">{t('monitor.forced')}</span>
+                )}
               </td>
             </tr>
           ))}

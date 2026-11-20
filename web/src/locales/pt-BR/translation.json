@@ -42,7 +42,12 @@
       "invalid-message": "O servidor não entendeu o último comando.",
       "disturbance-not-found": "Este distúrbio não existe no cenário.",
       "pairing-request-not-found": "O pedido de conexão já foi respondido ou expirou.",
-      "plant-not-running": "A planta não está rodando; o comando foi ignorado."
+      "plant-not-running": "A planta não está rodando; o comando foi ignorado.",
+      "plant-not-paused": "A planta não está pausada; o comando foi ignorado.",
+      "invalid-settings": "Configuração inválida; nada foi alterado.",
+      "several-masters-authorized": "Há mais de um mestre autorizado. Retire a autorização dos que sobram antes de escolher um mestre por vez.",
+      "input-not-found": "Esta entrada não pode ser forçada.",
+      "master-not-found": "Este IP não está autorizado."
     }
   },
   "connection": {
@@ -65,13 +70,26 @@
     "status": {
       "running": "Rodando",
       "faulted": "Parada por erro",
-      "ended": "Encerrada"
+      "ended": "Encerrada",
+      "paused": "Pausada"
     },
     "restart": "Reiniciar planta",
     "restartConfirm": "Reiniciar a planta no estado inicial do cenário? O mestre Modbus continua conectado e os comandos dele continuam valendo.",
     "downloadCsv": "Baixar ensaio (CSV)",
     "values": "Valores",
-    "seconds": "{{value}} s"
+    "seconds": "{{value}} s",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "pausedNotice": "Planta pausada: o tempo simulado está parado. O mestre Modbus continua conectado e rodando; o que ele escrever vale quando a planta for retomada.",
+    "ioMapCsv": "Mapa de I/O (CSV)",
+    "ioMapPdf": "Mapa de I/O (PDF)",
+    "tabsLabel": "Seções da planta",
+    "tabs": {
+      "process": "Processo",
+      "communication": "Comunicação",
+      "monitor": "Monitor",
+      "log": "Log"
+    }
   },
   "modbus": {
     "heading": "Mestre Modbus",
@@ -90,7 +108,8 @@
     "question": "Aceitar conexão de {{address}}?",
     "hint": "Aceite só se for o seu mestre. Sem resposta, a conexão é fechada às {{time}}.",
     "accept": "Aceitar",
-    "refuse": "Recusar"
+    "refuse": "Recusar",
+    "replaceWarning": "Modo um mestre por vez: aceitar desconecta o mestre {{address}}."
   },
   "alarms": {
     "heading": "Alarmes",
@@ -130,7 +149,8 @@
       "LSHH-101": "LSHH-101 · Nível muito alto",
       "PSH-101": "PSH-101 · Pressão alta",
       "PSV-101_open": "PSV-101 · Válvula de alívio aberta"
-    }
+    },
+    "heartbeat": "Heartbeat do mestre"
   },
   "synoptic": {
     "caldeira": {
@@ -141,6 +161,168 @@
       "feedwater": "Água de alimentação",
       "fuel": "Combustível",
       "steam": "Vapor"
+    }
+  },
+  "settings": {
+    "heading": "Configurações de comunicação",
+    "serverAddress": "IP do servidor",
+    "port": "Porta Modbus",
+    "readOnly": "Definidos pelo servidor",
+    "unitId": "Unit ID",
+    "format": "Formato analógico",
+    "wordOrder": "Ordem das palavras do float32",
+    "watchdog": "Watchdog",
+    "watchdogEnabled": "Ligado",
+    "watchdogTimeout": "Tempo limite (s)",
+    "diagnostics": "Bloco de diagnóstico em unidades de engenharia",
+    "diagnosticsEnabled": "Publicar",
+    "masterPolicy": "Mestres permitidos",
+    "apply": "Aplicar",
+    "discard": "Desfazer",
+    "hint": "As mudanças valem no passo seguinte, sem reiniciar a planta, e vão para o log de comunicação. Valem enquanto a planta existir.",
+    "singleHint": "No modo um por vez, aceitar outro mestre desconecta o anterior.",
+    "values": {
+      "format": {
+        "counts27648": "0–27648 (Siemens)",
+        "counts10000": "0–10000",
+        "counts32767": "0–32767",
+        "float32": "float32 em unidades de engenharia"
+      },
+      "wordOrder": {
+        "highWordFirst": "Normal (big-endian)",
+        "lowWordFirst": "Invertida (word swap)"
+      },
+      "masterPolicy": {
+        "multiple": "Vários ao mesmo tempo",
+        "single": "Um por vez"
+      },
+      "bool": {
+        "true": "ligado",
+        "false": "desligado"
+      }
+    }
+  },
+  "masters": {
+    "heading": "Mestres e conexões",
+    "authorized": "IPs autorizados",
+    "revoke": "Retirar",
+    "revokeConfirm": "Retirar a autorização de {{address}}? As conexões dele serão fechadas.",
+    "connections": "Conexões abertas",
+    "pending": "aguardando pareamento",
+    "requestsPerSecond": "Requisições por segundo",
+    "requests": "Requisições atendidas",
+    "exceptions": "Respostas de exceção",
+    "none": "nenhuma"
+  },
+  "monitor": {
+    "heading": "Monitor de registradores",
+    "notation": "Notação de endereços",
+    "base0": "Base 0",
+    "classic": "Clássica",
+    "paused": "Planta pausada",
+    "waiting": "Aguardando o monitor…",
+    "forced": "FORÇADO",
+    "force": "Forçar",
+    "release": "Liberar",
+    "forceValue": "Valor a forçar de {{signal}}",
+    "on": "1",
+    "off": "0",
+    "writtenBy": "{{author}} às {{time}}",
+    "areas": {
+      "coil": "Coils",
+      "discrete-input": "Entradas discretas",
+      "holding-register": "Holding registers",
+      "input-register": "Input registers"
+    },
+    "columns": {
+      "address": "Endereço",
+      "signal": "Sinal",
+      "raw": "Bruto",
+      "value": "Engenharia",
+      "lastWrite": "Última escrita",
+      "force": "Forçar"
+    }
+  },
+  "forced": {
+    "heading": "Valores forçados",
+    "hint": "O mestre lê estes valores no lugar da medição, até serem liberados.",
+    "item": "{{signal}}: {{value}}",
+    "release": "Liberar"
+  },
+  "log": {
+    "heading": "Log de comunicação",
+    "empty": "Nenhum evento ainda.",
+    "count": "×{{count}}",
+    "columns": {
+      "time": "Horário",
+      "event": "Evento",
+      "author": "Autor"
+    },
+    "kinds": {
+      "connection-authorized": "Mestre {{address}} conectado (porta de origem {{port}}).",
+      "connection-refused": "Conexão de {{address}} fechada pelo pareamento.",
+      "connection-closed": "Conexão de {{address}} fechada depois de {{requests}} requisições.",
+      "connection-limit": "Conexão de {{address}} recusada: a planta já tem o máximo de conexões.",
+      "pairing-requested": "Pedido de pareamento de {{address}}.",
+      "pairing-accepted": "Pareamento de {{address}} aceito.",
+      "pairing-refused": "Pareamento de {{address}} recusado.",
+      "pairing-expired": "Pedido de {{address}} sem resposta no prazo; conexão fechada.",
+      "master-authorized": "Mestre {{address}} autorizado.",
+      "master-revoked": "Autorização de {{address}} retirada ({{connections}} conexões fechadas).",
+      "master-replaced": "{{address}} desconectado: {{replacement}} foi aceito no modo um mestre por vez.",
+      "modbus-exception": "Exceção {{code}} ({{codeName}}) para {{address}} na função {{function}}.",
+      "modbus-exception-register": "Exceção {{code}} ({{codeName}}) para {{address}} na função {{function}}, endereço {{register}}.",
+      "setting-changed": "{{setting}}: {{old}} → {{new}}.",
+      "input-forced": "{{signal}} ({{area}}) forçado em {{value}}.",
+      "input-released": "{{signal}} ({{area}}) liberado.",
+      "paused": "Planta pausada no passo {{step}}.",
+      "resumed": "Planta retomada no passo {{step}}.",
+      "restarted": "Planta reiniciada (reinício {{run}})."
+    },
+    "settings": {
+      "format": "Formato analógico",
+      "wordOrder": "Ordem das palavras",
+      "watchdogEnabled": "Watchdog",
+      "watchdogTimeoutSeconds": "Tempo limite do watchdog",
+      "diagnosticsEnabled": "Bloco de diagnóstico",
+      "unitId": "Unit ID",
+      "masterPolicy": "Mestres permitidos"
+    },
+    "areas": {
+      "discrete-input": "entrada discreta",
+      "input-register": "input register"
+    },
+    "exceptions": {
+      "1": "função ilegal",
+      "2": "endereço ilegal",
+      "3": "valor ilegal",
+      "4": "falha no escravo",
+      "11": "Unit ID não atendido"
+    },
+    "unknownException": "desconhecida",
+    "seconds": "{{value}} s"
+  },
+  "ioMap": {
+    "heading": "Mapa de I/O · {{scenario}}",
+    "facts": "Formato {{format}} · ordem das palavras {{wordOrder}} · Unit ID {{unitId}} · porta {{port}}",
+    "print": "Imprimir ou salvar em PDF",
+    "back": "Voltar à planta",
+    "loading": "Carregando o mapa…",
+    "access": {
+      "read": "Leitura",
+      "write": "Escrita"
+    },
+    "columns": {
+      "area": "Área",
+      "address": "Base 0",
+      "classic": "Clássica",
+      "length": "Regs.",
+      "signal": "Sinal",
+      "access": "Acesso",
+      "dataType": "Tipo",
+      "raw": "Bruto (4–20 mA)",
+      "range": "Faixa",
+      "unit": "Unidade"
     }
   }
 }

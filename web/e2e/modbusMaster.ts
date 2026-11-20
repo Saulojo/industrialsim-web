@@ -1,5 +1,12 @@
 import { Socket } from 'node:net';
 
+/** Resposta de exceção Modbus. */
+export class ModbusException extends Error {
+  constructor(readonly code: number) {
+    super(`Exceção Modbus ${code}`);
+  }
+}
+
 /**
  * Mestre Modbus TCP mínimo para os testes de ponta a ponta (sem dependência nova): conecta, lê e escreve
  * holding registers e avisa quando o servidor fecha a conexão.
@@ -38,6 +45,25 @@ export class ModbusMaster {
     const values: number[] = [];
     for (let i = 0; i < count; i++) values.push(reply.readUInt16BE(2 + 2 * i));
     return values;
+  }
+
+  /** Função 4: lê input registers (palavras sem sinal). Lança `ModbusException` com o código da exceção. */
+  async readInputRegisters(address: number, count: number, unitId = 1): Promise<number[]> {
+    const pdu = Buffer.from([0x04, address >> 8, address & 0xff, count >> 8, count & 0xff]);
+    const reply = await this.request(pdu, unitId);
+    if (reply[0] !== 0x04) throw new ModbusException(reply[1] ?? 0);
+    const values: number[] = [];
+    for (let i = 0; i < count; i++) values.push(reply.readUInt16BE(2 + 2 * i));
+    return values;
+  }
+
+  /** Lê um `float32` em dois input registers, com a palavra mais significativa primeiro. */
+  async readFloat(address: number, unitId = 1): Promise<number> {
+    const [high = 0, low = 0] = await this.readInputRegisters(address, 2, unitId);
+    const buffer = Buffer.alloc(4);
+    buffer.writeUInt16BE(high, 0);
+    buffer.writeUInt16BE(low, 2);
+    return buffer.readFloatBE(0);
   }
 
   /** Função 6: escreve um holding register. */

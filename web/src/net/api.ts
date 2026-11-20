@@ -1,5 +1,6 @@
 import type {
   ApiError,
+  IoMapResponse,
   PlantCreateRequest,
   PlantSummary,
   ScenarioSummary,
@@ -47,4 +48,17 @@ export async function createPlant(scenarioId: string): Promise<PlantSummary> {
 /** Gravação do ensaio em CSV, desde o último reinício (D34). */
 export function recordingUrl(plantId: string): string {
   return `/api/plants/${encodeURIComponent(plantId)}/recording`;
+}
+
+/** Mapa de I/O da planta em CSV, no formato e com as faixas atuais (Etapa 8). */
+export function ioMapCsvUrl(plantId: string): string {
+  return `/api/plants/${encodeURIComponent(plantId)}/io-map.csv`;
+}
+
+/** Mapa de I/O da planta, para a página de impressão (PDF). */
+export async function fetchIoMap(plantId: string, signal?: AbortSignal): Promise<IoMapResponse> {
+  const response = await check(
+    await fetch(`/api/plants/${encodeURIComponent(plantId)}/io-map`, { signal: signal ?? null }),
+  );
+  return (await response.json()) as IoMapResponse;
 }
