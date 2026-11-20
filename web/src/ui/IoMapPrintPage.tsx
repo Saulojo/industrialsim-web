@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ApiRequestError, fetchIoMap } from '../net/api';
 import type { IoMapResponse, IoMapRow } from '../net/contracts.generated';
-import { apiErrorText, formatNumber, signalLabel, translateDynamic } from './format';
+import { apiErrorText, signalLabel, translateDynamic } from './format';
 import { navigate, plantPath } from './navigation';
 
 export interface IoMapPrintPageProps {
@@ -29,10 +29,11 @@ export function IoMapPrintPage({ plantId }: IoMapPrintPageProps) {
     return () => abort.abort();
   }, [plantId]);
 
+  const number = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 6 });
   const range = (row: IoMapRow) =>
     row.lrv === null || row.urv === null
       ? ''
-      : `${formatNumber(i18n.language, row.lrv)} – ${formatNumber(i18n.language, row.urv)}`;
+      : `${number.format(row.lrv)} – ${number.format(row.urv)}`;
   const raw = (row: IoMapRow) => (row.rawMin === null ? '' : `${row.rawMin} – ${row.rawMax}`);
 
   return (

@@ -47,6 +47,12 @@
   background: var(--color-accent);
 }
 
+.button--primary:disabled {
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
 .value {
   font-family: var(--font-family-mono);
   font-variant-numeric: tabular-nums;

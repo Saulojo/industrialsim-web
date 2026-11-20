@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import type { ModbusStatusMessage } from '../../net/contracts.generated';
-import { formatNumber } from '../format';
 
 export interface MastersPanelProps {
   modbus: ModbusStatusMessage | null;
@@ -11,6 +10,7 @@ export interface MastersPanelProps {
 /** IPs autorizados (com "Retirar"), conexões abertas e contadores de requisições do Modbus da planta. */
 export function MastersPanel({ modbus, disabled, onRevoke }: MastersPanelProps) {
   const { t, i18n } = useTranslation();
+  const rate = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 });
   const authorized = modbus?.authorizedMasters ?? [];
   const connections = modbus?.connections ?? [];
 
@@ -26,7 +26,7 @@ export function MastersPanel({ modbus, disabled, onRevoke }: MastersPanelProps) 
       <dl className="facts">
         <dt>{t('masters.requestsPerSecond')}</dt>
         <dd className="value" data-testid="modbus-rate" data-value={modbus?.requestsPerSecond ?? 0}>
-          {formatNumber(i18n.language, modbus?.requestsPerSecond ?? 0)}
+          {rate.format(modbus?.requestsPerSecond ?? 0)}
         </dd>
         <dt>{t('masters.requests')}</dt>
         <dd className="value">{modbus?.requests ?? 0}</dd>

@@ -157,6 +157,9 @@ test('critério 3: um valor forçado aparece destacado na IHM e no monitor, e de
     ([counts]) => counts === 6912, // 0,3 m em 0–1,2 m = 25 % de 27648
   );
   await evidence(page, testInfo, 'criterio-3-monitor-forcado');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await evidence(page, testInfo, 'criterio-3-monitor-forcado-escuro');
+  await page.emulateMedia({ colorScheme: 'light' });
 
   await page.getByTestId('tab-process').click();
   await expect(page.getByTestId('forced-LT-101')).toContainText('0,300 m');

@@ -55,8 +55,13 @@ export function CaldeiraSynoptic({ welcome, state, forced = [] }: CaldeiraSynopt
 
   const active = (name: string) => (find(name)?.value ?? 0) >= 0.5;
   const isForced = (name: string) => forced.some((f) => f.signal === name);
-  const forcedMark = (name: string) =>
-    isForced(name) && <tspan className="synoptic__forced"> {t('monitor.forced')}</tspan>;
+  /** Aviso de valor forçado, numa linha abaixo da leitura (para não sair do desenho). */
+  const forcedMark = (name: string, x: number) =>
+    isForced(name) && (
+      <tspan className="synoptic__forced" x={x} dy={14}>
+        {t('monitor.forced')}
+      </tspan>
+    );
   const level = find(LEVEL);
   const levelFraction = Math.min(
     Math.max(level ? (fractionOfRange(level.value, level.info) ?? 0) : 0, 0),
@@ -79,7 +84,7 @@ export function CaldeiraSynoptic({ welcome, state, forced = [] }: CaldeiraSynopt
       >
         <tspan className="synoptic__tag">{name.replace(/_.*$/, '')} </tspan>
         {text(signal.value, signal.info)}
-        {forcedMark(name)}
+        {forcedMark(name, x)}
       </text>
     );
   };
@@ -94,7 +99,7 @@ export function CaldeiraSynoptic({ welcome, state, forced = [] }: CaldeiraSynopt
       data-forced={isForced(name)}
     >
       {name.replace(/_.*$/, '')}
-      {forcedMark(name)}
+      {forcedMark(name, x)}
     </text>
   );
 

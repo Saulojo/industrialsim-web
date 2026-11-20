@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 import { recordingsDir } from '../playwright.config';
+import { PlantSocketProtocol } from '../src/net/contracts.generated';
 import { evidence, modbusPort, numberAttribute, openPlant, record } from './evidence';
 import { ModbusMaster } from './modbusMaster';
 
@@ -166,7 +167,7 @@ test('critério 4: um cliente com outra versão do protocolo recebe a mensagem d
   await page.getByRole('button', { name: 'Abrir planta' }).click();
   await expect(page.getByTestId('connection-status')).toHaveText('Versão incompatível');
   await expect(page.getByTestId('incompatible')).toHaveText(
-    'Esta página usa a versão 99 do protocolo, mas o servidor usa a versão 1. Recarregue a página (Ctrl+F5) para carregar a versão atual.',
+    `Esta página usa a versão 99 do protocolo, mas o servidor usa a versão ${PlantSocketProtocol.version}. Recarregue a página (Ctrl+F5) para carregar a versão atual.`,
   );
   await page.waitForTimeout(3000);
   await expect(page.getByTestId('connection-status')).toHaveText('Versão incompatível'); // não insiste

@@ -193,7 +193,9 @@ export function MonitorPanel(props: MonitorPanelProps) {
                       <td>{signalLabel(t, scenarioId, point.signal)}</td>
                       <td className="value">{rawText(point, words)}</td>
                       <td className="value">
-                        {digital ? String(value) : formatNumber(i18n.language, value)}
+                        {digital || point.kind === MonitorPointKinds.heartbeat
+                          ? String(value)
+                          : formatNumber(i18n.language, value)}
                         {point.unit && !digital && ` ${point.unit}`}
                         {forced && (
                           <span className="chip chip--forced monitor__flag">
