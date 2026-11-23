@@ -136,7 +136,7 @@ industrialsim-web/
 ├─ web/         site: Vite, React, TypeScript, i18next
 ├─ scenarios/   pacotes de cenário (a partir da Etapa 3)
 ├─ tools/       implementações de referência para validação cruzada
-├─ deploy/      serviço do Windows, Caddy e PostgreSQL (Etapa 9)
+├─ deploy/      VM Linux: serviços systemd, Caddy e PostgreSQL (Etapa 9)
 └─ docs/        descritivo, plano, guias e evidências de validação
 ```
 

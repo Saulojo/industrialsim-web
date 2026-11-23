@@ -150,9 +150,9 @@ O navegador só repassa bytes nos dois sentidos; quem monta os quadros e respond
 - [x] A página de ponte abre a COM11 pela Web Serial e repassa bytes nos dois sentidos (teste com um terminal serial na COM10 e o servidor ecoando os bytes).
 - [x] O PACTware, com o DTM de modem HART na COM10, encontra o instrumento simulado (comando 0) e lê PV, corrente e faixa.
 - [x] O PACTware escreve faixa e amortecimento, e a mudança aparece no log do servidor e na leitura seguinte.
-- [ ] Tempo de resposta medido com o servidor local e com o servidor em outro PC da rede, comparado ao time-out do DTM. *(Parte local medida em 14 e 15/11/2026. A parte com outro PC fica para a Etapa 9, quando o servidor estará no PC do laboratório; não havia segundo computador na Etapa 2.)*
+- [ ] Tempo de resposta medido com o servidor local e com o servidor em outro PC da rede, comparado ao time-out do DTM. *(Parte local medida em 14 e 15/11/2026. A parte com outro PC fica para a Etapa 9B, quando o servidor estará no PC do laboratório; não havia segundo computador na Etapa 2.)*
 - [x] 30 minutos conectado sem queda nem erro de comunicação no PACTware.
-- [x] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com revisão HART e parâmetros da serial definidos. *(Registrado como A provisório em 15/11/2026: S1 a S6 e S8 atendidos; S7 a confirmar na Etapa 9.)*
+- [x] Resultado do portão de decisão (A, B ou C) registrado na D09 do descritivo, com revisão HART e parâmetros da serial definidos. *(Registrado como A provisório em 15/11/2026: S1 a S6 e S8 atendidos; S7 a confirmar na Etapa 9B.)*
 
 Evidências: `docs/validacao/etapa-02.md`.
 
@@ -255,7 +255,7 @@ Evidências: `docs/validacao/etapa-04.md`.
 - [x] Testes de API com `WebApplicationFactory` cobrem criar, consultar e encerrar.
 - [x] Encerrar o processo com plantas ativas (Ctrl+C ou parada do host, como na parada do serviço) não deixa threads penduradas.
 
-Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de desenvolvimento (Windows 11); repetir no PC do laboratório no teste de carga da Etapa 9.
+Evidências: `docs/validacao/etapa-05.md`. O ensaio de carga foi medido no PC de desenvolvimento (Windows 11); repetir na VM Linux nos testes de carga das Etapas 9A e 9B (D10, alterada em 21/11/2026).
 
 ### Etapa 6 — Modbus TCP por planta com pareamento
 
@@ -335,29 +335,60 @@ Evidências: `docs/validacao/etapa-07.md`.
 
 Evidências: `docs/validacao/etapa-08.md`.
 
-### Etapa 9 — Implantação no laboratório (Marco 1: MVP)
+### Etapa 9 — Implantação (Marco 1: MVP)
 
-**Objetivo:** o MVP no ar no PC do laboratório, acessível pela rede da universidade e, se a TI liberar, pela internet.
+*(Replanejada em 21/11/2026: o servidor passa a rodar numa VM Linux no PC do laboratório (D10, alterada nesta data), e a etapa foi dividida em duas partes. As duas aguardam o PC do laboratório, que a universidade ainda está providenciando; enquanto isso, segue a trilha de design.)*
 
-**Depende de:** Etapa 8. Conversar com a TI antes de começar.
+Conversar com a TI antes da Etapa 9B; como DNS, certificado e IP público costumam demorar, vale abrir a conversa já.
+
+#### Etapa 9A — Implantação reproduzível
+
+**Objetivo:** a implantação completa pronta e testada numa VM Linux, com roteiro que se repete sem surpresas no PC do laboratório e, depois, numa VM da universidade ou da nuvem.
+
+**Depende de:** Etapa 8.
+
+**Máquina de teste:** a VM Linux no PC do laboratório. A etapa só começa quando ele chegar; não se monta VM de teste no PC de desenvolvimento (decisão do autor em 23/11/2026: a VM pesa demais nele).
 
 **Escopo**
 
-- Publicação do servidor com o web embutido (`dotnet publish`), instalado como serviço do Windows; Caddy para Windows com HTTPS (D10).
-- Serviço com reinício automático; logs persistidos com rotação.
-- Firewall do Windows: 443 e 15000–15999; todo o resto fechado. A faixa 16000–16999 só abre se o HART-IP for adotado (ver D09).
-- Com a TI: DNS, certificado e IP público, ou acesso por VPN.
+- VM Hyper-V com Ubuntu Server LTS (versão fixada nesta etapa), com núcleos e RAM reservados e início automático junto com o Windows.
+- Publicação do servidor com o web embutido (`dotnet publish` self-contained para `linux-x64`), instalado como serviço systemd com reinício automático; Caddy (repositório oficial) como proxy reverso, também como serviço, com HTTPS por certificado interno (`tls internal`) nesta parte.
+- O servidor recebe o IP real do navegador pelos cabeçalhos encaminhados do Caddy (aceitos só do loopback), para o log e o monitor (D44).
+- Logs persistidos com rotação (servidor e Caddy), com retenção curta.
+- Firewall da VM: 443 e 15000–15999; todo o resto fechado. A faixa 16000–16999 só abre se o HART-IP for adotado (ver D09).
+- Ferramenta de teste de carga: cria plantas, autoriza e roda mestres Modbus simulados, lê as métricas do laço e registra CPU e RAM da VM.
+- Roteiro de implantação e atualização em `docs/implantacao.md` (criar a VM, instalar, atualizar, voltar versão), incluindo a lista do que pedir à TI (DNS, certificado, IP público ou VPN, banda de upload).
+
+**Validação**
+
+- [ ] O site abre por HTTPS (certificado interno) a partir de outro computador (o hospedeiro da VM conta).
+- [ ] Ensaio completo com um mestre real (ex.: CODESYS) contra a VM: pareamento, malha de nível fechada no mestre, distúrbio pela IHM e CSV exportado.
+- [ ] Após reiniciar a VM, e também o hospedeiro, o serviço volta sozinho em menos de 2 minutos.
+- [ ] Teste de carga com 30 plantas e 30 clientes Modbus simulados por 30 minutos, sem erros e dentro das metas de tempo real (deriva < 0,1%, atraso do passo no p99 < 5 ms), com CPU e RAM da VM registradas.
+- [ ] Teste de carga crescente (30, 60, 100, 200 plantas e mestres…) até uma meta de tempo real, CPU ou RAM quebrar; o limite medido e o gargalo ficam registrados em `docs/implantacao.md`.
+- [ ] Uma varredura de portas feita de fora da VM mostra só as portas previstas.
+
+#### Etapa 9B — Implantação no PC do laboratório (Marco 1: MVP)
+
+**Objetivo:** o MVP no ar no PC do laboratório, acessível pela rede da universidade e, se a TI liberar, pela internet.
+
+**Depende de:** Etapa 9A, do PC do laboratório e da TI.
+
+**Escopo**
+
+- Levar a VM da 9A para o PC do laboratório (ou repetir o roteiro nele), com a VM na rede do laboratório (switch externo, IP próprio).
+- Com a TI: DNS, certificado e IP público, ou acesso por VPN; liberação das portas só para a VM.
 - Opcional: arquivos estáticos em CDN se a banda do laboratório limitar.
-- Roteiro de implantação e atualização em `docs/implantacao.md`.
+- Atualizar `docs/implantacao.md` com o que mudou na instalação real.
 
 **Validação**
 
 - [ ] O site abre por HTTPS, com certificado válido, a partir de outro PC da rede (e de fora, se liberado).
-- [ ] Ensaio completo com um mestre real (ex.: CODESYS) num PC do laboratório: pareamento, malha de nível fechada no mestre, distúrbio pela IHM e CSV exportado. *(Alterado em 17/11/2026: o teste com CLP real ou PLCSIM Advanced foi retirado do plano.)*
+- [ ] Ensaio completo com um mestre real (ex.: CODESYS) num PC do laboratório, contra a VM do servidor. *(Alterado em 17/11/2026: o teste com CLP real ou PLCSIM Advanced foi retirado do plano.)*
 - [ ] Após reiniciar o PC do laboratório, o serviço volta sozinho em menos de 2 minutos.
-- [ ] Teste de carga com 30 plantas e 30 clientes Modbus simulados por 30 minutos, sem erros e dentro das metas de tempo real.
+- [ ] Testes de carga da 9A (30 por 30 minutos e crescente) repetidos no PC do laboratório, dentro das metas.
 - [ ] Uma varredura de portas feita de fora mostra só as portas previstas.
-- [ ] (Pendência da Etapa 2, critério S7) Com o servidor da prova HART (`tools/hart-poc`) no PC do laboratório e a página de ponte em outro PC da rede (e, se possível, por uma conexão de internet comum), o tempo de resposta fica dentro do time-out do DTM e o PACTware lê e escreve; o resultado do portão é confirmado como A ou alterado para B na D09.
+- [ ] (Pendência da Etapa 2, critério S7) Com o servidor da prova HART (`tools/hart-poc`) na VM do servidor e a página de ponte em outro PC da rede (e, se possível, por uma conexão de internet comum), o tempo de resposta fica dentro do time-out do DTM e o PACTware lê e escreve; o resultado do portão é confirmado como A ou alterado para B na D09.
 - [ ] Marco 1 registrado na linha “Estado atual” do descritivo.
 
 ## Trilha de design
@@ -422,7 +453,7 @@ Ao fim da Fase 2, qualquer pessoa, de qualquer lugar, cria conta (ou entra como 
 
 **Objetivo:** pessoas criam conta, salvam plantas e voltam a elas de onde pararam; quem não quer conta usa como visitante.
 
-**Depende de:** Etapa 9 e trilha de design (Etapa D2).
+**Depende de:** Etapa 9A e trilha de design (Etapa D2). Os critérios que exigem o servidor do laboratório (ex.: login social) ficam desmarcados, com nota, até a Etapa 9B.
 
 **Escopo**
 
@@ -493,7 +524,7 @@ Ao fim da Fase 2, qualquer pessoa, de qualquer lugar, cria conta (ou entra como 
 
 **Objetivo:** o site pronto para qualquer pessoa, em três idiomas, com limites que protegem o servidor.
 
-**Depende de:** Etapa 12.
+**Depende de:** Etapa 12 e Etapa 9B (o site precisa estar no servidor do laboratório antes de abrir ao público).
 
 **Escopo**
 
