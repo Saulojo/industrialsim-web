@@ -70,7 +70,7 @@ Fidelidade no protótipo: **A** alta (identidade visual, dados realistas, intera
 | T22 | Editor Ladder (esboço) | `/plants/{id}#program` | 22 | PRF, ALU | — | M | não | wf: `T22-Ladder` |
 | T23 | Nova aba (menu do +: abrir ferramenta ou instrumento) | sobre a planta | D2 | todos | — | A | não | wf: `T23-NovaAba` |
 | T24 | Menu da planta (sair, outras plantas, turmas, idioma, tema, conta) | sobre a planta | D2 | todos | — | A | não | wf: `T24-MenuPlanta` |
-| T25 | Gráficos (tendências grandes: vários gráficos, escolha de sinais, janela, zoom, cursor, marcas de eventos, exportar trecho) | `/plants/{id}#trends` | D2 | todos | 2–4 | A | parcial (tendência pequena em Processo) | wf: `T25-Graficos` |
+| T25 | Gráficos (tendências grandes: vários gráficos, escolha de sinais, janela até toda a sessão, zoom, cursor, marcas de eventos, exportar trecho) | `/plants/{id}#trends` | D2 | todos | 2–4 | A | parcial (tendência pequena em Processo) | wf: `T25-Graficos` |
 
 Fora do mapa por ora (sem tela própria na D1): conta e privacidade (exportar e excluir conta, LGPD, Etapas 10 e 13), termos de uso, editor FBD (Etapa 23, segue o modelo do T22), reprodução de ensaio gravado (entra como ação em T14 ou T06 quando a etapa existir).
 
@@ -106,7 +106,14 @@ Decisões de interface que os wireframes propõem e que a revisão (fim da parte
 7. **Pausar e Reiniciar** ficam na barra da planta; as exportações (ensaio CSV, mapa de I/O CSV e PDF) vão para um menu "Exportar".
 8. **Comandos do mestre** aparecem no sinóptico, ao lado da posição de cada válvula ("cmd do mestre 82,3 %"), em vez de um painel próprio, para sobrar espaço à planta (revisão de 23/11).
 9. **Compartilhamento sem papéis** (revisão de 23/11, pedido do autor): quem recebe o convite tem os mesmos direitos de quem compartilhou; só quem criou a planta a exclui e remove pessoas. O acesso só de leitura fica para o professor que observa a planta de um aluno pela turma. *(As duas regras foram confirmadas pelo autor em 23/11/2026.)* **Contraria a D15 e o RF09** (papéis dono, operador e observador) e a tabela "Compartilhamento" do descritivo; a decisão nova é registrada no descritivo ao fim da D1.
-10. **Histórico dos gráficos (T25):** a IHM guarda só o que recebeu desde que a página abriu. Para "desde o reinício" ou para uma aba aberta depois, o servidor teria que mandar o histórico (por exemplo, lendo a gravação do ensaio, D34). A decisão fica para a D2; até lá, a janela máxima é o que o navegador recebeu.
+10. **Histórico dos gráficos (T25)** *(decidido pelo autor em 23/11/2026)*:
+    - **Só a sessão atual.** Não há histórico de sessões anteriores. Quem entra na planta depois (outro aluno, o professor, a mesma pessoa reabrindo a página) vê o histórico desde o início da sessão, mandado pelo servidor ao conectar.
+    - **Sessão (suposição a confirmar):** do momento em que a planta começa a rodar (criada ou retomada da hibernação) até ela encerrar ou hibernar. O reinício da planta zera o histórico, como já zera a tendência (D41).
+    - **Implementação, para a D2 ou a etapa que fizer o servidor guardar o histórico:**
+      - o servidor guarda o histórico em memória, por planta;
+      - para caber no PC do laboratório (RNF07), os últimos minutos ficam a 20 Hz e o resto é reduzido (por exemplo, a 1 Hz). A 1 Hz e 16 sinais `float32`, cerca de 230 kB por hora por planta;
+      - o envio ao conectar e o formato da mensagem entram no protocolo WebSocket (D40).
+    - Vira decisão nova no descritivo ao fim da D1.
 11. **Código de acesso à planta**: gerado em T15, de 1 uso ou de vários usos, com validade e revogável; digitado em Minhas plantas ou Turmas, no mesmo campo que aceita código de turma, ou aberto como link.
 
 ## Fluxos

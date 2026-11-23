@@ -1,6 +1,6 @@
 # Guia de identidade visual
 
-Etapa D1, parte C. Proposta para aprovação: falta escolher o conceito de logotipo. Os valores ficam em [`tokens.json`](tokens.json), que é a fonte da Etapa D2; este guia explica como usá-los. Prancha visual: canvas "IndustrialSim · Identidade visual" (link em [`README.md`](README.md)).
+Etapa D1, parte C. Logotipo escolhido pelo autor em 23/11/2026 (conceito B). Os valores ficam em [`tokens.json`](tokens.json), que é a fonte da Etapa D2; este guia explica como usá-los. Prancha visual: canvas "IndustrialSim · Identidade visual" (link em [`README.md`](README.md)).
 
 ## Nome
 
@@ -8,15 +8,23 @@ Etapa D1, parte C. Proposta para aprovação: falta escolher o conceito de logot
 
 ## Logotipo
 
-Três conceitos, em [`logo/`](logo/): cada arquivo tem o símbolo e o logotipo em texto, na versão clara.
+**Escolhido: conceito B, Instrumento.** O balão de instrumento da ISA-5.1 (círculo com linha horizontal: instrumento no painel) com uma resposta ao degrau na metade de cima, como numa tendência. Ele fala com quem é da área e vale para qualquer cenário, não só para a caldeira.
+
+| Arquivo | Uso |
+| --- | --- |
+| [`logo/simbolo.svg`](logo/simbolo.svg), [`logo/simbolo-escuro.svg`](logo/simbolo-escuro.svg) | Símbolo sozinho, só caminhos, para fundo claro e escuro (a partir de 32 px) |
+| [`logo/favicon.svg`](logo/favicon.svg) | Favicon: traço mais grosso e a curva reduzida a um degrau, legível em 16 px; segue o tema do sistema |
+| [`logo/logo.svg`](logo/logo.svg), [`logo/logo-escuro.svg`](logo/logo-escuro.svg), [`logo/logo-mono.svg`](logo/logo-mono.svg) | Logotipo completo (símbolo e nome), claro, escuro e monocromático. **O nome ainda é texto: falta converter em curvas** |
+
+Os três conceitos apresentados ficam em [`logo/conceitos/`](logo/conceitos/), como registro da escolha:
 
 | Conceito | Símbolo | A favor | Contra |
 | --- | --- | --- | --- |
-| A · Tubulão ([SVG](logo/conceito-a-tubulao.svg)) | O tubulão da caldeira com o nível de água e a saída de vapor | O mais legível em 16 px; diz "planta de processo" de imediato | Preso à caldeira quando vierem outros cenários |
-| B · Instrumento ([SVG](logo/conceito-b-instrumento.svg)) | O balão de instrumento da ISA-5.1 com uma resposta ao degrau | Fala com quem é da área e vale para qualquer cenário | A curva some em 16 px (fica só o balão) |
-| C · Malha fechada ([SVG](logo/conceito-c-malha.svg)) | A seta de realimentação em volta do tubulão | Conta a ideia do produto: o seu controle fecha a malha | Lembra o ícone de "atualizar" em tamanho pequeno |
+| A · Tubulão | O tubulão da caldeira com o nível de água e a saída de vapor | O mais legível em 16 px; diz "planta de processo" de imediato | Preso à caldeira quando vierem outros cenários |
+| **B · Instrumento (escolhido)** | O balão de instrumento da ISA-5.1 com uma resposta ao degrau | Fala com quem é da área e vale para qualquer cenário | A curva some em 16 px; resolvido com o favicon simplificado |
+| C · Malha fechada | A seta de realimentação em volta do tubulão | Conta a ideia do produto: o seu controle fecha a malha | Lembra o ícone de "atualizar" em tamanho pequeno |
 
-**Regras de uso**, valem para o conceito escolhido:
+**Regras de uso:**
 
 - **Versões:**
   - clara: traço em `text` e acento em `accent`;
@@ -26,7 +34,7 @@ Três conceitos, em [`logo/`](logo/): cada arquivo tem o símbolo e o logotipo e
 - **Tamanho mínimo:** o símbolo sozinho em 16 px (favicon); o logotipo completo com 120 px de largura.
 - **Não fazer:** girar, esticar, mudar cores fora das versões, pôr sombra ou gradiente, colocar o símbolo sobre fotos sem fundo liso.
 
-**Arquivo final (com o autor):** escolhido o conceito, o SVG daqui serve de base. O texto do logotipo está como `<text>` e precisa virar curvas, para não depender da fonte instalada:
+**Arquivo final (com o autor):** os SVGs de `logo/` servem de base. Nos três arquivos `logo*.svg`, o nome está como `<text>` e precisa virar curvas, para não depender da fonte instalada:
 - no Inkscape: selecionar o texto e usar **Caminho › Objeto para caminho**, depois salvar como "SVG simples";
 - no Figma: **Outline stroke** / **Flatten**.
 

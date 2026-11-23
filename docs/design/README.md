@@ -9,8 +9,8 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | A | Perfis e tarefas | [`perfis-e-tarefas.md`](perfis-e-tarefas.md) | pronto |
 | A | Mapa de telas e fluxos | [`mapa-de-telas.md`](mapa-de-telas.md) | pronto |
 | B | Wireframes de baixa fidelidade | Artifact (link abaixo) | pronto, aguardando revisão |
-| C | Guia de identidade visual | [`identidade-visual.md`](identidade-visual.md) e Artifact (link abaixo) | pronto, aguardando a escolha do logotipo |
-| C | Conceitos de logotipo | [`logo/`](logo/) | 3 conceitos, aguardando escolha |
+| C | Guia de identidade visual | [`identidade-visual.md`](identidade-visual.md) e Artifact (link abaixo) | pronto |
+| C | Logotipo | [`logo/`](logo/) | conceito B escolhido em 23/11; falta converter o nome em curvas (autor, Inkscape ou Figma) |
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
 | D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | a fazer |

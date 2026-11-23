@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon: o símbolo simplificado para 16 e 32 px (traço mais grosso e a resposta ao degrau reduzida a um
+       degrau), com cores que seguem o tema do sistema. -->
+  <style>
+    .ink { stroke: #1A1D21; }
+    .acc { stroke: #1C5A91; }
+    @media (prefers-color-scheme: dark) {
+      .ink { stroke: #E7EAED; }
+      .acc { stroke: #8CC2F2; }
+    }
+  </style>
+  <circle class="ink" cx="32" cy="32" r="26" fill="none" stroke-width="7"/>
+  <path class="ink" d="M6 33 H58" fill="none" stroke-width="7"/>
+  <path class="acc" d="M15 25 H25 L31 15 H49" fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

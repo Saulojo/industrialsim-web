@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" role="img" aria-labelledby="t">
+  <title id="t">IndustrialSim Web</title>
+  <!-- Logotipo completo, versão para fundo escuro. O texto ainda é <text>: converter em curvas na versão final. -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#E7EAED" stroke-width="5"/>
+  <path d="M6 32 H58" fill="none" stroke="#E7EAED" stroke-width="5"/>
+  <path d="M13 26 H21 C25 26 25 13 31 13 C37 13 37 19 51 19" fill="none" stroke="#8CC2F2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="74" y="42" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="600" fill="#E7EAED">IndustrialSim<tspan font-weight="400" fill="#A7AFB7"> Web</tspan></text>
+</svg>
