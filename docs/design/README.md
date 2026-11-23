@@ -17,7 +17,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo, 4 ressalvas para o orientador |
 | D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto; falta o teste piloto, e o termo precisa dos nomes e contatos |
-| E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto (o CSV só tem o cabeçalho até o teste) |
+| E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto e conferido pelo autor no claude.ai em 23/11 (o CSV só tem o cabeçalho até o teste) |
 | F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
 
 ## Links
