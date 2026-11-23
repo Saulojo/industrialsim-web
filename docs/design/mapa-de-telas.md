@@ -29,7 +29,7 @@ Fora e dentro de uma planta a navegação muda, para a planta ocupar a tela:
    - **⌂** sai da planta para Minhas plantas (visitante: início).
    - **Nome da planta ▾** abre o menu da planta (T24): Minhas plantas, abrir outra planta, turmas, renomear, ajuda, idioma, tema e conta. Avisa que sair não desliga a planta.
    - **Abas:** Processo fica fixa (não fecha); as outras ferramentas abrem em abas que se fecham (×) e se reordenam (arrastar).
-   - **+** abre o menu de nova aba (T23), com busca e um clique por ferramenta: Conexão, Configurações, Monitor, Log, Mapa de I/O (abre a página de impressão), detalhe de cada instrumento, Configurador HART (Fase 3), Programa Ladder (Fase 4). Ferramenta já aberta: o clique vai para a aba dela.
+   - **+** abre o menu de nova aba (T23), com busca e um clique por ferramenta: Gráficos (T25), Conexão, Configurações, Monitor, Log, Mapa de I/O (abre a página de impressão), detalhe de cada instrumento, Configurador HART (Fase 3), Programa Ladder (Fase 4). Ferramenta já aberta: o clique vai para a aba dela.
    - As abas abertas ficam lembradas por planta, só neste navegador.
 3. **Barra de estado da planta** (logo abaixo das abas, sempre visível em qualquer aba): **estado do mestre** em destaque (nenhum, aguardando pareamento, conectado, com erro), situação (rodando, pausada), tempo simulado, alarmes ativos, Pausar ou Retomar, Reiniciar, menu Exportar (ensaio CSV, mapa de I/O CSV e PDF), Compartilhar (com conta) e, para o visitante, o tempo restante. O estado do WebSocket do navegador só aparece quando há problema (reconectando, incompatível).
 
@@ -70,6 +70,7 @@ Fidelidade no protótipo: **A** alta (identidade visual, dados realistas, intera
 | T22 | Editor Ladder (esboço) | `/plants/{id}#program` | 22 | PRF, ALU | — | M | não | wf: `T22-Ladder` |
 | T23 | Nova aba (menu do +: abrir ferramenta ou instrumento) | sobre a planta | D2 | todos | — | A | não | wf: `T23-NovaAba` |
 | T24 | Menu da planta (sair, outras plantas, turmas, idioma, tema, conta) | sobre a planta | D2 | todos | — | A | não | wf: `T24-MenuPlanta` |
+| T25 | Gráficos (tendências grandes: vários gráficos, escolha de sinais, janela, zoom, cursor, marcas de eventos, exportar trecho) | `/plants/{id}#trends` | D2 | todos | 2–4 | A | parcial (tendência pequena em Processo) | wf: `T25-Graficos` |
 
 Fora do mapa por ora (sem tela própria na D1): conta e privacidade (exportar e excluir conta, LGPD, Etapas 10 e 13), termos de uso, editor FBD (Etapa 23, segue o modelo do T22), reprodução de ensaio gravado (entra como ação em T14 ou T06 quando a etapa existir).
 
@@ -104,8 +105,9 @@ Decisões de interface que os wireframes propõem e que a revisão (fim da parte
 6. **Prioridade de alarme:** a banda de alarmes (E03) mostra prioridade por forma e número, mas a seção `hmi.alarms` do cenário (D39) ainda não tem prioridade. Se a ideia ficar, a D2 ou a Etapa 15 acrescenta o campo ao `scenario.json` (decisão nova).
 7. **Pausar e Reiniciar** ficam na barra da planta; as exportações (ensaio CSV, mapa de I/O CSV e PDF) vão para um menu "Exportar".
 8. **Comandos do mestre** aparecem no sinóptico, ao lado da posição de cada válvula ("cmd do mestre 82,3 %"), em vez de um painel próprio, para sobrar espaço à planta (revisão de 23/11).
-9. **Compartilhamento sem papéis** (revisão de 23/11, pedido do autor): quem recebe o convite tem os mesmos direitos de quem compartilhou; só quem criou a planta a exclui e remove pessoas. O acesso só de leitura fica para o professor que observa a planta de um aluno pela turma. **Contraria a D15 e o RF09** (papéis dono, operador e observador) e a tabela "Compartilhamento" do descritivo; a decisão nova é registrada ao fim da D1, com a confirmação do autor.
-10. **Código de acesso à planta**: gerado em T15, de 1 uso ou de vários usos, com validade e revogável; digitado em Minhas plantas ou Turmas, no mesmo campo que aceita código de turma, ou aberto como link.
+9. **Compartilhamento sem papéis** (revisão de 23/11, pedido do autor): quem recebe o convite tem os mesmos direitos de quem compartilhou; só quem criou a planta a exclui e remove pessoas. O acesso só de leitura fica para o professor que observa a planta de um aluno pela turma. *(As duas regras foram confirmadas pelo autor em 23/11/2026.)* **Contraria a D15 e o RF09** (papéis dono, operador e observador) e a tabela "Compartilhamento" do descritivo; a decisão nova é registrada no descritivo ao fim da D1.
+10. **Histórico dos gráficos (T25):** a IHM guarda só o que recebeu desde que a página abriu. Para "desde o reinício" ou para uma aba aberta depois, o servidor teria que mandar o histórico (por exemplo, lendo a gravação do ensaio, D34). A decisão fica para a D2; até lá, a janela máxima é o que o navegador recebeu.
+11. **Código de acesso à planta**: gerado em T15, de 1 uso ou de vários usos, com validade e revogável; digitado em Minhas plantas ou Turmas, no mesmo campo que aceita código de turma, ou aberto como link.
 
 ## Fluxos
 

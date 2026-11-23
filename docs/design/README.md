@@ -22,12 +22,12 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 
 Os Artifacts são páginas privadas no claude.ai; quem os publicou decide com quem compartilhar.
 
-- Wireframes (31 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
+- Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Protótipo: *(preenchido na parte D)*
 - Formulário do moderador: *(preenchido na parte E)*
 
 ## Convenções
 
-- Telas identificadas por T01…T24 e estados por E01…E10 (`mapa-de-telas.md`); tarefas por T1…T5 (principais) e S1…S13 (`perfis-e-tarefas.md`).
+- Telas identificadas por T01…T25 e estados por E01…E10 (`mapa-de-telas.md`); tarefas por T1…T5 (principais) e S1…S13 (`perfis-e-tarefas.md`).
 - Dados do protótipo tirados do repositório: tags, faixas e mapa Modbus de `scenarios/caldeira/scenario.json`; textos de `web/src/locales/pt-BR/translation.json`.
 - Nenhum código de produção nesta etapa: `web/src` só muda na D2.
