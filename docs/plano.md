@@ -347,7 +347,7 @@ Conversar com a TI antes da Etapa 9B; como DNS, certificado e IP público costum
 
 **Depende de:** Etapa 8.
 
-**Máquina de teste:** a VM Linux no PC do laboratório. Se ele ainda não tiver chegado quando a etapa começar, uma VM Hyper-V no PC de desenvolvimento, ligada só a ele (switch interno), sem abrir nada na rede nem no firewall do Windows.
+**Máquina de teste:** a VM Linux no PC do laboratório. A etapa só começa quando ele chegar; não se monta VM de teste no PC de desenvolvimento (decisão do autor em 23/11/2026: a VM pesa demais nele).
 
 **Escopo**
 
