@@ -51,10 +51,14 @@ public class IoImageTests(ITestOutputHelper output)
     /// <summary>
     /// Thread-safe: quatro threads escrevem pares de registradores (sempre dois valores iguais, numa operação só)
     /// enquanto outra tira snapshots. Nenhum snapshot pode ver um par pela metade.
+    /// Cada tarefa tem thread própria (<see cref="TaskCreationOptions.LongRunning"/>): no pool, as quatro escritoras,
+    /// sempre ocupadas, tomavam as threads da VM do CI e a leitora não chegava a começar. O ensaio dura pelo menos
+    /// 500 ms e segue até haver snapshots suficientes, com prazo de 10 s.
     /// </summary>
     [Fact]
     public async Task ConcurrentWrites_NeverAppearHalfDoneInASnapshot()
     {
+        const long TargetSnapshots = 1000;
         var image = new IoImage(coilCount: 2, discreteInputCount: 0, holdingRegisterCount: 8, inputRegisterCount: 0);
         using var stop = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         long torn = 0;
@@ -62,7 +66,7 @@ public class IoImageTests(ITestOutputHelper output)
 
         Task[] writers =
         [
-            .. Enumerable.Range(0, 4).Select(w => Task.Run(() =>
+            .. Enumerable.Range(0, 4).Select(w => StartDedicated(() =>
             {
                 ushort value = (ushort)(w * 1000);
                 while (!stop.IsCancellationRequested)
@@ -71,37 +75,47 @@ public class IoImageTests(ITestOutputHelper output)
                     image.TryWriteHoldingRegisters(2 * w, [value, value]);
                     image.TryWriteCoils(0, [(value & 1) == 0, (value & 1) == 0]);
                 }
-            }, TestContext.Current.CancellationToken)),
+            })),
         ];
 
-        Task reader = Task.Run(() =>
+        Task reader = StartDedicated(() =>
         {
             while (!stop.IsCancellationRequested)
             {
                 IoSnapshot snapshot = image.Snapshot();
-                snapshots++;
                 for (int pair = 0; pair < 4; pair++)
                 {
                     if (snapshot.HoldingRegisters[2 * pair] != snapshot.HoldingRegisters[(2 * pair) + 1])
                     {
-                        torn++;
+                        Interlocked.Increment(ref torn);
                     }
                 }
 
                 if (snapshot.Coils[0] != snapshot.Coils[1])
                 {
-                    torn++;
+                    Interlocked.Increment(ref torn);
                 }
-            }
-        }, TestContext.Current.CancellationToken);
 
+                Interlocked.Increment(ref snapshots);
+            }
+        });
+
+        var elapsed = System.Diagnostics.Stopwatch.StartNew();
         await Task.Delay(500, TestContext.Current.CancellationToken);
+        while (Interlocked.Read(ref snapshots) < TargetSnapshots && elapsed.Elapsed < TimeSpan.FromSeconds(10))
+        {
+            await Task.Delay(50, TestContext.Current.CancellationToken);
+        }
+
         await stop.CancelAsync();
         await Task.WhenAll([.. writers, reader]);
 
-        output.WriteLine($"{snapshots} snapshots, {torn} com escrita pela metade");
-        Assert.True(snapshots > 100, $"snapshots: {snapshots}");
+        output.WriteLine($"{snapshots} snapshots, {torn} com escrita pela metade, em {elapsed.ElapsedMilliseconds} ms");
+        Assert.True(snapshots >= TargetSnapshots, $"snapshots: {snapshots} em {elapsed.ElapsedMilliseconds} ms");
         Assert.Equal(0, torn);
+
+        static Task StartDedicated(Action action) =>
+            Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
     /// <summary>
