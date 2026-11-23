@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Instrumentos HART</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.inst{display:flex;flex-direction:column;gap:2px;width:100%;padding:10px 14px;border:none;border-bottom:1px solid var(--color-border);background:none;font:inherit;text-align:left;color:var(--color-text);cursor:pointer}
+.inst:hover{background:var(--color-surface-sunken)}
+.inst.is-on{box-shadow:inset 3px 0 0 var(--color-accent);background:var(--color-surface-sunken)}
+.ftabs{display:flex;gap:4px;border-bottom:1px solid var(--color-border);flex-wrap:wrap}
+.ftab{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border:none;background:none;font:inherit;color:var(--color-text-muted);cursor:pointer}
+.ftab.is-on{color:var(--color-text);font-weight:600;box-shadow:inset 0 -3px 0 var(--color-accent)}
+.frame{display:flex;flex-wrap:wrap;gap:4px;font-family:var(--font-family-mono);font-size:12px}
+.fld-b{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;border-radius:4px;background:var(--color-surface);border:1px solid var(--color-border)}
+.fld-b small{font-family:var(--font-family-base);font-size:11px;color:var(--color-text-muted)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1100px">
+  <dc-import name="PlantBar" tab="instruments" open="process,trends,monitor,instruments" hint-size="100%,104px"></dc-import>
+  <main style="display: flex; flex-wrap: wrap; gap: 16px; padding: 16px; align-items: flex-start">
+    <nav class="panel" aria-label="Instrumentos HART" style="flex: 0 0 240px; padding: 0; overflow: hidden">
+      <span class="lbl" style="display: block; padding: 10px 14px">Instrumentos · HART 7</span>
+      <sc-for list="{{ insts }}" as="i" hint-placeholder-count="4">
+        <button type="button" class="{{ i.cls }}" aria-current="{{ i.cur }}" onClick="{{ i.pick }}"><strong class="mono">{{ i.tag }}</strong><span class="muted small">{{ i.desc }} · endereço {{ i.addr }}</span></button>
+      </sc-for>
+    </nav>
+
+    <section class="panel col" aria-labelledby="t12-t" style="flex: 999 1 520px; min-width: 0; gap: 14px">
+      <div class="row" style="gap: 12px">
+        <h2 id="t12-t" class="h3">{{ cur.tag }} · {{ cur.desc }}</h2>
+        <span class="muted">PV <span class="mono">{{ cur.pv }}</span> · <span class="mono">{{ cur.ma }}</span> · status normal</span>
+        <button type="button" class="btn btn-sm push"><dc-import name="Icon" icon="rotate" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Ler tudo</button>
+      </div>
+      <div class="ftabs" role="tablist" aria-label="Grupos de parâmetros">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
+          <button type="button" role="tab" class="{{ g.cls }}" aria-selected="{{ g.on }}" onClick="{{ g.pick }}">{{ g.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isRange }}" hint-placeholder-val="{{ true }}">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+          <div class="field"><label for="t12-lrv">LRV (4 mA)</label><div class="row" style="gap: 8px"><input id="t12-lrv" class="input mono" value="{{ cur.lrv }}" style="width: 140px"><span>{{ cur.unit }}</span></div></div>
+          <div class="field"><label for="t12-urv">URV (20 mA)</label><div class="row" style="gap: 8px"><input id="t12-urv" class="input mono" value="{{ cur.urv }}" style="width: 140px"><span>{{ cur.unit }}</span></div></div>
+          <div class="field"><label for="t12-unit">Unidade da PV</label><select id="t12-unit" class="select" style="width: 160px"><option>{{ cur.unit }}</option></select></div>
+          <div class="field"><label for="t12-damp">Amortecimento</label><div class="row" style="gap: 8px"><input id="t12-damp" class="input mono" value="0,2" style="width: 140px"><span>s</span></div></div>
+          <div class="field"><label for="t12-tf">Função de transferência</label><select id="t12-tf" class="select" style="width: 160px"><option>Linear</option></select></div>
+        </div>
+        <p class="hint">Mudar a faixa muda a corrente e o valor que o mestre lê (comandos 35, 36 e 37). A unidade muda só o que o HART reporta.</p>
+      </sc-if>
+      <sc-if value="{{ isOther }}" hint-placeholder-val="{{ false }}">
+        <p class="muted" style="padding: 24px 0">{{ otherText }}</p>
+      </sc-if>
+      <div class="row" style="gap: 8px; justify-content: flex-end"><button type="button" class="btn">Desfazer</button><button type="button" class="btn btn-primary" onClick="{{ write }}">Gravar no instrumento</button></div>
+    </section>
+
+    <div class="col" style="flex: 1 1 360px; gap: 16px">
+      <section class="panel col" aria-labelledby="t12-fr" style="gap: 10px">
+        <div class="row"><h2 id="t12-fr" class="panel-title">Quadros trocados</h2><label class="check push"><input type="checkbox" checked="{{ didactic }}" onChange="{{ toggleDid }}"> Modo didático</label></div>
+        <sc-if value="{{ hasFrame }}" hint-placeholder-val="{{ true }}">
+          <span class="small"><strong>→ Comando 35</strong> · gravar faixa ({{ cur.tag }})</span>
+          <div class="frame sunken" style="padding: 8px">
+            <sc-for list="{{ req }}" as="b" hint-placeholder-count="7"><span class="fld-b" title="{{ b.help }}">{{ b.hex }}<sc-if value="{{ didactic }}" hint-placeholder-val="{{ true }}"><small>{{ b.name }}</small></sc-if></span></sc-for>
+          </div>
+          <span class="small"><strong>← Resposta</strong> · sucesso, configuração alterada</span>
+          <div class="frame sunken" style="padding: 8px">
+            <sc-for list="{{ resp }}" as="b" hint-placeholder-count="8"><span class="fld-b" title="{{ b.help }}">{{ b.hex }}<sc-if value="{{ didactic }}" hint-placeholder-val="{{ true }}"><small>{{ b.name }}</small></sc-if></span></sc-for>
+          </div>
+          <p class="hint">Passe o mouse num campo para ver o que ele significa.</p>
+        </sc-if>
+        <sc-if value="{{ noFrame }}" hint-placeholder-val="{{ false }}"><p class="muted">Grave uma mudança para ver o pedido e a resposta, campo a campo. No protótipo, só há exemplo para o PT-101.</p></sc-if>
+      </section>
+      <section class="panel col" aria-labelledby="t12-br" style="gap: 8px">
+        <h2 id="t12-br" class="panel-title">Ponte para o PACTware</h2>
+        <p class="muted">Liga uma porta COM virtual (com0com) a esta planta pela Web Serial: 1200 baud, 8 bits, paridade ímpar, 1 bit de parada. Só no Chrome e no Edge.</p>
+        <div class="row" style="gap: 8px"><button type="button" class="btn">Escolher porta COM…</button><span class="muted">Desligada</span></div>
+        <a href="#ajuda" class="small">Guia: PACTware com com0com</a>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { inst: 'PT-101', group: 'range', didactic: true, written: true };
+  }
+  renderVals() {
+    const s = this.state;
+    const defs = {
+      'LT-101': { tag: 'LT-101', desc: 'Nível do tubulão', addr: 1, pv: '0,600 m', ma: '12,00 mA', lrv: '0,000', urv: '1,200', unit: 'm' },
+      'PT-101': { tag: 'PT-101', desc: 'Pressão do vapor', addr: 2, pv: '10,00 bar', ma: '14,00 mA', lrv: '0,00', urv: '16,00', unit: 'bar' },
+      'FT-101': { tag: 'FT-101', desc: 'Vazão de água', addr: 3, pv: '2,000 kg/s', ma: '12,00 mA', lrv: '0,000', urv: '4,000', unit: 'kg/s' },
+      'FT-102': { tag: 'FT-102', desc: 'Vazão de vapor', addr: 4, pv: '2,000 kg/s', ma: '10,40 mA', lrv: '0,000', urv: '5,000', unit: 'kg/s' }
+    };
+    const cur = defs[s.inst];
+    const gdefs = [['id', 'Identificação'], ['range', 'Faixa e unidade'], ['loop', 'Teste de malha'], ['trim', 'Trim'], ['status', 'Status']];
+    const others = {
+      id: 'Tag, descritor, mensagem, data, fabricante e revisão (comandos 0, 13 e 20).',
+      loop: 'Fixa a corrente em 4, 12 ou 20 mA para conferir a malha até o mestre (comando 40).',
+      trim: 'Ajuste de zero e do DAC (comandos 43, 45 e 46).',
+      status: 'Bits de status do instrumento e status adicional (comando 48).'
+    };
+    // Exemplo de PT-101: faixa 0–16 bar, unidade bar (código 7). Checksum = XOR do delimitador até o último byte de dados.
+    const B = (hex, name, help) => ({ hex, name, help });
+    const req = [
+      B('FF FF FF FF FF', 'preâmbulo', 'Bytes 0xFF para sincronizar o modem FSK'),
+      B('82', 'delimitador', 'Quadro longo, mestre para instrumento (STX)'),
+      B('A6 1A 00 00 02', 'endereço', 'Endereço longo de 5 bytes; o bit mais alto indica o mestre primário'),
+      B('23', 'comando', 'Comando 35: gravar faixa'),
+      B('09', 'nº de bytes', '9 bytes de dados'),
+      B('07', 'unidade', 'Código de unidade 7 = bar'),
+      B('41 80 00 00', 'URV', 'Fim da faixa, float IEEE 754: 16,0'),
+      B('00 00 00 00', 'LRV', 'Início da faixa, float IEEE 754: 0,0'),
+      B('D0', 'checksum', 'XOR de todos os bytes do delimitador até o fim dos dados')
+    ];
+    const resp = [
+      B('FF FF FF FF FF', 'preâmbulo', 'Bytes 0xFF para sincronizar o modem FSK'),
+      B('86', 'delimitador', 'Quadro longo, resposta do instrumento (ACK)'),
+      B('A6 1A 00 00 02', 'endereço', 'O mesmo endereço do pedido'),
+      B('23', 'comando', 'Comando 35'),
+      B('0B', 'nº de bytes', '2 bytes de status + 9 de dados'),
+      B('00', 'resposta', 'Código de resposta 0: sucesso'),
+      B('40', 'status', 'Status do instrumento: bit 6, configuração alterada'),
+      B('07 41 80 00 00 00 00 00 00', 'dados', 'Os valores gravados, devolvidos'),
+      B('96', 'checksum', 'XOR de todos os bytes do delimitador até o fim dos dados')
+    ];
+    return {
+      s16: 16,
+      insts: Object.values(defs).map((d) => ({ ...d, cls: d.tag === s.inst ? 'inst is-on' : 'inst', cur: d.tag === s.inst ? 'true' : 'false', pick: () => this.setState({ inst: d.tag, written: false }) })),
+      cur,
+      groups: gdefs.map(([id, label]) => ({ label, on: s.group === id ? 'true' : 'false', cls: s.group === id ? 'ftab is-on' : 'ftab', pick: () => this.setState({ group: id }) })),
+      isRange: s.group === 'range', isOther: s.group !== 'range', otherText: others[s.group] || '',
+      didactic: s.didactic,
+      toggleDid: () => this.setState({ didactic: !s.didactic }),
+      hasFrame: s.written && s.inst === 'PT-101', noFrame: !(s.written && s.inst === 'PT-101'),
+      req, resp,
+      write: () => this.setState({ written: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

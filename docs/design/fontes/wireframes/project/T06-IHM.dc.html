@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T06 IHM Processo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.tag{position:absolute;display:flex;flex-direction:column;gap:2px;font-size:13px;text-decoration:none;padding:2px 4px;border-radius:4px}
+.tag:hover{background:#eceff1}
+.bar{width:90px;height:8px;border:1px solid #5f6368;position:relative;background:#fff}
+.band{position:absolute;top:0;bottom:0;background:#dadce0}
+.ptr{position:absolute;top:-3px;width:3px;height:14px;background:#202124}
+.eq{position:absolute;border:3px solid #9aa0a6;box-sizing:border-box}
+.pipe{position:absolute;background:#9aa0a6}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="process" open="process,connection,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 24px">
+    <section aria-label="Alarmes" style="display: flex; align-items: center; gap: 12px; padding: 6px 12px; border: 1px solid #dadce0; border-radius: 6px">
+      <span class="lbl">Alarmes</span><span class="muted">Nenhum alarme ativo</span>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 12px">
+      <section class="box" aria-labelledby="t06-syn" style="flex: 999 1 760px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <h2 id="t06-syn" style="font-size: 16px">Caldeira · tubulão TB-101</h2>
+          <span class="muted" style="font-size: 12px">Clique numa tag para o detalhe; o detalhe também pode virar aba</span>
+          <span style="margin-left: auto; display: inline-flex; border: 1px solid #5f6368; border-radius: 6px; overflow: hidden"><span style="padding: 4px 10px; background: #202124; color: #fff">2D</span><a href="T20-Cena3D.dc.html" style="padding: 4px 10px; text-decoration: none">3D (Fase 3)</a></span>
+        </div>
+        <div style="width: 975px; max-width: 100%; height: 500px; margin: 0 auto; overflow: hidden">
+        <div style="position: relative; width: 780px; height: 400px; transform: scale(1.25); transform-origin: top left">
+          <div class="pipe" style="left: 40px; top: 300px; width: 380px; height: 3px"></div>
+          <div class="pipe" style="left: 420px; top: 230px; width: 3px; height: 73px"></div>
+          <div class="pipe" style="left: 40px; top: 372px; width: 360px; height: 3px"></div>
+          <div class="pipe" style="left: 500px; top: 60px; width: 3px; height: 70px"></div>
+          <div class="pipe" style="left: 500px; top: 60px; width: 270px; height: 3px"></div>
+          <div class="pipe" style="left: 500px; top: 250px; width: 3px; height: 92px"></div>
+          <div class="eq" style="left: 380px; top: 130px; width: 240px; height: 120px; border-radius: 56px; overflow: hidden"><div style="position: absolute; left: 0; right: 0; bottom: 0; height: 50%; background: #dadce0"></div><span style="position: absolute; left: 0; right: 0; top: 10px; text-align: center; font-size: 13px">TB-101</span></div>
+          <div class="eq" style="left: 100px; top: 280px; width: 44px; height: 44px; border-radius: 50%; background: #5f6368; border-color: #5f6368"></div>
+          <div class="eq" style="left: 400px; top: 342px; width: 200px; height: 52px; display: flex; align-items: center; justify-content: center">Queimador</div>
+          <span style="position: absolute; left: 40px; top: 270px" class="muted">Água de alimentação</span>
+          <span style="position: absolute; left: 40px; top: 378px" class="muted">Combustível</span>
+          <span style="position: absolute; left: 720px; top: 34px" class="muted">Vapor</span>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 640px; top: 150px"><strong>LT-101 <span class="mono">0,600 m</span></strong><span class="bar"><span class="band" style="left: 25%; width: 50%"></span><span class="ptr" style="left: 50%"></span></span></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 300px; top: 56px"><strong>PT-101 <span class="mono">10,0 bar</span></strong><span class="bar"><span class="band" style="left: 50%; width: 25%"></span><span class="ptr" style="left: 62%"></span></span></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 560px; top: 2px"><strong>FT-102 <span class="mono">2,00 kg/s</span></strong></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 200px; top: 244px"><strong>FT-101 <span class="mono">2,00 kg/s</span></strong></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 200px; top: 304px">FV-101 <span class="mono">82,3 %</span><span class="muted" style="font-size: 11px">cmd do mestre 82,3 %</span></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 200px; top: 376px">FV-102 <span class="mono">50,0 %</span><span class="muted" style="font-size: 11px">cmd do mestre 50,0 %</span></a>
+          <a class="tag" href="T07-Faceplate.dc.html" style="left: 640px; top: 66px">FV-103 <span class="mono">50,0 %</span></a>
+          <span class="tag" style="left: 88px; top: 326px">P-101 em operação</span>
+          <span class="tag muted" style="left: 640px; top: 110px">LSHH-101</span>
+          <span class="tag muted" style="left: 640px; top: 210px">LSLL-101</span>
+          <span class="tag muted" style="left: 410px; top: 100px">PSH-101 · PSV-101</span>
+        </div>
+        </div>
+      </section>
+
+      <aside style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 12px">
+        <section class="box" aria-labelledby="t06-dist" style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="t06-dist" style="font-size: 16px">Distúrbios</h2>
+          <label for="t06-fv103">FV-103 · Válvula de saída de vapor (carga)</label>
+          <div style="display: flex; align-items: center; gap: 12px"><input id="t06-fv103" type="range" min="0" max="100" value="50" style="flex: 1"><span class="mono">50,0 %</span></div>
+        </section>
+        <section class="box" aria-labelledby="t06-frc" style="padding: 12px 16px">
+          <h2 id="t06-frc" style="font-size: 15px">Valores forçados</h2>
+          <p class="muted">Nenhum.</p>
+        </section>
+        <button type="button" style="min-height: 40px; border: 1px dashed #5f6368; border-radius: 8px; background: #fff; font: inherit; color: #5f6368">Recolher painel ›</button>
+      </aside>
+    </div>
+
+    <details open class="box" style="padding: 10px 16px">
+      <summary style="cursor: pointer; display: flex; align-items: center; gap: 12px; min-height: 32px"><strong>Tendências</strong><span class="muted">em % da faixa · últimos 2 min</span><a href="T25-Graficos.dc.html" style="margin-left: auto">Abrir na aba Gráficos</a></summary>
+      <div class="ph" style="height: 150px; margin-top: 8px">LT-101, PT-101, FT-101, FT-102 (e FV-103 ao mover o distúrbio); legenda com valores atuais clicável para esconder séries</div>
+    </details>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

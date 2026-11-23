@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Paleta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1C5A91}a:hover{color:#154773}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1500px; box-sizing: border-box; padding: 40px; background: #E9EBED; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1A1D21; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 600">Paleta · temas claro e escuro</h1>
+    <p style="margin: 0; color: #4D555D; max-width: 960px">Fundo e equipamentos em cinza neutro; o azul só para interação (links, botão principal, foco); cor forte só para estados anormais. Cada combinação usada foi conferida por script (WCAG 2.2 AA): 98 pares, todos passam (docs/design/contraste.md).</p>
+  </div>
+  <div style="display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); gap: 0; background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; overflow: hidden">
+    <div style="padding: 12px 16px; font-size: 12px; font-weight: 600; color: #4D555D; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #CDD2D7">Token (--color-…)</div>
+    <div style="padding: 12px 16px; font-size: 12px; font-weight: 600; color: #4D555D; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #CDD2D7">Claro</div>
+    <div style="padding: 12px 16px; font-size: 12px; font-weight: 600; color: #A7AFB7; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #353B42; background: #121518">Escuro</div>
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="33">
+      <div style="{{ r.nameStyle }}">{{ r.name }}</div>
+      <div style="{{ r.lightCell }}"><span style="{{ r.lightSw }}"></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{ r.light }}</span></div>
+      <div style="{{ r.darkCell }}"><span style="{{ r.darkSw }}"></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #E7EAED">{{ r.dark }}</span></div>
+    </sc-for>
+  </div>
+  <p style="margin: 0; color: #4D555D; max-width: 960px">Prioridades de alarme: 1 vermelho, 2 laranja, 3 amarelo; sempre com forma e número (círculo, triângulo, quadrado), nunca só cor. Forçado em magenta e falha de instrumento em ciano-escuro são estados anormais que não são alarme. Verde e vermelho não marcam “ligado/desligado”: equipamento em operação é cinza-escuro preenchido.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const groups = [{"n":"Neutros","r":[["bg","#E9EBED","#121518"],["surface","#FFFFFF","#1C2024"],["surface-sunken","#F3F4F6","#16191C"],["border","#CDD2D7","#353B42"],["border-strong","#6E7780","#7C858E"],["text","#1A1D21","#E7EAED"],["text-muted","#4D555D","#A7AFB7"],["text-disabled","#8A929A","#6B737B"]]},{"n":"Interação","r":[["accent","#1C5A91","#8CC2F2"],["accent-hover","#154773","#A9D3F7"],["on-accent","#FFFFFF","#0B1A28"],["focus","#1C5A91","#8CC2F2"]]},{"n":"Processo (ISA-101)","r":[["equipment","#6E7780","#7C858E"],["equipment-on","#3B434B","#C6CDD4"],["water","#C3D0DC","#2D4357"]]},{"n":"Estados anormais","r":[["alarm-1","#C8102E","#FF5C5C"],["alarm-1-text","#B00020","#FF8A80"],["alarm-1-surface","#FDE8EA","#3D1A1C"],["alarm-2","#F28C00","#FF9F1A"],["alarm-2-text","#954700","#FFB45C"],["alarm-2-surface","#FFF0DC","#3A2610"],["alarm-3","#F5D000","#F5D000"],["alarm-3-text","#6B5800","#F2D64B"],["alarm-3-surface","#FFF8D6","#33300F"],["forced","#8E2A7A","#E59AD6"],["forced-surface","#F6E6F3","#3A1D35"],["fault","#006B73","#5CCFD8"],["fault-surface","#E0F2F3","#12343A"]]},{"n":"Tendências","r":[["trend-1","#1C5A91","#8CC2F2"],["trend-2","#6B4C9A","#B9A3DC"],["trend-3","#2F7A3E","#86C98F"],["trend-4","#7A5C3A","#C8A27E"],["trend-5","#4D555D","#A7AFB7"]]}];
+    const cell = 'display: flex; align-items: center; gap: 12px; padding: 8px 16px;';
+    const sw = 'width: 72px; height: 28px; border-radius: 6px; flex: none;';
+    const rows = [];
+    for (const g of groups) {
+      rows.push({
+        name: g.n, light: '', dark: '',
+        nameStyle: 'padding: 14px 16px 6px; font-weight: 600; font-size: 15px; border-top: 1px solid #CDD2D7;',
+        lightCell: 'border-top: 1px solid #CDD2D7;', darkCell: 'border-top: 1px solid #353B42; background: #121518;',
+        lightSw: 'display: none;', darkSw: 'display: none;'
+      });
+      for (const [name, light, dark] of g.r) {
+        rows.push({
+          name, light, dark,
+          nameStyle: 'padding: 8px 16px; font-family: \'IBM Plex Mono\', monospace; font-size: 13px; display: flex; align-items: center;',
+          lightCell: cell,
+          darkCell: cell + ' background: #121518;',
+          lightSw: sw + ' background: ' + light + '; box-shadow: inset 0 0 0 1px #CDD2D7;',
+          darkSw: sw + ' background: ' + dark + '; box-shadow: inset 0 0 0 1px #353B42;'
+        });
+      }
+    }
+    return { rows };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Painel do professor</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.tile{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:8px;background:var(--color-surface);border:1px solid var(--color-border)}
+.tile.is-abn{border:2px solid var(--color-text)}
+.tile.is-fault{border:2px dashed var(--color-fault);background:var(--color-fault-surface)}
+.tile.is-off{border:1px solid var(--color-border);background:transparent}
+.tile .meas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile .v{font-family:var(--font-family-mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:15px}
+.tile .spark{display:block;width:100%;height:28px}
+.flag{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:13px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--color-border);border-radius:8px;cursor:pointer}
+.opt.is-on{border:2px solid var(--color-accent);padding:9px 11px}
+.opt input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--color-accent)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1100px; position: relative">
+  <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  <main class="col" style="gap: 14px; padding: 20px 24px 32px">
+    <nav aria-label="Caminho" class="small"><a href="T16-Turmas.dc.html">Turmas</a> <span class="muted">›</span> <a href="T17-Turma.dc.html">Controle de Processos · turma A</a> <span class="muted">›</span></nav>
+    <div class="row" style="gap: 12px">
+      <h1 class="h2">Malha de nível LIC-101 · ao vivo</h1>
+      <span class="muted">{{ summary }}</span>
+      <span class="row push" style="gap: 8px">
+        <button type="button" class="btn" onClick="{{ openAll }}"><dc-import name="Icon" icon="zap" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Injetar em todas…</button>
+        <button type="button" class="btn"><dc-import name="Icon" icon="download" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Exportar ensaios (CSV)</button>
+      </span>
+    </div>
+    <div class="row" role="group" aria-label="Filtrar plantas" style="gap: 8px">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+        <button type="button" class="{{ f.cls }}" aria-pressed="{{ f.on }}" onClick="{{ f.pick }}" style="min-height: 36px; cursor: pointer">{{ f.label }}</button>
+      </sc-for>
+      <span class="muted small push">Anormais primeiro · atualiza a cada segundo</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px">
+      <sc-for list="{{ tiles }}" as="p" hint-placeholder-count="12">
+        <article class="{{ p.cls }}" aria-label="{{ p.name }}">
+          <div class="row" style="gap: 8px; flex-wrap: nowrap">
+            <strong>{{ p.name }}</strong>
+            <span class="push"></span>
+            <sc-if value="{{ p.p1 }}" hint-placeholder-val="{{ false }}"><span class="flag" style="color: var(--color-alarm-1-text)"><svg width="20" height="20" viewBox="0 0 30 30" role="img" aria-label="Prioridade 1"><circle cx="15" cy="15" r="13" style="fill: var(--color-alarm-1)"></circle><text x="15" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" style="fill: var(--color-on-alarm-1)">1</text></svg>{{ p.flag }}</span></sc-if>
+            <sc-if value="{{ p.p2 }}" hint-placeholder-val="{{ false }}"><span class="flag"><svg width="21" height="20" viewBox="0 0 32 30" role="img" aria-label="Prioridade 2"><path d="M16 2 L30 28 H2 Z" style="fill: var(--color-alarm-2); stroke: var(--color-alarm-2-edge)" stroke-width="1.5" stroke-linejoin="round"></path><text x="16" y="24" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" style="fill: var(--color-on-alarm-2)">2</text></svg>{{ p.flag }}</span></sc-if>
+            <sc-if value="{{ p.plain }}" hint-placeholder-val="{{ false }}"><span class="flag">{{ p.flag }}</span></sc-if>
+            <sc-if value="{{ p.fault }}" hint-placeholder-val="{{ false }}"><span class="fault-mark">FALHA · {{ p.faultInst }}</span></sc-if>
+          </div>
+          <span class="{{ p.mCls }}" style="align-self: flex-start; min-height: 26px; font-size: 13px; font-weight: 500"><span class="dot"></span>{{ p.master }}</span>
+          <div class="meas">
+            <div><span class="muted small">LT-101</span> <span class="v">{{ p.lt }}</span>
+              <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true"><path d="{{ p.ltPath }}" fill="none" style="stroke: var(--color-text-muted)" stroke-width="1.5"></path></svg></div>
+            <div><span class="muted small">PT-101</span> <span class="v">{{ p.pt }}</span>
+              <svg class="spark" viewBox="0 0 120 28" preserveAspectRatio="none" aria-hidden="true"><path d="{{ p.ptPath }}" fill="none" style="stroke: var(--color-text-muted)" stroke-width="1.5"></path></svg></div>
+          </div>
+          <div class="row" style="gap: 6px">
+            <sc-if value="{{ p.open }}" hint-placeholder-val="{{ true }}"><a class="btn btn-sm" href="EB-Pausada.dc.html"><dc-import name="Icon" icon="eye" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Observar</a></sc-if>
+            <sc-if value="{{ p.canInject }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn btn-sm" onClick="{{ p.inject }}"><dc-import name="Icon" icon="zap" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Injetar falha…</button></sc-if>
+            <sc-if value="{{ p.fault }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-sm" onClick="{{ p.remove }}">Remover falha</button></sc-if>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+    <p class="hint">Só o anormal se destaca (alarme, sem mestre, pausada, falha injetada); o normal fica discreto. Legível de longe, para o projetor.</p>
+  </main>
+
+  <sc-if value="{{ dlg }}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" style="position: fixed; overflow-y: auto; padding-top: 32px; padding-bottom: 32px">
+      <section role="dialog" aria-modal="true" aria-labelledby="t19-t" class="dialog" style="width: 640px; gap: 18px">
+        <div class="row"><h2 id="t19-t" class="h2">Injetar falha ou distúrbio</h2><button type="button" class="btn btn-ghost btn-icon push" aria-label="Fechar" onClick="{{ close }}"><dc-import name="Icon" icon="x" size="{{ s20 }}" hint-size="20px,20px"></dc-import></button></div>
+        <sc-if value="{{ confirming }}" hint-placeholder-val="{{ false }}">
+          <div class="notice col" style="gap: 10px">
+            <strong>Injetar “{{ faultLabel }}” em {{ instLabel }} nas 12 plantas da atividade?</strong>
+            <span class="muted">Todas as duplas veem o efeito ao mesmo tempo. Você pode remover depois, planta por planta ou em todas.</span>
+          </div>
+          <div class="row" style="justify-content: flex-end; gap: 12px"><button type="button" class="btn" onClick="{{ back }}">Voltar</button><button type="button" class="btn btn-primary" onClick="{{ apply }}">Sim, injetar em 12 plantas</button></div>
+        </sc-if>
+        <sc-if value="{{ editing }}" hint-placeholder-val="{{ true }}">
+          <fieldset class="col" style="border: none; padding: 0; margin: 0; gap: 8px"><legend class="field-label" style="margin-bottom: 6px">Em quais plantas</legend>
+            <label class="{{ oneCls }}"><input type="radio" name="t19-scope" checked="{{ scopeOne }}" onChange="{{ setOne }}"><span>Só na planta da <strong>{{ target }}</strong></span></label>
+            <label class="{{ allCls }}"><input type="radio" name="t19-scope" checked="{{ scopeAll }}" onChange="{{ setAll }}"><span>Em todas as plantas da atividade <span class="muted">(12)</span></span></label>
+          </fieldset>
+          <fieldset class="col" style="border: none; padding: 0; margin: 0; gap: 8px"><legend class="field-label" style="margin-bottom: 6px">O quê</legend>
+            <div class="row" style="gap: 8px; flex-wrap: nowrap">
+              <label class="{{ instCls }}" style="flex: 1"><input type="radio" name="t19-kind" checked="{{ kindInst }}" onChange="{{ setInst }}"><span>Falha de instrumento</span></label>
+              <label class="{{ distCls }}" style="flex: 1"><input type="radio" name="t19-kind" checked="{{ kindDist }}" onChange="{{ setDist }}"><span>Distúrbio na carga (FV-103)</span></label>
+            </div>
+          </fieldset>
+          <sc-if value="{{ kindInst }}" hint-placeholder-val="{{ true }}">
+            <div class="row" style="gap: 12px; flex-wrap: nowrap">
+              <div class="field grow"><label for="t19-inst">Instrumento</label><select id="t19-inst" class="select" onChange="{{ pickInst }}"><option value="LT-101">LT-101 · Nível do tubulão</option><option value="PT-101">PT-101 · Pressão do vapor</option><option value="FT-101">FT-101 · Vazão de água</option><option value="FT-102">FT-102 · Vazão de vapor</option></select></div>
+              <div class="field grow"><label for="t19-type">Falha</label><select id="t19-type" class="select" onChange="{{ pickFault }}"><option value="open">Sensor aberto</option><option value="drift">Deriva</option><option value="stuck">Travamento do valor</option><option value="elec">Falha de eletrônica</option></select></div>
+            </div>
+            <p class="hint">{{ faultHelp }}</p>
+          </sc-if>
+          <sc-if value="{{ kindDist }}" hint-placeholder-val="{{ false }}">
+            <div class="row" style="gap: 12px"><label for="t19-step">Degrau em FV-103: de 50 % para</label><select id="t19-step" class="select" style="width: 120px"><option>70 %</option><option>30 %</option><option>90 %</option></select></div>
+          </sc-if>
+          <div class="col" style="gap: 4px">
+            <label class="check"><input type="checkbox"> Avisar o aluno na IHM</label>
+            <span class="hint" style="padding-left: 28px">Desligado: o aluno precisa diagnosticar pelo comportamento da planta e pelo monitor.</span>
+          </div>
+          <div class="row" style="gap: 12px"><label for="t19-dur">Duração</label><select id="t19-dur" class="select" style="width: 200px"><option>Até eu remover</option><option>5 min</option><option>15 min</option></select></div>
+          <div class="row" style="justify-content: flex-end; gap: 12px"><button type="button" class="btn" onClick="{{ close }}">Cancelar</button><button type="button" class="btn btn-primary" onClick="{{ submit }}">{{ submitLabel }}</button></div>
+        </sc-if>
+      </section>
+    </div>
+  </sc-if>
+  <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+    <div class="toast" role="status" style="position: fixed; top: 24px; bottom: auto"><dc-import name="Icon" icon="check" size="{{ s18 }}" hint-size="18px,18px"></dc-import>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dialog":{"editor":"enum","options":["nao","sim"],"default":"nao"},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { dlg: null, target: 'Dupla 03', scope: 'one', kind: 'inst', inst: 'LT-101', fault: 'open', confirming: false, faultInst: {}, toast: '', filter: 'all', tick: 0 };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ tick: this.state.tick + 1 }), 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const s = this.state;
+    const dlg = s.dlg ?? (this.props.dialog === 'sim');
+    const spark = (seed, amp) => {
+      let d = '';
+      for (let i = 0; i <= 24; i++) {
+        const x = i * 5;
+        const y = 14 + amp * Math.sin((i + s.tick) * 0.45 + seed) + (amp / 2) * Math.sin((i + s.tick) * 1.3 + seed * 2);
+        d += (i ? ' L' : 'M') + x + ' ' + y.toFixed(1);
+      }
+      return d;
+    };
+    const base = [
+      ['Dupla 04', 'conn', '10.0.4.14', '0,95 m', '10,4 bar', 'p2', 'LSHH-101'],
+      ['Dupla 09', 'conn', '10.0.4.19', '0,60 m', '12,9 bar', 'p1', 'Watchdog'],
+      ['Dupla 02', 'none', '', '0,42 m', '9,1 bar', 'plain', 'SEM MESTRE'],
+      ['Dupla 07', 'conn', '10.0.4.17', '0,58 m', '10,0 bar', 'plain', 'PAUSADA'],
+      ['Dupla 11', 'none', '', '0,50 m', '9,8 bar', 'plain', 'SEM MESTRE'],
+      ['Dupla 01', 'conn', '10.0.4.11', '0,61 m', '10,1 bar'],
+      ['Dupla 03', 'conn', '10.0.4.13', '0,59 m', '9,9 bar'],
+      ['Dupla 05', 'conn', '10.0.4.15', '0,60 m', '10,0 bar'],
+      ['Dupla 06', 'conn', '10.0.4.16', '0,62 m', '10,2 bar'],
+      ['Dupla 08', 'conn', '10.0.4.18', '0,57 m', '9,7 bar'],
+      ['Dupla 10', 'conn', '10.0.4.20', '0,60 m', '10,0 bar'],
+      ['Dupla 12', 'off', '', '—', '—', 'plain', 'NÃO ABERTA']
+    ];
+    let tiles = base.map(([name, m, ip, lt, pt, kind, flag], i) => {
+      const fi = s.faultInst[name];
+      const fault = !!fi;
+      const off = m === 'off';
+      const ltFault = fi === 'LT-101';
+      return {
+        name, flag: flag || '', fault, faultInst: fi || '',
+        p1: kind === 'p1', p2: kind === 'p2', plain: kind === 'plain',
+        abn: !!kind || fault,
+        cls: fault ? 'tile is-fault' : off ? 'tile is-off' : kind ? 'tile is-abn' : 'tile',
+        mCls: m === 'conn' ? 'master' : 'master is-none',
+        master: m === 'conn' ? 'Mestre ' + ip : m === 'off' ? 'Planta ainda não aberta' : 'Nenhum mestre',
+        lt: ltFault ? '3,6 mA' : lt, pt,
+        ltPath: off ? '' : ltFault ? 'M0 26 L120 26' : spark(i, kind === 'p2' ? 3 : 5),
+        ptPath: off ? '' : spark(i + 3, kind === 'p1' ? 9 : 4),
+        open: !off, canInject: !off && !fault,
+        inject: () => this.setState({ dlg: true, target: name, scope: 'one', confirming: false }),
+        remove: () => { const m2 = { ...s.faultInst }; delete m2[name]; this.flash(m2, 'Falha removida da ' + name + '.'); }
+      };
+    });
+    const cnt = (fn) => tiles.filter(fn).length;
+    const nFaults = Object.keys(s.faultInst).length;
+    const fdefs = [
+      ['all', 'Todas · 12', () => true],
+      ['alarm', 'Com alarme · ' + cnt((t) => t.p1 || t.p2), (t) => t.p1 || t.p2],
+      ['nomaster', 'Sem mestre · ' + cnt((t) => t.flag === 'SEM MESTRE'), (t) => t.flag === 'SEM MESTRE'],
+      ['paused', 'Pausadas · 1', (t) => t.flag === 'PAUSADA'],
+      ['fault', 'Com falha injetada · ' + nFaults, (t) => t.fault]
+    ];
+    const fsel = fdefs.find((f) => f[0] === s.filter) || fdefs[0];
+    tiles = tiles.filter(fsel[2]).sort((a, b) => (b.abn ? 1 : 0) - (a.abn ? 1 : 0));
+    const faultNames = { open: 'sensor aberto', drift: 'deriva', stuck: 'travamento do valor', elec: 'falha de eletrônica' };
+    const helps = {
+      open: 'Sensor aberto leva a corrente a 3,6 mA (NAMUR NE43): o mestre lê −691 no formato 0–27648.',
+      drift: 'A medição se afasta do valor real 1 % da faixa por minuto; a corrente continua dentro de 4–20 mA.',
+      stuck: 'A medição fica parada no último valor, mesmo com o processo mudando.',
+      elec: 'A corrente vai a 21 mA (NAMUR NE43), acima da faixa.'
+    };
+    const all = s.scope === 'all';
+    const val = (e) => { try { return e.target.value; } catch (x) { return null; } };
+    return {
+      s16: 16, s18: 18, s20: 20,
+      summary: '12 plantas · 11 rodando · 9 com mestre · 2 com alarme' + (nFaults ? ' · ' + nFaults + ' com falha injetada' : ''),
+      filters: fdefs.map(([id, label]) => ({ label, on: s.filter === id ? 'true' : 'false', cls: s.filter === id ? 'chip is-on' : 'chip', pick: () => this.setState({ filter: id }) })),
+      tiles,
+      dlg, target: s.target,
+      confirming: s.confirming, editing: !s.confirming,
+      scopeOne: !all, scopeAll: all,
+      oneCls: all ? 'opt' : 'opt is-on', allCls: all ? 'opt is-on' : 'opt',
+      kindInst: s.kind === 'inst', kindDist: s.kind === 'dist',
+      instCls: s.kind === 'inst' ? 'opt is-on' : 'opt', distCls: s.kind === 'dist' ? 'opt is-on' : 'opt',
+      faultHelp: helps[s.fault], faultLabel: faultNames[s.fault], instLabel: s.inst,
+      submitLabel: all ? 'Injetar em 12 plantas…' : 'Injetar em 1 planta',
+      setOne: () => this.setState({ scope: 'one' }),
+      setAll: () => this.setState({ scope: 'all' }),
+      setInst: () => this.setState({ kind: 'inst' }),
+      setDist: () => this.setState({ kind: 'dist' }),
+      pickInst: (e) => { const v = val(e); if (v) this.setState({ inst: v }); },
+      pickFault: (e) => { const v = val(e); if (v) this.setState({ fault: v }); },
+      openAll: () => this.setState({ dlg: true, scope: 'all', confirming: false }),
+      close: () => this.setState({ dlg: false, confirming: false }),
+      back: () => this.setState({ confirming: false }),
+      submit: () => all ? this.setState({ confirming: true }) : this.inject([s.target]),
+      apply: () => this.inject(base.filter((b) => b[1] !== 'off').map((b) => b[0])),
+      toastOn: !!s.toast, toast: s.toast
+    };
+  }
+  inject(names) {
+    const s = this.state;
+    const what = s.kind === 'dist' ? 'Degrau em FV-103' : 'Falha “' + ({ open: 'sensor aberto', drift: 'deriva', stuck: 'travamento do valor', elec: 'falha de eletrônica' })[s.fault] + '” em ' + s.inst;
+    const where = names.length === 1 ? ' na ' + names[0] : ' em ' + names.length + ' plantas';
+    const faultInst = { ...s.faultInst };
+    if (s.kind !== 'dist') names.forEach((n) => { faultInst[n] = s.inst; });
+    this.setState({ dlg: false, confirming: false });
+    this.flash(faultInst, what + where + '.');
+  }
+  flash(faultInst, msg) {
+    this.setState({ faultInst, toast: msg });
+    clearTimeout(this.tt);
+    this.tt = setTimeout(() => this.setState({ toast: '' }), 3500);
+  }
+}
+</script>
+</body>
+</html>

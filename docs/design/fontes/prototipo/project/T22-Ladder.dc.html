@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Programa Ladder</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.rung{display:flex;align-items:center;min-height:96px;padding:8px 0;border-bottom:1px solid var(--color-border)}
+.rail{width:4px;align-self:stretch;background:var(--color-text)}
+.wire{flex:1 1 24px;min-width:24px;height:2px;background:var(--color-border-strong)}
+.wire.is-on{height:4px;background:var(--color-accent)}
+.el{display:inline-flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;border:1px solid transparent;border-radius:6px;background:none;font:inherit;color:var(--color-text);cursor:pointer}
+.el:hover{border-color:var(--color-border-strong)}
+.el.is-sel{border:2px solid var(--color-accent);padding:5px 7px}
+.el .sym{font-family:var(--font-family-mono);font-size:18px;font-weight:600;letter-spacing:-.02em}
+.el.is-on .sym{color:var(--color-accent)}
+.el .nm{font-family:var(--font-family-mono);font-size:12px}
+.el .st{font-family:var(--font-family-mono);font-size:11px;color:var(--color-text-muted)}
+.blk{display:inline-flex;flex-direction:column;gap:2px;padding:8px 12px;border:2px solid var(--color-text);border-radius:4px;background:var(--color-surface);font-family:var(--font-family-mono);font-size:12px;text-align:left;cursor:pointer;color:var(--color-text)}
+.blk.is-sel{border-color:var(--color-accent);box-shadow:0 0 0 2px var(--color-accent)}
+.app .tree a{display:block;padding:4px 0;text-decoration:none}
+.app .tree a:hover{text-decoration:underline;text-underline-offset:4px}
+</style>
+</helmet>
+<div class="app" style="min-height: 1000px">
+  <dc-import name="PlantBar" tab="program" open="process,monitor,program" hint-size="100%,104px"></dc-import>
+  <div role="toolbar" aria-label="Elementos Ladder" class="row" style="gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--color-border); background: var(--color-surface)">
+    <button type="button" class="btn btn-sm mono" title="Contato normalmente aberto">—| |—</button><button type="button" class="btn btn-sm mono" title="Contato normalmente fechado">—|/|—</button><button type="button" class="btn btn-sm mono" title="Bobina">—( )—</button><button type="button" class="btn btn-sm mono" title="Bobina set">—(S)—</button><button type="button" class="btn btn-sm mono" title="Bobina reset">—(R)—</button>
+    <button type="button" class="btn btn-sm">TON</button><button type="button" class="btn btn-sm">CTU</button><button type="button" class="btn btn-sm">CMP</button><button type="button" class="btn btn-sm">MOVE</button><button type="button" class="btn btn-sm">PID</button>
+    <span class="row push" style="gap: 8px">
+      <span class="{{ plcCls }}" style="min-height: 32px"><span class="dot"></span>{{ plcText }}</span>
+      <button type="button" class="btn btn-sm">Verificar</button>
+      <button type="button" class="btn btn-sm btn-primary" onClick="{{ run }}"><dc-import name="Icon" icon="play" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Baixar e rodar</button>
+      <button type="button" class="{{ monCls }}" aria-pressed="{{ monOn }}" onClick="{{ toggleMon }}"><dc-import name="Icon" icon="eye" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Monitorar</button>
+    </span>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; align-items: stretch">
+    <nav aria-label="Projeto" class="tree" style="flex: 0 0 250px; border-right: 1px solid var(--color-border); padding: 14px 16px; background: var(--color-surface); min-height: 820px">
+      <span class="lbl">POUs</span>
+      <a href="#main" style="font-weight: 600">Main (LD)</a><a href="#inter">Intertravamentos (LD)</a><a href="#malhas" class="muted">Malhas (FBD, Etapa 23)</a>
+      <span class="lbl" style="display: block; margin-top: 14px">Variáveis da planta</span>
+      <sc-for list="{{ vars }}" as="v" hint-placeholder-count="7"><a href="#var" class="mono small">{{ v.id }} <span class="muted">· {{ v.addr }}</span></a></sc-for>
+    </nav>
+    <main style="flex: 999 1 640px; min-width: 0; padding: 8px 24px">
+      <div class="rung">
+        <span class="muted mono small" style="width: 40px">001</span><span class="rail"></span>
+        <span class="{{ w1 }}"></span>
+        <button type="button" class="{{ e.start }}" onClick="{{ selStart }}"><span class="nm">START</span><span class="sym">—| |—</span><sc-if value="{{ mon }}" hint-placeholder-val="{{ false }}"><span class="st">= 1</span></sc-if></button>
+        <span class="{{ w1 }}"></span>
+        <button type="button" class="{{ e.lshh }}" onClick="{{ selLshh }}"><span class="nm">LSHH_101</span><span class="sym">—|/|—</span><sc-if value="{{ mon }}" hint-placeholder-val="{{ false }}"><span class="st">= 0</span></sc-if></button>
+        <span class="{{ w1 }}"></span>
+        <button type="button" class="{{ e.p101 }}" onClick="{{ selP101 }}"><span class="nm">P101_CMD</span><span class="sym">—( )—</span><sc-if value="{{ mon }}" hint-placeholder-val="{{ false }}"><span class="st">= 1</span></sc-if></button>
+        <span class="{{ w1 }}"></span><span class="rail"></span>
+      </div>
+      <div class="rung">
+        <span class="muted mono small" style="width: 40px">002</span><span class="rail"></span>
+        <span class="{{ w1 }}" style="flex: 0 0 60px"></span>
+        <button type="button" class="{{ e.pid }}" onClick="{{ selPid }}"><strong>PID · LIC_101</strong><span>PV  := LT_101{{ pvMon }}</span><span>SP  := 0,60 m</span><span>OUT =&gt; FV101_CMD{{ outMon }}</span></button>
+        <span class="{{ w1 }}"></span><span class="rail"></span>
+      </div>
+      <div class="rung" style="align-items: flex-start">
+        <span class="muted mono small" style="width: 40px; margin-top: 30px">003</span><span class="rail"></span>
+        <div class="col" style="gap: 0; flex: 0 0 auto">
+          <div class="row" style="gap: 0; flex-wrap: nowrap"><span class="wire" style="flex: 0 0 24px"></span><button type="button" class="{{ e.lsll }}" onClick="{{ selLsll }}"><span class="nm">LSLL_101</span><span class="sym">—| |—</span><sc-if value="{{ mon }}" hint-placeholder-val="{{ false }}"><span class="st">= 0</span></sc-if></button><span class="wire" style="flex: 0 0 24px"></span></div>
+          <div class="row" style="gap: 0; flex-wrap: nowrap; border-left: 2px solid var(--color-border-strong); border-right: 2px solid var(--color-border-strong); margin-top: -40px; padding-top: 40px"><span class="wire" style="flex: 0 0 22px"></span><button type="button" class="{{ e.psh }}" onClick="{{ selPsh }}"><span class="nm">PSH_101</span><span class="sym">—| |—</span><sc-if value="{{ mon }}" hint-placeholder-val="{{ false }}"><span class="st">= 0</span></sc-if></button><span class="wire" style="flex: 0 0 22px"></span></div>
+        </div>
+        <span class="wire" style="margin-top: 30px"></span>
+        <button type="button" class="{{ e.move }}" onClick="{{ selMove }}" style="margin-top: 8px"><strong>MOVE</strong><span>IN  := 0</span><span>OUT =&gt; FV102_CMD</span></button>
+        <span class="wire" style="margin-top: 30px"></span><span class="rail"></span>
+      </div>
+      <p class="hint" style="margin-top: 16px">Esboço: o editor salva em PLCopen XML e o soft-PLC roda no servidor, no mesmo laço da planta (D11). As variáveis vêm do mapa de I/O do cenário, sem digitar endereço.</p>
+    </main>
+    <aside class="col" aria-labelledby="t22-prop" style="flex: 0 0 280px; gap: 8px; padding: 16px; border-left: 1px solid var(--color-border); background: var(--color-surface)">
+      <span id="t22-prop" class="lbl">Propriedades</span>
+      <strong>{{ prop.title }}</strong>
+      <span class="mono small">{{ prop.id }}</span>
+      <span class="muted">{{ prop.desc }}</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sel: 'lshh', mon: false, running: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const mon = s.mon && s.running;
+    const on = { start: true, lshh: true, p101: true, pid: true, lsll: false, psh: false, move: false };
+    const cls = (id, blk) => (blk ? 'blk' : 'el') + (s.sel === id ? ' is-sel' : '') + (mon && on[id] && !blk ? ' is-on' : '');
+    const props = {
+      start: ['Contato NA', 'START', 'Variável interna: botão de partida da bomba.'],
+      lshh: ['Contato NF', 'LSHH_101', 'Entrada discreta 2 · nível muito alto. Desliga a bomba quando o tubulão enche demais.'],
+      p101: ['Bobina', 'P101_CMD', 'Coil 0 · comando da bomba P-101.'],
+      pid: ['Bloco PID', 'LIC_101', 'Malha de nível: lê LT-101 (input register 0) e escreve FV-101 (holding register 0).'],
+      lsll: ['Contato NA', 'LSLL_101', 'Entrada discreta 1 · nível muito baixo.'],
+      psh: ['Contato NA', 'PSH_101', 'Entrada discreta 3 · pressão alta.'],
+      move: ['Bloco MOVE', 'FV102_CMD', 'Fecha a válvula de combustível (holding register 1) com nível muito baixo ou pressão alta.']
+    };
+    const p = props[s.sel];
+    const sel = (id) => () => this.setState({ sel: id });
+    return {
+      s16: 16, mon,
+      e: { start: cls('start'), lshh: cls('lshh'), p101: cls('p101'), pid: cls('pid', true), lsll: cls('lsll'), psh: cls('psh'), move: cls('move', true) },
+      w1: mon ? 'wire is-on' : 'wire',
+      pvMon: mon ? '  (0,600 m)' : '', outMon: mon ? '  (82,3 %)' : '',
+      prop: { title: p[0], id: p[1], desc: p[2] },
+      selStart: sel('start'), selLshh: sel('lshh'), selP101: sel('p101'), selPid: sel('pid'), selLsll: sel('lsll'), selPsh: sel('psh'), selMove: sel('move'),
+      plcCls: s.running ? 'master' : 'master is-none',
+      plcText: s.running ? 'Soft-PLC rodando' : 'Soft-PLC parado',
+      monOn: s.mon ? 'true' : 'false',
+      monCls: s.mon ? 'btn btn-sm btn-primary' : 'btn btn-sm',
+      run: () => this.setState({ running: true }),
+      toggleMon: () => this.setState({ mon: !s.mon, running: s.running || !s.mon }),
+      vars: [
+        { id: 'P101_CMD', addr: 'coil 0' }, { id: 'LSLL_101', addr: 'DI 1' }, { id: 'LSHH_101', addr: 'DI 2' }, { id: 'PSH_101', addr: 'DI 3' },
+        { id: 'LT_101', addr: 'IR 0' }, { id: 'FV101_CMD', addr: 'HR 0' }, { id: 'FV102_CMD', addr: 'HR 1' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

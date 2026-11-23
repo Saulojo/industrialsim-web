@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Tipografia, símbolos e ícones</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1C5A91}a:hover{color:#154773}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1150px; box-sizing: border-box; padding: 40px; background: #E9EBED; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1A1D21; display: flex; flex-direction: column; gap: 24px">
+  <h1 style="margin: 0; font-size: 32px; font-weight: 600">Tipografia, símbolos de processo e ícones</h1>
+  <div style="display: flex; flex-wrap: wrap; gap: 24px">
+    <section style="flex: 1 1 620px; background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">IBM Plex Sans · textos da interface (SIL OFL 1.1)</span>
+      <div style="display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px 16px; align-items: baseline">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">2xl · 32 / 600</span><span style="font-size: 32px; font-weight: 600; line-height: 1.2">Caldeira com tubulão</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">xl · 24 / 600</span><span style="font-size: 24px; font-weight: 600; line-height: 1.2">Conecte seu mestre Modbus</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">lg · 20 / 600</span><span style="font-size: 20px; font-weight: 600">Configurações da planta</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">md · 16 / 400</span><span style="font-size: 16px">As mudanças valem no passo seguinte, sem reiniciar a planta.</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">sm · 14 / 400</span><span style="font-size: 14px; color: #4D555D">Rótulos, tabelas e textos de apoio da IHM.</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D">xs · 12 / 600</span><span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">Rótulo de seção</span>
+      </div>
+    </section>
+    <section style="flex: 1 1 520px; background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">IBM Plex Mono · valores, endereços e tags (SIL OFL 1.1)</span>
+      <div style="display: flex; align-items: baseline; gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 600; line-height: 1">0,600</span><span style="font-size: 18px">m</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4D555D; margin-left: auto">value-lg · 40 / 600</span></div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 16px">
+        <span>LT-101</span><span style="text-align: right">13824</span><span style="text-align: right">0,600 m</span>
+        <span>PT-101</span><span style="text-align: right">17280</span><span style="text-align: right">10,00 bar</span>
+        <span>FT-102</span><span style="text-align: right">11059</span><span style="text-align: right">2,000 kg/s</span>
+      </div>
+      <p style="margin: 0; color: #4D555D">Números sempre em mono: os dígitos têm a mesma largura e as colunas não “dançam” a 20 atualizações por segundo. Unidade depois do valor, em peso normal. Vírgula ou ponto decimal segue o idioma; unidades não mudam.</p>
+    </section>
+  </div>
+
+  <section style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">Símbolos de processo · desenho próprio no estilo da ISA-5.1, traço em --color-equipment</span>
+    <div style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-end">
+      <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <svg width="72" height="56" viewBox="0 0 72 56" role="img" aria-label="Bomba centrífuga"><circle cx="30" cy="30" r="20" fill="none" stroke="#3B434B" stroke-width="3"></circle><path d="M30 10 H62" stroke="#3B434B" stroke-width="3"></path><path d="M4 30 H10" stroke="#3B434B" stroke-width="3"></path></svg>
+        <figcaption style="font-size: 13px">Bomba (P-101)</figcaption>
+      </figure>
+      <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <svg width="72" height="56" viewBox="0 0 72 56" role="img" aria-label="Válvula de controle"><path d="M10 26 L36 40 L62 26 L62 54 L36 40 L10 54 Z" fill="none" stroke="#3B434B" stroke-width="3" stroke-linejoin="round"></path><path d="M36 40 V18" stroke="#3B434B" stroke-width="3"></path><path d="M22 18 A14 12 0 0 1 50 18 Z" fill="none" stroke="#3B434B" stroke-width="3"></path></svg>
+        <figcaption style="font-size: 13px">Válvula de controle (FV)</figcaption>
+      </figure>
+      <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <svg width="64" height="56" viewBox="0 0 64 56" role="img" aria-label="Transmissor LT-101"><circle cx="32" cy="28" r="24" fill="#FFFFFF" stroke="#3B434B" stroke-width="3"></circle><text x="32" y="25" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="#1A1D21">LT</text><text x="32" y="40" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="#1A1D21">101</text></svg>
+        <figcaption style="font-size: 13px">Instrumento (balão)</figcaption>
+      </figure>
+      <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <svg width="120" height="56" viewBox="0 0 120 56" role="img" aria-label="Tubulão com nível"><rect x="4" y="6" width="112" height="44" rx="22" fill="#FFFFFF" stroke="#6E7780" stroke-width="3"></rect><path d="M5.5 28 H114.5 V30 C114.5 41 105 48.5 94 48.5 H26 C15 48.5 5.5 41 5.5 30 Z" fill="#C3D0DC"></path><path d="M6 28 H114" stroke="#3B434B" stroke-width="2"></path></svg>
+        <figcaption style="font-size: 13px">Tubulão: água clara, nível em traço escuro</figcaption>
+      </figure>
+      <figure style="margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px">
+        <svg width="72" height="56" viewBox="0 0 72 56" role="img" aria-label="Bomba em operação"><circle cx="30" cy="30" r="20" fill="#3B434B" stroke="#3B434B" stroke-width="3"></circle><path d="M30 10 H62" stroke="#3B434B" stroke-width="3"></path></svg>
+        <figcaption style="font-size: 13px">Em operação: preenchido, sem verde</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+    <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">Ícones de interface · Lucide (licença ISC), traço de 2 px, 20 px</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 24px; font-size: 14px">
+      <span><code>house</code> sair da planta</span><span><code>plus</code> nova aba</span><span><code>x</code> fechar aba</span><span><code>chevron-down</code> menus</span>
+      <span><code>share-2</code> compartilhar</span><span><code>download</code> exportar</span><span><code>pause</code> / <code>play</code> pausar, retomar</span><span><code>rotate-ccw</code> reiniciar</span>
+      <span><code>activity</code> gráficos</span><span><code>plug</code> conexão</span><span><code>settings</code> configurações</span><span><code>table</code> monitor</span>
+      <span><code>list</code> log</span><span><code>gauge</code> instrumento</span><span><code>copy</code> copiar</span><span><code>search</code> buscar</span>
+      <span><code>sun</code> / <code>moon</code> tema</span><span><code>languages</code> idioma</span><span><code>log-in</code> / <code>log-out</code> conta</span><span></span>
+    </div>
+    <p style="margin: 0; color: #4D555D">Ícones sempre com texto ou nome acessível; sozinhos, só nos botões de aba (×, +) e no ⌂, com aria-label. Na IHM, ícone nunca substitui o símbolo de processo.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

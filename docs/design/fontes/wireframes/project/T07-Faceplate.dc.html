@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T07 Detalhe de instrumento</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-s{min-height:36px;padding:0 12px}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:40px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="process" open="process,connection,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; gap: 0">
+    <div class="ph" style="flex: 999 1 600px; min-height: 924px; border-radius: 0; border: none; background: #eceff1">IHM · Processo (T06) atrás, sem escurecer: o operador continua vendo o processo</div>
+    <aside aria-labelledby="t07-title" style="flex: 0 0 440px; box-sizing: border-box; border-left: 2px solid #5f6368; background: #fff; padding: 20px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; align-items: flex-start; gap: 12px">
+        <div style="flex: 1">
+          <span class="lbl">Transmissor de nível · HART</span>
+          <h2 id="t07-title" style="font-size: 22px">LT-101 · Nível do tubulão</h2>
+        </div>
+        <a class="btn btn-s" href="T06-IHM.dc.html" aria-label="Fechar detalhe">✕</a>
+      </div>
+
+      <div style="display: flex; align-items: flex-end; gap: 16px">
+        <span class="mono" style="font-size: 40px; font-weight: 700; line-height: 1">0,600</span><span style="font-size: 18px">m</span>
+        <span class="muted" style="margin-left: auto">Normal</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <div style="position: relative; height: 20px; border: 1px solid #5f6368; background: #fff">
+          <div style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #dadce0"></div>
+          <div style="position: absolute; left: 25%; top: -6px; bottom: -6px; width: 2px; background: #5f6368"></div>
+          <div style="position: absolute; left: 75%; top: -6px; bottom: -6px; width: 2px; background: #5f6368"></div>
+          <div style="position: absolute; left: calc(50% - 2px); top: -4px; width: 4px; height: 28px; background: #202124"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px" class="muted"><span>0 m</span><span>LSLL 0,30</span><span>LSHH 0,90</span><span>1,2 m</span></div>
+      </div>
+
+      <div class="kv">
+        <span class="muted">% da faixa</span><span class="mono">50,0 %</span>
+        <span class="muted">Corrente</span><span class="mono">12,00 mA</span>
+        <span class="muted">Valor no Modbus</span><span class="mono">13824 <span class="muted">(30001, 0–27648)</span></span>
+        <span class="muted">Faixa (LRV–URV)</span><span class="mono">0 – 1,2 m</span>
+        <span class="muted">Amortecimento</span><span class="mono">0,5 s</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span class="lbl">Últimos 2 min</span>
+        <div class="ph" style="height: 110px">Tendência só deste instrumento</div>
+      </div>
+
+      <section class="box" aria-labelledby="t07-force" style="display: flex; flex-direction: column; gap: 8px">
+        <h3 id="t07-force" style="font-size: 15px">Forçar valor</h3>
+        <p class="muted">O mestre passa a ler este valor no lugar da medição, até você liberar.</p>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <label for="t07-val" style="position: absolute; left: -9999px">Valor a forçar de LT-101</label>
+          <input id="t07-val" class="inp" value="0,600" style="width: 120px"><span>m</span>
+          <button type="button" class="btn btn-s" style="margin-left: auto">Forçar</button>
+        </div>
+      </section>
+
+      <section class="box" aria-labelledby="t07-fault" style="display: flex; flex-direction: column; gap: 8px">
+        <h3 id="t07-fault" style="font-size: 15px">Simular falha do instrumento</h3>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <select class="inp" aria-label="Tipo de falha" style="flex: 1"><option>Sensor aberto</option><option>Deriva</option><option>Travamento do valor</option><option>Falha de eletrônica</option></select>
+          <button type="button" class="btn btn-s">Aplicar</button>
+        </div>
+        <p class="muted" style="font-size: 12px">Leva à corrente de falha NAMUR NE43. Fase 3 (Etapa 16).</p>
+      </section>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap">
+        <a href="T23-NovaAba.dc.html">Abrir em aba própria</a>
+        <a href="T09-Monitor.dc.html">Ver no monitor</a>
+        <a href="T12-HART.dc.html">Abrir no configurador HART</a>
+      </div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Minhas plantas</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ftabs{display:flex;gap:4px;border-bottom:1px solid var(--color-border)}
+.ftab{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:none;background:none;font:inherit;color:var(--color-text-muted);cursor:pointer}
+.ftab.is-on{color:var(--color-text);font-weight:600;box-shadow:inset 0 -3px 0 var(--color-accent)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1000px">
+  <dc-import name="GlobalBar" active="plantas" user="aluno" hint-size="100%,64px"></dc-import>
+  <main class="wrap col" style="gap: 16px; padding-top: 28px; padding-bottom: 48px">
+    <div class="row" style="gap: 16px">
+      <h1 class="h1">Minhas plantas</h1>
+      <div class="row push" role="search" aria-label="Entrar com código" style="gap: 8px">
+        <label for="t14-code">Tem um código?</label>
+        <input id="t14-code" class="input mono" placeholder="ex.: 4K9-TQ2" style="width: 150px">
+        <a class="btn" href="T06-Conta.dc.html">Entrar</a>
+      </div>
+      <a class="btn btn-primary" href="T03-Cenarios.dc.html"><dc-import name="Icon" icon="plus" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Nova planta</a>
+    </div>
+    <div class="ftabs" role="tablist" aria-label="Filtrar plantas">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+        <button type="button" role="tab" class="{{ f.cls }}" aria-selected="{{ f.on }}" onClick="{{ f.pick }}">{{ f.label }}</button>
+      </sc-for>
+    </div>
+    <div class="panel" style="padding: 0; overflow: visible">
+      <table class="table">
+        <thead><tr><th>Planta</th><th>Situação</th><th>Mestre</th><th>Última atividade</th><th>Pessoas</th><th style="width: 260px"><span class="sr">Ações</span></th></tr></thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="p" hint-placeholder-count="3">
+            <tr>
+              <td><a href="T06-Conta.dc.html"><strong>{{ p.name }}</strong></a><br><span class="muted small">{{ p.sub }}</span></td>
+              <td>{{ p.state }}</td>
+              <td><span class="{{ p.mCls }}" style="min-height: 28px; font-weight: 500; font-size: 13px"><span class="dot"></span>{{ p.master }}</span></td>
+              <td class="muted">{{ p.last }}</td>
+              <td>{{ p.people }}</td>
+              <td style="text-align: right; white-space: nowrap; position: relative">
+                <a class="btn btn-sm" href="T06-Conta.dc.html">Abrir</a>
+                <a class="btn btn-sm" href="T15-Compartilhar.dc.html"><dc-import name="Icon" icon="share" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Compartilhar</a>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Mais ações de {{ p.name }}" aria-expanded="{{ p.menuOpen }}" onClick="{{ p.toggle }}"><dc-import name="Icon" icon="more" size="{{ s18 }}" hint-size="18px,18px"></dc-import></button>
+                <sc-if value="{{ p.menu }}" hint-placeholder-val="{{ false }}">
+                  <nav class="pop menu" aria-label="Ações da planta" style="right: 8px; top: 44px; min-width: 220px; text-align: left">
+                    <a href="#renomear">Renomear</a><a href="#ensaio">Reproduzir ensaio</a><a href="T11-MapaIO.dc.html">Mapa de I/O</a>
+                    <sc-if value="{{ p.owner }}" hint-placeholder-val="{{ true }}"><a href="#excluir" style="color: var(--color-alarm-1-text)">Excluir planta…</a></sc-if>
+                    <sc-if value="{{ p.notOwner }}" hint-placeholder-val="{{ false }}"><a href="#sair">Sair desta planta</a></sc-if>
+                  </nav>
+                </sc-if>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">O campo “Tem um código?” aceita código de planta (de um colega) e de turma.</p>
+    <p class="hint">Plantas sem ninguém conectado hibernam depois de 30 minutos e voltam do mesmo estado ao abrir, na mesma porta Modbus quando possível.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filter: 'mine', menu: '' };
+  }
+  renderVals() {
+    const f = this.state.filter;
+    const all = {
+      mine: [
+        { id: 'a', name: 'Caldeira · bancada 3', sub: 'Caldeira com tubulão · porta 15003', state: 'Rodando', master: '200.18.4.42', mCls: 'master', last: 'agora', people: 'você e mais 2', owner: true },
+        { id: 'b', name: 'Caldeira · ensaio PID', sub: 'Caldeira com tubulão · porta 15011', state: 'Hibernando', master: 'Nenhum', mCls: 'master is-none', last: 'ontem às 17:40', people: 'só você', owner: true },
+        { id: 'c', name: 'Caldeira · testes em casa', sub: 'Caldeira com tubulão · porta 15027', state: 'Pausada', master: 'Nenhum', mCls: 'master is-none', last: 'há 3 dias', people: 'só você', owner: true }
+      ],
+      shared: [
+        { id: 'd', name: 'Caldeira · grupo do TCC', sub: 'De Lucas Moreira · porta 15040', state: 'Rodando', master: '10.0.4.31', mCls: 'master', last: 'há 12 min', people: 'você e mais 3', owner: false }
+      ],
+      classes: [
+        { id: 'e', name: 'Malha de nível LIC-101 · Dupla 03', sub: 'Controle de Processos · turma A', state: 'Rodando', master: 'Nenhum', mCls: 'master is-none', last: 'há 2 h', people: 'dupla', owner: false }
+      ]
+    };
+    const labels = [['mine', 'Minhas · 3'], ['shared', 'Compartilhadas comigo · 1'], ['classes', 'De turmas · 1']];
+    return {
+      s16: 16, s18: 18,
+      filters: labels.map(([id, label]) => ({
+        label, on: f === id ? 'true' : 'false', cls: f === id ? 'ftab is-on' : 'ftab',
+        pick: () => this.setState({ filter: id, menu: '' })
+      })),
+      rows: all[f].map((r) => ({
+        ...r, notOwner: !r.owner,
+        menu: this.state.menu === r.id,
+        menuOpen: this.state.menu === r.id ? 'true' : 'false',
+        toggle: () => this.setState({ menu: this.state.menu === r.id ? '' : r.id })
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

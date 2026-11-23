@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>IndustrialSim Web · início</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 1500px">
+  <dc-import name="GlobalBar" active="inicio" user="visitante" hint-size="100%,64px"></dc-import>
+  <main>
+    <section style="background: var(--color-surface); border-bottom: 1px solid var(--color-border)">
+      <div class="wrap" style="display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding-top: 64px; padding-bottom: 64px">
+        <div class="col" style="flex: 1 1 480px; gap: 20px">
+          <span class="lbl">Simulador de processo contínuo · ensino e pesquisa</span>
+          <h1 style="font-size: 44px; font-weight: 600; line-height: 1.15">Uma planta industrial no navegador, controlada pelo seu CLP</h1>
+          <p class="muted" style="font-size: 18px; max-width: 560px">Abra uma caldeira que roda no servidor e controle-a com qualquer mestre Modbus TCP: CLP real, CODESYS, OpenPLC, SCADA ou um script. Nada para instalar.</p>
+          <div class="row" style="gap: 12px">
+            <a class="btn btn-primary btn-lg" href="T03-Cenarios.dc.html">Experimentar sem conta</a>
+            <a class="btn btn-lg" href="T13-Entrar.dc.html">Entrar ou criar conta</a>
+          </div>
+          <p class="hint">Sem conta, a planta dura até 60 minutos e não é salva.</p>
+        </div>
+        <figure class="panel" style="flex: 1 1 520px; padding: 0; overflow: hidden; background: var(--color-bg)" aria-label="Sinóptico da caldeira com valores ao vivo">
+          <div class="row" style="padding: 10px 14px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); gap: 8px">
+            <span class="master" style="min-height: 26px; font-size: 13px"><span class="dot"></span>Mestre conectado</span>
+            <span class="muted small">Caldeira com tubulão · t = 1 284,6 s</span>
+          </div>
+          <div class="syn" style="height: 300px">
+            <div class="pipe" style="left: 30px; top: 210px; width: 230px; height: 3px"></div>
+            <div class="pipe" style="left: 260px; top: 160px; width: 3px; height: 53px"></div>
+            <div class="pipe" style="left: 330px; top: 50px; width: 3px; height: 50px"></div>
+            <div class="pipe" style="left: 330px; top: 50px; width: 200px; height: 3px"></div>
+            <div class="eq" style="left: 230px; top: 98px; width: 200px; height: 100px; border-radius: 50px; overflow: hidden"><div style="position: absolute; left: 0; right: 0; bottom: 0; height: 50%; background: var(--color-water); border-top: 2px solid var(--color-equipment-on)"></div></div>
+            <div class="eq" style="left: 70px; top: 190px; width: 40px; height: 40px; border-radius: 50%; background: var(--color-equipment-on); border-color: var(--color-equipment-on)"></div>
+            <span class="tag" style="left: 440px; top: 120px"><span class="t">LT-101</span><span class="v">0,600 m</span></span>
+            <span class="tag" style="left: 190px; top: 30px"><span class="t">PT-101</span><span class="v">10,0 bar</span></span>
+            <span class="tag" style="left: 130px; top: 220px"><span class="t">FT-101</span><span class="v">2,00 kg/s</span></span>
+            <span class="tag" style="left: 400px; top: 4px"><span class="t">FT-102</span><span class="v">2,00 kg/s</span></span>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding-top: 56px; padding-bottom: 24px" aria-labelledby="como">
+      <h2 id="como" class="h2" style="margin-bottom: 20px">Como funciona</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+        <div class="card col" style="gap: 10px">
+          <span class="tool-ic"><dc-import name="Icon" icon="cube" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span>
+          <h3 class="h4">1. Abra uma planta</h3>
+          <p class="muted">Escolha um cenário. A física roda no servidor a cada 10 ms; a planta não tem controle próprio.</p>
+        </div>
+        <div class="card col" style="gap: 10px">
+          <span class="tool-ic"><dc-import name="Icon" icon="plug" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span>
+          <h3 class="h4">2. Conecte seu mestre</h3>
+          <p class="muted">Configure no seu mestre o servidor, a porta e o Unit ID que a planta mostra, e aceite o pedido de conexão.</p>
+        </div>
+        <div class="card col" style="gap: 10px">
+          <span class="tool-ic"><dc-import name="Icon" icon="activity" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span>
+          <h3 class="h4">3. Controle e observe</h3>
+          <p class="muted">Feche as malhas no seu programa, provoque distúrbios e acompanhe gráficos, alarmes e registradores.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" style="padding-top: 32px; padding-bottom: 24px" aria-labelledby="cen">
+      <h2 id="cen" class="h2" style="margin-bottom: 20px">Cenários</h2>
+      <article class="card row" style="gap: 24px">
+        <div class="sunken" style="width: 200px; height: 120px; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted)"><svg width="140" height="72" viewBox="0 0 140 72" aria-hidden="true"><rect x="20" y="10" width="100" height="52" rx="26" fill="none" style="stroke: var(--color-equipment)" stroke-width="3"></rect><path d="M21.5 36 H118.5" style="stroke: var(--color-equipment-on)" stroke-width="2"></path></svg></div>
+        <div class="col grow" style="gap: 6px; flex: 1 1 400px">
+          <h3 class="h3">Caldeira com tubulão</h3>
+          <p class="muted">Controle de nível (LT-101 → FV-101) e de pressão (PT-101 → FV-102) no seu CLP; a carga é a válvula de vapor FV-103.</p>
+          <div class="row" style="gap: 8px"><span class="chip">Malhas LIC-101 e PIC-101</span><span class="chip">4 instrumentos HART</span><span class="chip">Modbus TCP</span></div>
+        </div>
+        <a class="btn btn-primary" href="T04-CriarPlanta.dc.html">Abrir planta</a>
+      </article>
+    </section>
+
+    <section class="wrap" style="padding-top: 32px; padding-bottom: 56px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px">
+      <div class="card col">
+        <h2 class="h3">Funciona com o mestre que você já usa</h2>
+        <div class="row" style="gap: 8px"><span class="chip">CODESYS</span><span class="chip">OpenPLC</span><span class="chip">TIA Portal · MB_CLIENT</span><span class="chip">PLCSIM Advanced</span><span class="chip">SCADA</span><span class="chip">Node-RED</span><span class="chip">Python · pymodbus</span></div>
+        <a href="#ajuda">Guias de conexão passo a passo</a>
+      </div>
+      <div class="card col">
+        <h2 class="h3">Para professores</h2>
+        <p class="muted">Crie uma turma, distribua plantas aos alunos, acompanhe todas ao vivo e injete falhas de instrumento.</p>
+        <a href="T16-Turmas.dc.html">Conhecer as turmas</a>
+      </div>
+    </section>
+  </main>
+  <footer style="background: var(--color-surface); border-top: 1px solid var(--color-border)">
+    <div class="wrap row small muted" style="padding-top: 20px; padding-bottom: 20px; gap: 24px">
+      <a href="#sobre">Sobre o projeto</a><a href="#ajuda">Guias</a><a href="#termos">Termos de uso e privacidade</a>
+      <span class="push">Projeto de iniciação científica · servidor no ar · versão 0.1.0</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { s20: 20 };
+  }
+}
+</script>
+</body>
+</html>

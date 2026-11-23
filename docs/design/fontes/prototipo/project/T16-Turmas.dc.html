@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Turmas</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.app a.tcard{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--color-text)}
+.app a.tcard:hover{border-color:var(--color-accent)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1000px; position: relative">
+  <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  <main class="wrap col" style="gap: 32px; padding-top: 28px; padding-bottom: 48px">
+    <div class="row" style="gap: 16px">
+      <h1 class="h1">Turmas</h1>
+      <button type="button" class="btn btn-primary push" onClick="{{ openNew }}"><dc-import name="Icon" icon="plus" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Criar turma</button>
+    </div>
+
+    <section class="col" aria-labelledby="t16-teach" style="gap: 12px">
+      <h2 id="t16-teach" class="h3">Turmas que leciono</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px">
+        <a class="card tcard" href="T17-Turma.dc.html">
+          <strong class="h4">Controle de Processos · turma A</strong>
+          <span class="muted">2026/2 · 24 alunos · 2 atividades</span>
+          <span class="row" style="gap: 8px">Agora: 11 plantas rodando
+            <span class="row" style="gap: 4px; font-weight: 600"><svg width="20" height="19" viewBox="0 0 32 30" aria-hidden="true"><path d="M16 2 L30 28 H2 Z" style="fill: var(--color-alarm-2); stroke: var(--color-alarm-2-edge)" stroke-width="1.5" stroke-linejoin="round"></path></svg>2 com alarme</span></span>
+        </a>
+        <a class="card tcard" href="T17-Turma.dc.html">
+          <strong class="h4">Controle de Processos · turma B</strong>
+          <span class="muted">2026/2 · 18 alunos · 1 atividade</span>
+          <span class="muted">Nenhuma planta rodando</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="col" aria-labelledby="t16-learn" style="gap: 12px">
+      <h2 id="t16-learn" class="h3">Turmas em que estou</h2>
+      <div class="panel row" style="gap: 12px; align-items: flex-end">
+        <div class="field"><label for="t16-code">Entrar com código de turma ou de planta</label><input id="t16-code" class="input mono" placeholder="ex.: K7P-2QX" style="width: 220px"></div>
+        <a class="btn" href="T17-Turma.dc.html">Entrar</a>
+        <span class="muted">Ou abra o link que o professor mandou.</span>
+      </div>
+      <p class="muted">Você ainda não está em nenhuma turma como aluno.</p>
+    </section>
+  </main>
+
+  <sc-if value="{{ newOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" style="position: fixed; overflow-y: auto">
+      <section role="dialog" aria-modal="true" aria-labelledby="t16-new" class="dialog" style="width: 520px">
+        <div class="row"><h2 id="t16-new" class="h2">Criar turma</h2><button type="button" class="btn btn-ghost btn-icon push" aria-label="Fechar" onClick="{{ close }}"><dc-import name="Icon" icon="x" size="{{ s20 }}" hint-size="20px,20px"></dc-import></button></div>
+        <div class="field"><label for="t16-n">Nome</label><input id="t16-n" class="input" placeholder="ex.: Controle de Processos · turma C"></div>
+        <div class="field"><label for="t16-s">Semestre</label><input id="t16-s" class="input" value="2026/2" style="width: 160px"></div>
+        <p class="hint">Depois de criar, você recebe um código e um link de convite para os alunos.</p>
+        <div class="row" style="justify-content: flex-end; gap: 12px"><button type="button" class="btn" onClick="{{ close }}">Cancelar</button><a class="btn btn-primary" href="T17-Turma.dc.html">Criar turma</a></div>
+      </section>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { newOpen: false };
+  }
+  renderVals() {
+    return {
+      s18: 18, s20: 20,
+      newOpen: this.state.newOpen,
+      openNew: () => this.setState({ newOpen: true }),
+      close: () => this.setState({ newOpen: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

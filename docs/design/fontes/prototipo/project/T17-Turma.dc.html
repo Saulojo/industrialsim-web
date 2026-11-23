@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Turma e atividades</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.ftabs{display:flex;gap:4px;border-bottom:1px solid var(--color-border)}
+.ftab{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:none;background:none;font:inherit;color:var(--color-text-muted);cursor:pointer}
+.ftab.is-on{color:var(--color-text);font-weight:600;box-shadow:inset 0 -3px 0 var(--color-accent)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1100px; position: relative">
+  <dc-import name="GlobalBar" active="turmas" user="{{ user }}" hint-size="100%,64px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: stretch">
+    <main class="col" style="flex: 999 1 700px; min-width: 0; gap: 16px; padding: 24px">
+      <nav aria-label="Caminho" class="small"><a href="T16-Turmas.dc.html">Turmas</a> <span class="muted">›</span></nav>
+      <div class="row" style="gap: 16px">
+        <h1 class="h1">Controle de Processos · turma A</h1>
+        <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}">
+          <span class="row" style="gap: 8px"><span class="chip" style="min-height: 36px">Código da turma <strong class="mono" style="font-size: 15px">K7P-2QX</strong></span>
+          <button type="button" class="btn btn-sm" onClick="{{ copyLink }}"><dc-import name="Icon" icon="copy" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Copiar link de convite</button></span>
+        </sc-if>
+      </div>
+      <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}">
+        <div class="ftabs" role="tablist" aria-label="Seções da turma">
+          <button type="button" role="tab" class="ftab is-on" aria-selected="true">Atividades</button>
+          <button type="button" role="tab" class="ftab" aria-selected="false">Alunos · 24</button>
+          <button type="button" role="tab" class="ftab" aria-selected="false">Ensaios</button>
+        </div>
+      </sc-if>
+
+      <article class="card row" style="gap: 16px">
+        <div class="col grow" style="gap: 4px; flex: 1 1 380px">
+          <strong class="h4">Malha de nível LIC-101</strong>
+          <span class="muted">Caldeira com tubulão · uma planta por dupla (12) · formato 0–27648 · diagnóstico desligado</span>
+          <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}">
+            <span class="row" style="gap: 8px">Agora: 11 rodando · 9 com mestre ·
+              <span class="row" style="gap: 4px; font-weight: 600"><svg width="20" height="19" viewBox="0 0 32 30" aria-hidden="true"><path d="M16 2 L30 28 H2 Z" style="fill: var(--color-alarm-2); stroke: var(--color-alarm-2-edge)" stroke-width="1.5" stroke-linejoin="round"></path></svg>2 com alarme</span></span>
+          </sc-if>
+          <sc-if value="{{ isStudent }}" hint-placeholder-val="{{ false }}"><span>Sua dupla: Dupla 03 (com Bruno Lima) · disponível até 05/12 às 23:59</span></sc-if>
+        </div>
+        <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}">
+          <a class="btn btn-primary" href="T18-Painel.dc.html"><dc-import name="Icon" icon="eye" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Acompanhar ao vivo</a>
+          <button type="button" class="btn">Editar</button>
+        </sc-if>
+        <sc-if value="{{ isStudent }}" hint-placeholder-val="{{ false }}"><a class="btn btn-primary" href="T06-Conta.dc.html">Abrir a planta da dupla</a></sc-if>
+      </article>
+      <article class="card row" style="gap: 16px">
+        <div class="col" style="gap: 4px; flex: 1 1 380px">
+          <strong class="h4">Malha de pressão PIC-101 com falha</strong>
+          <span class="muted">Começa em 30/11 às 08:00 · falha inicial: FT-102 travado</span>
+        </div>
+        <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}"><button type="button" class="btn">Editar</button></sc-if>
+        <sc-if value="{{ isStudent }}" hint-placeholder-val="{{ false }}"><span class="muted">Ainda não disponível</span></sc-if>
+      </article>
+    </main>
+
+    <sc-if value="{{ isProf }}" hint-placeholder-val="{{ true }}">
+      <aside class="col" aria-labelledby="t17-new" style="flex: 0 0 420px; gap: 14px; padding: 24px; background: var(--color-surface); border-left: 1px solid var(--color-border)">
+        <h2 id="t17-new" class="h3">Nova atividade</h2>
+        <div class="field"><label for="t17-name">Nome</label><input id="t17-name" class="input"></div>
+        <div class="field"><label for="t17-scen">Cenário</label><select id="t17-scen" class="select"><option>Caldeira com tubulão</option></select></div>
+        <fieldset class="col" style="border: none; padding: 0; margin: 0; gap: 4px"><legend class="field-label" style="margin-bottom: 4px">Uma planta para</legend>
+          <label class="check"><input type="radio" name="t17-who" checked> cada aluno</label><label class="check"><input type="radio" name="t17-who"> cada dupla ou equipe</label></fieldset>
+        <span class="lbl">Configuração inicial</span>
+        <div class="field"><label for="t17-fmt">Formato analógico</label><select id="t17-fmt" class="select"><option>0–27648 (Siemens)</option><option>0–10000</option><option>0–32767</option><option>float32</option></select></div>
+        <label class="check"><input type="checkbox"> Watchdog ligado</label>
+        <label class="check"><input type="checkbox"> Publicar bloco de diagnóstico</label>
+        <div class="field"><label for="t17-flt">Falha inicial</label><select id="t17-flt" class="select"><option>Nenhuma</option><option>Sensor aberto em LT-101</option><option>FT-102 travado</option></select></div>
+        <div class="row" style="gap: 12px"><div class="field grow"><label for="t17-from">Disponível de</label><input id="t17-from" class="input" placeholder="dd/mm/aaaa hh:mm"></div><div class="field grow"><label for="t17-to">até</label><input id="t17-to" class="input" placeholder="dd/mm/aaaa hh:mm"></div></div>
+        <div class="row" style="gap: 8px; justify-content: flex-end"><button type="button" class="btn">Cancelar</button><button type="button" class="btn btn-primary">Criar atividade</button></div>
+      </aside>
+    </sc-if>
+  </div>
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div class="toast" role="status" style="position: fixed; top: 24px; bottom: auto"><dc-import name="Icon" icon="check" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Link de convite copiado.</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"user":{"editor":"enum","options":["professor","aluno"],"default":"professor"},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { toast: false };
+  }
+  renderVals() {
+    const user = this.props.user ?? 'professor';
+    return {
+      s16: 16, s18: 18, user,
+      isProf: user === 'professor', isStudent: user === 'aluno',
+      toast: this.state.toast,
+      copyLink: () => { this.setState({ toast: true }); setTimeout(() => this.setState({ toast: false }), 2500); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Monitor de registradores</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 1300px">
+  <dc-import name="PlantBar" tab="monitor" open="process,trends,connection,settings,monitor" role="visitante" hint-size="100%,104px"></dc-import>
+  <main class="col" style="gap: 12px; padding: 16px">
+    <div class="row" style="gap: 16px">
+      <span class="muted">Notação</span>
+      <span class="row" style="gap: 0; border: 1px solid var(--color-border-strong); border-radius: 6px; overflow: hidden" role="group" aria-label="Notação de endereços">
+        <button type="button" class="{{ b0Cls }}" aria-pressed="{{ isBase0 }}" onClick="{{ setBase0 }}" style="border: none; border-radius: 0">Base 0</button>
+        <button type="button" class="{{ clCls }}" aria-pressed="{{ isClassic }}" onClick="{{ setClassic }}" style="border: none; border-radius: 0">Clássica</button>
+      </span>
+      <label class="sr" for="m-q">Buscar sinal</label>
+      <input id="m-q" class="input" placeholder="Buscar tag ou sinal" style="width: 260px">
+      <label class="check"><input type="checkbox" checked> Destacar escritas recentes</label>
+      <span class="muted small push">Atualiza 10 vezes por segundo</span>
+    </div>
+    <div class="panel" style="padding: 0; overflow-x: auto">
+      <table class="table">
+        <thead><tr><th style="width: 110px">Endereço</th><th>Sinal</th><th class="num" style="width: 130px">Bruto</th><th class="num" style="width: 140px">Engenharia</th><th style="width: 260px">Última escrita</th><th style="width: 70px"><span class="sr">Ações</span></th></tr></thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="20">
+            <tr class="{{ r.cls }}">
+              <td class="mono">{{ r.addr }}</td>
+              <td>{{ r.signal }} <sc-if value="{{ r.forced }}" hint-placeholder-val="{{ false }}"><span class="forced-mark">FORÇADO</span></sc-if></td>
+              <td class="num">{{ r.raw }}</td>
+              <td class="num">{{ r.eng }}</td>
+              <td class="muted small">{{ r.write }}</td>
+              <td style="position: relative"><sc-if value="{{ r.act }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-ghost btn-icon btn-sm" aria-label="Ações de {{ r.signal }}" onClick="{{ r.toggle }}"><dc-import name="Icon" icon="more" size="{{ s18 }}" hint-size="18px,18px"></dc-import></button></sc-if>
+                <sc-if value="{{ r.menu }}" hint-placeholder-val="{{ false }}"><nav class="pop menu" style="right: 8px; top: 36px; min-width: 220px" aria-label="Ações da linha"><a href="T07-Faceplate.dc.html">Forçar valor…</a><a href="T07-Faceplate.dc.html">Abrir detalhe</a><a href="T25-Graficos.dc.html">Ver no gráfico</a></nav></sc-if>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { classic: false, menu: '' };
+  }
+  renderVals() {
+    const classic = this.state.classic;
+    const base = { coil: 1, di: 10001, hr: 40001, ir: 30001 };
+    const A = (area, a, b) => classic ? (b === undefined ? String(base[area] + a) : (base[area] + a) + '–' + (base[area] + b)) : (b === undefined ? String(a) : a + '–' + b);
+    const head = (t) => ({ grp: true, cls: 'grp', addr: '', signal: t, raw: '', eng: '', write: '', act: false, forced: false, menu: false, toggle: null });
+    const r = (id, area, a, signal, raw, eng, write, act, opts) => ({
+      id, addr: A(area, a, opts && opts.b), signal, raw, eng, write: write || '', act: !!act,
+      forced: !!(opts && opts.forced),
+      cls: opts && opts.forced ? 'is-forced' : (opts && opts.recent ? 'is-recent' : ''),
+      menu: this.state.menu === id,
+      toggle: () => this.setState({ menu: this.state.menu === id ? '' : id })
+    });
+    const w = '200.18.4.42 às 09:12:08';
+    const rows = [
+      head('Coils · o mestre escreve'),
+      r('c0', 'coil', 0, 'P-101 · Comando da bomba', '1', '1', w),
+      head('Entradas discretas · o mestre lê'),
+      r('d0', 'di', 0, 'P-101 · Bomba em operação', '1', '1', '', true),
+      r('d1', 'di', 1, 'LSLL-101 · Nível muito baixo', '0', '0', '', true),
+      r('d2', 'di', 2, 'LSHH-101 · Nível muito alto', '0', '0', '', true),
+      r('d3', 'di', 3, 'PSH-101 · Pressão alta', '0', '0', '', true),
+      r('d4', 'di', 4, 'PSV-101 · Válvula de alívio aberta', '0', '0', '', true),
+      r('d5', 'di', 5, 'Watchdog disparado (estado seguro)', '0', '0', '', true),
+      head('Holding registers · o mestre escreve'),
+      r('h0', 'hr', 0, 'FV-101 · Comando da válvula de água', '22754', '82,30 %', '200.18.4.42 às 09:18:06 · agora', false, { recent: true }),
+      r('h1', 'hr', 1, 'FV-102 · Comando da válvula de combustível', '13824', '50,00 %', w),
+      r('h10', 'hr', 10, 'Heartbeat do mestre', '4711', '4711', '200.18.4.42 às 09:18:06'),
+      head('Input registers · o mestre lê'),
+      r('i0', 'ir', 0, 'LT-101 · Nível do tubulão', '13824', '0,600 m', '', true),
+      r('i1', 'ir', 1, 'PT-101 · Pressão do vapor', '17280', '10,00 bar', '', true),
+      r('i2', 'ir', 2, 'FT-101 · Vazão de água', '13824', '2,000 kg/s', '', true),
+      r('i3', 'ir', 3, 'FT-102 · Vazão de vapor', '11059', '2,000 kg/s', '', true),
+      r('i4', 'ir', 4, 'FV-101 · Posição da válvula de água', '22754', '82,30 %', '', true),
+      r('i5', 'ir', 5, 'FV-102 · Posição da válvula de combustível', '13824', '50,00 %', '', true),
+      r('i100', 'ir', 100, 'Diagnóstico · nível (float32)', '0x3F19 0x999A', '0,600 m', '', false, { b: 101 }),
+      r('i102', 'ir', 102, 'Diagnóstico · pressão (float32)', '0x4120 0x0000', '10,00 bar', '', false, { b: 103 })
+    ];
+    return {
+      s18: 18, rows,
+      isBase0: classic ? 'false' : 'true', isClassic: classic ? 'true' : 'false',
+      b0Cls: classic ? 'btn btn-sm' : 'btn btn-sm btn-primary',
+      clCls: classic ? 'btn btn-sm btn-primary' : 'btn btn-sm',
+      setBase0: () => this.setState({ classic: false }),
+      setClassic: () => this.setState({ classic: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Configurações</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.sec{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;padding:24px 0;border-bottom:1px solid var(--color-border)}
+</style>
+</helmet>
+<div class="app" style="min-height: 1250px">
+  <dc-import name="PlantBar" tab="settings" open="process,trends,connection,settings" role="{{ role }}" hint-size="100%,104px"></dc-import>
+  <main style="max-width: 1080px; padding: 8px 24px 140px">
+    <p class="muted" style="padding: 16px 0 0">As mudanças valem no passo seguinte, sem reiniciar a planta, e vão para o log de comunicação.</p>
+
+    <section class="sec" aria-labelledby="s-fmt">
+      <div class="col" style="gap: 6px"><h2 id="s-fmt" class="h3">Formato analógico</h2><p class="muted">Como o mestre lê as medições e escreve os comandos analógicos. Escolha o formato do cartão ou do controlador que você usa.</p></div>
+      <fieldset class="col" style="border: none; margin: 0; padding: 0; gap: 8px">
+        <legend class="sr">Formato analógico</legend>
+        <sc-for list="{{ formats }}" as="f" hint-placeholder-count="4">
+          <label class="{{ f.cls }}">
+            <input type="radio" name="fmt" checked="{{ f.on }}" onChange="{{ f.pick }}">
+            <span class="col" style="gap: 2px"><span><strong>{{ f.label }}</strong> <span class="muted">{{ f.tag }}</span></span><span class="hint">LT-101 em 0,600 m chega ao mestre como <strong class="mono" style="color: var(--color-text)">{{ f.example }}</strong>{{ f.extra }}</span></span>
+          </label>
+        </sc-for>
+        <div class="field" style="padding-left: 36px">
+          <label for="s-wo">Ordem das palavras do float32</label>
+          <select id="s-wo" class="select" disabled="{{ notFloat }}" style="max-width: 280px"><option>Normal (big-endian)</option><option>Invertida (word swap)</option></select>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="sec" aria-labelledby="s-uid">
+      <div class="col" style="gap: 6px"><h2 id="s-uid" class="h3">Unit ID</h2><p class="muted">Requisições com outro Unit ID recebem a exceção 11. O MB_CLIENT da Siemens usa 255 por padrão.</p></div>
+      <div class="field"><label for="s-uid-in">Unit ID da planta</label><div class="row"><input id="s-uid-in" class="input mono" value="1" style="width: 120px"><span class="hint">de 1 a 255</span></div></div>
+    </section>
+
+    <section class="sec" aria-labelledby="s-wd">
+      <div class="col" style="gap: 6px"><h2 id="s-wd" class="h3">Watchdog</h2><p class="muted">Se o heartbeat (holding register 10) ficar parado, a planta vai ao estado seguro: FV-101 abre e FV-102 fecha.</p></div>
+      <div class="row" style="gap: 20px"><label class="check"><input type="checkbox"> Ligado</label><div class="row" style="gap: 8px"><label for="s-wdt">Tempo limite</label><input id="s-wdt" class="input mono" value="2" style="width: 80px"><span>s</span></div></div>
+    </section>
+
+    <section class="sec" aria-labelledby="s-mp">
+      <div class="col" style="gap: 6px"><h2 id="s-mp" class="h3">Mestres permitidos</h2><p class="muted">No modo um por vez, aceitar outro mestre desconecta o anterior.</p></div>
+      <div class="col" style="gap: 4px"><label class="check"><input type="radio" name="mp" checked> Vários ao mesmo tempo</label><label class="check"><input type="radio" name="mp"> Um por vez</label></div>
+    </section>
+
+    <section class="sec" aria-labelledby="s-dg" style="border-bottom: none">
+      <div class="col" style="gap: 6px"><h2 id="s-dg" class="h3">Bloco de diagnóstico</h2><p class="muted">Input registers 100 a 109 com nível, pressão, vazões e FV-103 em unidades de engenharia. Desligue em avaliações.</p></div>
+      <label class="check"><input type="checkbox" checked> Publicar</label>
+    </section>
+
+    <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}">
+      <div role="region" aria-label="Alterações não aplicadas" class="panel row" style="position: sticky; bottom: 16px; gap: 12px; border: 2px solid var(--color-accent); box-shadow: var(--shadow-popover)">
+        <strong>1 alteração não aplicada</strong><span class="muted">Formato analógico: {{ appliedLabel }} → {{ chosenLabel }}</span>
+        <button type="button" class="btn push" onClick="{{ discard }}">Desfazer</button>
+        <button type="button" class="btn btn-primary" onClick="{{ apply }}">Aplicar</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ justApplied }}" hint-placeholder-val="{{ false }}">
+      <div role="status" class="panel row" style="position: sticky; bottom: 16px; gap: 12px; box-shadow: var(--shadow-popover)">
+        <span style="color: var(--color-accent)"><dc-import name="Icon" icon="check" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span>
+        <strong>Formato analógico aplicado: {{ appliedLabel }}.</strong><span class="muted">O mestre já lê no formato novo.</span>
+        <a class="btn btn-sm push" href="T10-Log.dc.html"><dc-import name="Icon" icon="list" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Ver no log</a>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1250}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { chosen: 'c27648', applied: 'c27648', justApplied: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const defs = {
+      c27648: ['0–27648', '(Siemens) · padrão', '13824', ''],
+      c10000: ['0–10000', '', '5000', ''],
+      c32767: ['0–32767', '', '16384', ''],
+      f32: ['float32', 'em unidades de engenharia', '0,600', ' em 2 registradores (30001–30002); cada sinal passa a ocupar 2']
+    };
+    const formats = Object.keys(defs).map((id) => ({
+      label: defs[id][0], tag: defs[id][1], example: defs[id][2], extra: defs[id][3],
+      on: s.chosen === id,
+      cls: s.chosen === id ? 'choice is-on' : 'choice',
+      pick: () => this.setState({ chosen: id, justApplied: false })
+    }));
+    const label = (id) => defs[id][0];
+    return {
+      s16: 16, s20: 20,
+      role: this.props.role ?? 'visitante',
+      formats,
+      notFloat: s.chosen !== 'f32',
+      dirty: s.chosen !== s.applied,
+      justApplied: s.justApplied && s.chosen === s.applied,
+      appliedLabel: label(s.applied), chosenLabel: label(s.chosen),
+      apply: () => this.setState({ applied: s.chosen, justApplied: true }),
+      discard: () => this.setState({ chosen: s.applied })
+    };
+  }
+}
+</script>
+</body>
+</html>

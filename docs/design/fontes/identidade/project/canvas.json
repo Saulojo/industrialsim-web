@@ -1,0 +1,20 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-23T15:00:00Z" },
+  "title": "IndustrialSim · Identidade visual",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1150, "title": "Logotipo · 3 conceitos", "expand": "fill" },
+    "Paleta.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 1500, "title": "Paleta · claro e escuro", "expand": "fill" },
+    "Tipografia.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 1150, "title": "Tipografia, símbolos e ícones", "expand": "fill" },
+    "IHM.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1000, "title": "Cor na IHM (ISA-101)", "expand": "fill" },
+    "Simbolo.dc.html": { "x": 0, "y": 1700, "w": 64, "h": 64, "title": "Componente: símbolo" }
+  },
+  "order": ["Main.dc.html", "Paleta.dc.html", "Tipografia.dc.html", "IHM.dc.html", "Simbolo.dc.html"],
+  "notes": {
+    "t0": { "x": 0, "y": -300, "text": "Identidade visual · D1 parte C (proposta para aprovação)", "kind": "title1", "maxW": 5960 },
+    "s0": { "x": 6080, "y": 0, "w": 460, "text": "Fonte dos valores: docs/design/tokens.json (nomes = variáveis CSS --color-…). Contraste conferido por script: docs/design/contraste.md (98 pares, todos passam).\n\nLogotipo: escolha um conceito (A, B ou C). O SVG final sai deste arquivo; o texto do logotipo precisa ser convertido em curvas (Inkscape ou Figma).\n\nNome mantido: IndustrialSim Web." }
+  },
+  "designSystems": []
+}

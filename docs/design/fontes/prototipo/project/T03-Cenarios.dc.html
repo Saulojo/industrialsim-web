@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cenários</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 900px">
+  <dc-import name="GlobalBar" active="cenarios" user="{{ user }}" hint-size="100%,64px"></dc-import>
+  <main class="wrap col" style="gap: 24px; padding-top: 36px; padding-bottom: 48px">
+    <div class="col" style="gap: 6px">
+      <h1 class="h1">Abrir uma planta</h1>
+      <p class="muted" style="max-width: 760px">Escolha um cenário. A planta roda no servidor e é controlada pelo seu mestre Modbus (CLP, CODESYS, OpenPLC, SCADA ou script).</p>
+    </div>
+    <article class="card" style="display: flex; flex-wrap: wrap; gap: 28px; padding: 28px">
+      <div class="sunken" style="flex: 0 0 380px; height: 250px; display: flex; align-items: center; justify-content: center">
+        <svg width="320" height="200" viewBox="0 0 320 200" role="img" aria-label="Esquema da caldeira: bomba, tubulão, queimador e saída de vapor">
+          <path d="M20 150 H150 V115" fill="none" style="stroke: var(--color-equipment)" stroke-width="3"></path>
+          <path d="M20 180 H140" fill="none" style="stroke: var(--color-equipment)" stroke-width="3"></path>
+          <path d="M200 60 V30 H300" fill="none" style="stroke: var(--color-equipment)" stroke-width="3"></path>
+          <rect x="120" y="60" width="160" height="70" rx="35" style="fill: var(--color-surface); stroke: var(--color-equipment)" stroke-width="3"></rect>
+          <path d="M122 98 H278 V100 C278 116 265 128 249 128 H151 C135 128 122 116 122 100 Z" style="fill: var(--color-water)"></path>
+          <path d="M122 98 H278" style="stroke: var(--color-equipment-on)" stroke-width="2"></path>
+          <circle cx="50" cy="150" r="14" style="fill: var(--color-equipment-on)"></circle>
+          <rect x="140" y="162" width="110" height="30" style="fill: var(--color-surface); stroke: var(--color-equipment)" stroke-width="3"></rect>
+        </svg>
+      </div>
+      <div class="col" style="flex: 1 1 480px; gap: 16px">
+        <h2 class="h2">Caldeira com tubulão</h2>
+        <p class="muted">Controle de nível (LT-101 → FV-101) e de pressão (PT-101 → FV-102) no seu CLP; a carga é a válvula de vapor FV-103.</p>
+        <div class="row" style="gap: 8px"><span class="chip">Malhas LIC-101 e PIC-101</span><span class="chip">Avançado: nível a três elementos</span><span class="chip">4 instrumentos HART</span></div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+          <div class="sunken" style="padding: 10px 12px"><span class="lbl">Coils</span><br><span class="mono h4">1</span> <span class="muted small">bomba</span></div>
+          <div class="sunken" style="padding: 10px 12px"><span class="lbl">Entradas discretas</span><br><span class="mono h4">6</span> <span class="muted small">chaves e estados</span></div>
+          <div class="sunken" style="padding: 10px 12px"><span class="lbl">Holding registers</span><br><span class="mono h4">3</span> <span class="muted small">válvulas e heartbeat</span></div>
+          <div class="sunken" style="padding: 10px 12px"><span class="lbl">Input registers</span><br><span class="mono h4">6 + 10</span> <span class="muted small">medições e diagnóstico</span></div>
+        </div>
+        <div class="row" style="gap: 12px; margin-top: 4px">
+          <a class="btn btn-primary btn-lg" href="T04-CriarPlanta.dc.html">Abrir planta</a>
+          <a class="btn" href="T11-MapaIO.dc.html"><dc-import name="Icon" icon="table" size="{{ s18 }}" hint-size="18px,18px"></dc-import> Ver o mapa de I/O</a>
+        </div>
+      </div>
+    </article>
+    <p class="muted small">Novos cenários entram como pacotes de arquivos (modelo 3D e descrição), sem mudar o site.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"user":{"editor":"enum","options":["visitante","aluno","professor"],"default":"visitante"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { s18: 18, user: this.props.user ?? 'visitante' };
+  }
+}
+</script>
+</body>
+</html>

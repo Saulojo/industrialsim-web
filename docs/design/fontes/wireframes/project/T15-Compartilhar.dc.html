@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T15 Compartilhar planta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-s{min-height:36px;padding:0 12px}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:44px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.person{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #eceff1}
+.av{width:32px;height:32px;border-radius:16px;background:#dadce0;flex:none}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #dadce0}
+th{font-size:12px;font-weight:600;color:#5f6368}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="PlantBar" tab="process" open="process,connection,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; padding: 32px 24px; background: #dadce0; min-height: 900px; box-sizing: border-box; align-items: flex-start">
+    <section role="dialog" aria-labelledby="t15-title" class="box" style="flex: 0 1 620px; display: flex; flex-direction: column; gap: 18px; padding: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.2)">
+      <div style="display: flex; align-items: center"><h2 id="t15-title" style="font-size: 22px">Compartilhar “Caldeira · bancada 3”</h2><a class="btn btn-s" href="T06-IHM.dc.html" aria-label="Fechar" style="margin-left: auto">✕</a></div>
+      <p class="muted">Quem entra pode fazer o mesmo que você: operar, parear mestres, configurar e compartilhar.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="t15-mail" style="font-weight: 600">Convidar por e-mail</label>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <input id="t15-mail" class="inp" type="email" placeholder="e-mail de quem já tem conta" style="flex: 1 1 280px">
+          <button type="button" class="btn btn-p">Convidar</button>
+        </div>
+      </div>
+
+      <div class="box" style="display: flex; flex-direction: column; gap: 12px">
+        <strong>Ou por código</strong>
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center">
+          <fieldset style="border: none; padding: 0; margin: 0; display: flex; gap: 12px; align-items: center"><legend style="float: left; margin-right: 8px" class="muted">Pode ser usado</legend>
+            <label><input type="radio" name="t15-uses" checked> 1 vez</label><label><input type="radio" name="t15-uses"> várias vezes</label></fieldset>
+          <label for="t15-exp" class="muted">Validade</label><select id="t15-exp" class="inp"><option>24 horas</option><option>7 dias</option><option>Até eu revogar</option></select>
+          <button type="button" class="btn">Gerar código</button>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 12px; background: #f1f3f4; border-radius: 6px">
+          <span class="mono" style="font-size: 28px; font-weight: 700; letter-spacing: .08em">4K9-TQ2</span>
+          <button type="button" class="btn btn-s">Copiar código</button>
+          <button type="button" class="btn btn-s">Copiar link</button>
+          <span class="muted" style="font-size: 13px">1 uso · expira amanhã às 09:30</span>
+        </div>
+        <p class="muted" style="font-size: 13px">O colega digita o código em Minhas plantas › Entrar com código, ou abre o link.</p>
+        <table>
+          <thead><tr><th>Códigos ativos</th><th>Usos</th><th>Expira</th><th><span style="position: absolute; left: -9999px">Ação</span></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">4K9-TQ2</td><td>0 de 1</td><td>amanhã 09:30</td><td style="text-align: right"><button type="button" class="btn btn-s">Revogar</button></td></tr>
+            <tr><td class="mono">8WM-3HD</td><td>3 · vários</td><td>30/11</td><td style="text-align: right"><button type="button" class="btn btn-s">Revogar</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <span class="lbl">Pessoas com acesso</span>
+        <div class="person"><span class="av" aria-hidden="true"></span><span style="flex: 1">Você <span class="muted">· criou a planta</span></span></div>
+        <div class="person"><span class="av" aria-hidden="true"></span><span style="flex: 1">[Colega da dupla]<br><span class="muted">entrou por código em 23/11</span></span><button type="button" class="btn btn-s">Remover</button></div>
+      </div>
+    </section>
+    <aside class="box" style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+      <span class="lbl" style="color: #202124">Proposta (pedido do autor, 23/11)</span>
+      <p>Sem papéis no compartilhamento: todos têm os mesmos direitos. Só quem criou a planta a exclui e remove pessoas.</p>
+      <p>O papel de observador continua só para o professor que abre a planta de um aluno pelo painel da turma.</p>
+      <p class="muted">Muda a D15 e o RF09 (dono, operador, observador): registrar como decisão nova ao fim da D1.</p>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

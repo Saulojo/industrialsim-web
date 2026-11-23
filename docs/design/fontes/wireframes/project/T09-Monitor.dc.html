@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T09 Monitor de registradores</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.inp{min-height:36px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.seg{display:inline-flex;border:1px solid #5f6368;border-radius:6px;overflow:hidden}
+.seg span{padding:6px 12px}
+.seg .on{background:#202124;color:#fff}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #dadce0;vertical-align:middle}
+th{font-size:12px;font-weight:600;color:#5f6368;position:sticky;top:0;background:#fff}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1300px">
+  <dc-import name="PlantBar" tab="monitor" open="process,settings,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 12px; padding: 16px 24px 32px">
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+      <span class="muted">Notação</span><span class="seg"><span class="on">Base 0</span><span>Clássica</span></span>
+      <span class="muted">Área</span><select class="inp" aria-label="Área"><option>Todas</option><option>Coils</option><option>Entradas discretas</option><option>Holding registers</option><option>Input registers</option></select>
+      <input class="inp" aria-label="Buscar sinal" placeholder="Buscar tag ou sinal" style="width: 240px">
+      <label><input type="checkbox" checked> Destacar escritas recentes</label>
+      <span class="muted" style="margin-left: auto">Atualiza 10 vezes por segundo</span>
+    </div>
+    <div class="box" style="padding: 0; overflow-x: auto">
+      <table>
+        <thead><tr><th style="width: 90px">Endereço</th><th>Sinal</th><th style="width: 140px">Bruto</th><th style="width: 140px">Engenharia</th><th style="width: 220px">Última escrita</th><th style="width: 90px">Ações</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="20">
+            <tr style="{{ r.style }}">
+              <td class="mono">{{ r.addr }}</td>
+              <td>{{ r.signal }} <strong>{{ r.mark }}</strong></td>
+              <td class="mono">{{ r.raw }}</td>
+              <td class="mono">{{ r.eng }}</td>
+              <td class="muted">{{ r.write }}</td>
+              <td><button type="button" class="btn" aria-label="Ações de {{ r.signal }}">{{ r.act }}</button></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div class="box" style="align-self: flex-start; display: flex; flex-direction: column; gap: 4px; padding: 0; width: 220px">
+      <span class="muted" style="padding: 8px 12px; font-size: 12px">Menu “⋯” de uma entrada</span>
+      <a href="T07-Faceplate.dc.html" style="padding: 8px 12px">Forçar valor…</a>
+      <a href="T07-Faceplate.dc.html" style="padding: 8px 12px">Abrir detalhe</a>
+      <span style="padding: 8px 12px">Copiar endereço</span>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const head = (t) => ({ addr: '', signal: t, raw: '', eng: '', write: '', act: '', mark: '', style: 'background: #eceff1; font-weight: 700;' });
+    const r = (addr, signal, raw, eng, write, act, extra) => ({ addr, signal, raw, eng, write: write || '', act: act || '', mark: (extra && extra.mark) || '', style: (extra && extra.style) || '' });
+    const recent = 'box-shadow: inset 4px 0 0 #5f6368; background: #f8f9fa;';
+    const forced = 'outline: 3px solid #202124; outline-offset: -3px;';
+    const rows = [
+      head('Coils · o mestre escreve'),
+      r('0', 'P-101 · Comando da bomba', '1', '1', '200.18.4.42 às 09:12:08'),
+      head('Entradas discretas · o mestre lê'),
+      r('0', 'P-101 · Bomba em operação', '1', '1', '', '⋯'),
+      r('1', 'LSLL-101 · Nível muito baixo', '0', '0', '', '⋯'),
+      r('2', 'LSHH-101 · Nível muito alto', '1', '1', '', '⋯', { mark: 'FORÇADO', style: forced }),
+      r('3', 'PSH-101 · Pressão alta', '0', '0', '', '⋯'),
+      r('4', 'PSV-101 · Válvula de alívio aberta', '0', '0', '', '⋯'),
+      r('5', 'Watchdog disparado (estado seguro)', '0', '0', '', '⋯'),
+      head('Holding registers · o mestre escreve'),
+      r('0', 'FV-101 · Comando da válvula de água', '22755', '82,30 %', '200.18.4.42 às 09:18:06 · agora', '', { style: recent }),
+      r('1', 'FV-102 · Comando da válvula de combustível', '13824', '50,00 %', '200.18.4.42 às 09:12:08'),
+      r('10', 'Heartbeat do mestre', '4711', '4711', '200.18.4.42 às 09:18:06'),
+      head('Input registers · o mestre lê'),
+      r('0', 'LT-101 · Nível do tubulão', '13824', '0,600 m', '', '⋯'),
+      r('1', 'PT-101 · Pressão do vapor', '17280', '10,00 bar', '', '⋯'),
+      r('2', 'FT-101 · Vazão de água', '13824', '2,000 kg/s', '', '⋯'),
+      r('3', 'FT-102 · Vazão de vapor', '11059', '2,000 kg/s', '', '⋯'),
+      r('4', 'FV-101 · Posição da válvula de água', '22755', '82,30 %', '', '⋯'),
+      r('5', 'FV-102 · Posição da válvula de combustível', '13824', '50,00 %', '', '⋯'),
+      r('100–101', 'Diagnóstico · nível', '0x3F19 0x999A', '0,600 m'),
+      r('102–103', 'Diagnóstico · pressão', '0x4120 0x0000', '10,00 bar'),
+      r('104–109', 'Diagnóstico · vazões e FV-103', '…', '…')
+    ];
+    return { rows, zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

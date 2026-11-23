@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T19 Injetar falha ou distúrbio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:44px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid #dadce0;border-radius:6px}
+.opt-on{border:2px solid #202124}
+fieldset{border:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+legend{font-weight:600;margin-bottom:6px}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; padding: 32px 24px; background: #dadce0; min-height: 936px; box-sizing: border-box; align-items: flex-start">
+    <section role="dialog" aria-labelledby="t19-title" class="box" style="flex: 0 1 620px; display: flex; flex-direction: column; gap: 18px; padding: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.2)">
+      <h2 id="t19-title" style="font-size: 22px">Injetar falha ou distúrbio</h2>
+      <fieldset><legend>Em quais plantas</legend>
+        <label class="opt opt-on"><input type="radio" name="t19-scope" checked><span><strong>Só na planta da Dupla 03</strong></span></label>
+        <label class="opt"><input type="radio" name="t19-scope"><span>Em todas as plantas da atividade <span class="muted">(12)</span></span></label>
+      </fieldset>
+      <fieldset><legend>O quê</legend>
+        <div style="display: flex; gap: 8px"><label class="opt opt-on" style="flex: 1"><input type="radio" name="t19-kind" checked> Falha de instrumento</label><label class="opt" style="flex: 1"><input type="radio" name="t19-kind"> Distúrbio (FV-103)</label></div>
+      </fieldset>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap">
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><label for="t19-inst">Instrumento</label><select id="t19-inst" class="inp"><option>LT-101 · Nível do tubulão</option><option>PT-101 · Pressão do vapor</option><option>FT-101 · Vazão de água</option><option>FT-102 · Vazão de vapor</option></select></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; flex: 1"><label for="t19-type">Falha</label><select id="t19-type" class="inp"><option>Sensor aberto</option><option>Deriva</option><option>Travamento do valor</option><option>Falha de eletrônica</option></select></div>
+      </div>
+      <p class="muted">Sensor aberto leva a corrente a 3,6 mA (NAMUR NE43): o mestre lê −691 no formato 0–27648.</p>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label><input type="checkbox"> Avisar o aluno na IHM</label>
+        <span class="muted" style="font-size: 13px">Desligado: o aluno precisa diagnosticar pelo comportamento da planta e pelo monitor.</span>
+      </div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
+        <label for="t19-dur">Duração</label><select id="t19-dur" class="inp"><option>Até eu remover</option><option>5 min</option><option>15 min</option></select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 12px">
+        <a class="btn" href="T18-Painel.dc.html">Cancelar</a>
+        <a class="btn btn-p" href="T18-Painel.dc.html">Injetar em 1 planta</a>
+      </div>
+    </section>
+    <aside class="box" style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 10px">
+      <span class="lbl" style="color: #202124">Regras</span>
+      <p>O botão diz o alcance: “Injetar em 1 planta” ou “Injetar em 12 plantas”. Com “todas”, pede uma segunda confirmação.</p>
+      <p>Depois de injetar, o cartão da planta no painel mostra “FALHA · LT-101” e o botão “Remover falha”.</p>
+      <p class="muted">Falhas de instrumento dependem do modelo HART (Etapa 16); o distúrbio em FV-103 já existe (D39).</p>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

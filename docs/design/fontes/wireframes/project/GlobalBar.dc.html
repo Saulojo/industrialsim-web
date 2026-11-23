@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Barra global</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+</style>
+</helmet>
+<header style="height: 64px; box-sizing: border-box; display: flex; align-items: center; gap: 24px; padding: 0 24px; border-bottom: 2px solid #9aa0a6; background: #ffffff; font-family: system-ui, sans-serif; font-size: 14px; color: #202124; flex-wrap: wrap">
+  <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 16px">
+    <span aria-hidden="true" style="width: 32px; height: 32px; border: 2px solid #5f6368; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #5f6368">logo</span>
+    <span>[Nome do produto]</span>
+  </a>
+  <nav aria-label="Menu principal" style="display: flex; gap: 4px; flex: 1 1 auto">
+    <sc-for list="{{ items }}" as="item" hint-placeholder-count="4">
+      <a href="{{ item.href }}" style="{{ item.style }}">{{ item.label }}</a>
+    </sc-for>
+  </nav>
+  <div style="display: flex; align-items: center; gap: 8px">
+    <button type="button" style="height: 36px; padding: 0 10px; border: 1px solid #9aa0a6; border-radius: 6px; background: #fff; font: inherit">PT ▾</button>
+    <button type="button" aria-label="Tema claro ou escuro" style="height: 36px; width: 36px; border: 1px solid #9aa0a6; border-radius: 6px; background: #fff; font: inherit">◐</button>
+    <sc-if value="{{ isVisitor }}" hint-placeholder-val="{{ false }}">
+      <a href="T13-Entrar.dc.html" style="height: 36px; display: inline-flex; align-items: center; padding: 0 14px; border: 2px solid #202124; border-radius: 6px; text-decoration: none; font-weight: 600">Entrar</a>
+    </sc-if>
+    <sc-if value="{{ isUser }}" hint-placeholder-val="{{ true }}">
+      <button type="button" style="height: 36px; display: inline-flex; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid #9aa0a6; border-radius: 18px; background: #fff; font: inherit"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 12px; background: #dadce0"></span>{{ userName }} ▾</button>
+    </sc-if>
+  </div>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["inicio","cenarios","plantas","turmas","ajuda"],"default":"inicio"},"user":{"editor":"enum","options":["visitante","aluno","professor"],"default":"aluno"},"$preview":{"width":1440,"height":64}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'inicio';
+    const user = this.props.user ?? 'aluno';
+    const base = 'display: inline-flex; align-items: center; height: 40px; padding: 0 12px; text-decoration: none; border-radius: 6px;';
+    const all = [
+      { id: 'cenarios', label: 'Cenários', href: 'T03-Cenarios.dc.html', any: true },
+      { id: 'plantas', label: 'Minhas plantas', href: 'T14-MinhasPlantas.dc.html', any: false },
+      { id: 'turmas', label: 'Turmas', href: 'T16-Turmas.dc.html', any: false },
+      { id: 'ajuda', label: 'Ajuda e guias', href: '#ajuda', any: true }
+    ];
+    const items = all
+      .filter((i) => i.any || user !== 'visitante')
+      .map((i) => ({
+        ...i,
+        style: base + (i.id === active ? ' font-weight: 700; background: #e8eaed; box-shadow: inset 0 -3px 0 #202124;' : '')
+      }));
+    return {
+      items,
+      isVisitor: user === 'visitante',
+      isUser: user !== 'visitante',
+      userName: user === 'professor' ? 'Prof. [nome]' : '[Nome do aluno]'
+    };
+  }
+}
+</script>
+</body>
+</html>

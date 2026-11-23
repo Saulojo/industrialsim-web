@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T22 Editor Ladder</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:12px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.rung{display:flex;align-items:center;gap:0;padding:18px 0;border-bottom:1px dashed #9aa0a6}
+.rail{width:3px;align-self:stretch;background:#202124}
+.wire{height:2px;background:#202124;flex:1}
+.el{display:flex;flex-direction:column;align-items:center;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:0 6px}
+.blk{border:2px solid #202124;padding:8px 12px;font-family:ui-monospace,Consolas,monospace;font-size:12px;display:flex;flex-direction:column;gap:2px}
+.tree a{display:block;padding:4px 8px;text-decoration:none}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="PlantBar" tab="program" open="process,monitor,program" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div role="toolbar" aria-label="Elementos Ladder" style="display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 24px; border-bottom: 1px solid #9aa0a6; align-items: center">
+    <button type="button" class="btn mono">—| |—</button><button type="button" class="btn mono">—|/|—</button><button type="button" class="btn mono">—( )—</button><button type="button" class="btn mono">—(S)—</button><button type="button" class="btn mono">—(R)—</button>
+    <button type="button" class="btn">TON</button><button type="button" class="btn">CTU</button><button type="button" class="btn">CMP</button><button type="button" class="btn">MOVE</button><button type="button" class="btn">PID</button>
+    <span style="margin-left: auto; display: flex; gap: 8px; align-items: center"><span class="muted">Soft-PLC: parado</span><button type="button" class="btn">Verificar</button><button type="button" class="btn btn-p">Baixar e rodar</button><button type="button" class="btn">Monitorar</button></span>
+  </div>
+  <div style="display: flex; flex-wrap: wrap">
+    <nav aria-label="Projeto" class="tree" style="flex: 0 0 240px; border-right: 1px solid #9aa0a6; padding: 12px; box-sizing: border-box; min-height: 820px">
+      <span class="lbl">POUs</span>
+      <a href="#" style="font-weight: 700">Main (LD)</a><a href="#">Intertravamentos (LD)</a><a href="#">Malhas (FBD, Etapa 23)</a>
+      <span class="lbl" style="display: block; margin-top: 12px">Variáveis da planta</span>
+      <a href="#" class="mono">P-101_run · coil 0</a><a href="#" class="mono">LSHH-101 · DI 2</a><a href="#" class="mono">LSLL-101 · DI 1</a><a href="#" class="mono">LT-101 · IR 0</a><a href="#" class="mono">FV-101_command · HR 0</a>
+    </nav>
+    <main style="flex: 999 1 640px; min-width: 0; padding: 16px 24px">
+      <div class="rung">
+        <span class="muted mono" style="width: 40px">001</span><span class="rail"></span>
+        <span class="el">START<span>—| |—</span></span><span class="wire"></span>
+        <span class="el">LSHH-101<span>—|/|—</span></span><span class="wire"></span>
+        <span class="el">LSLL-101<span>—|/|—</span></span><span class="wire"></span>
+        <span class="el">P-101_run<span>—( )—</span></span><span class="rail"></span>
+      </div>
+      <div class="rung">
+        <span class="muted mono" style="width: 40px">002</span><span class="rail"></span>
+        <span class="wire" style="flex: 0 0 60px"></span>
+        <span class="blk"><strong>PID · LIC-101</strong><span>PV  := LT-101</span><span>SP  := 0,60 m</span><span>OUT =&gt; FV-101_command</span></span>
+        <span class="wire"></span><span class="rail"></span>
+      </div>
+      <p class="muted" style="margin-top: 16px">Esboço: o editor salva em PLCopen XML e o soft-PLC roda no servidor, no mesmo laço da planta (D11). As variáveis vêm do mapa de I/O do cenário, sem endereço manual.</p>
+    </main>
+    <aside class="box" style="flex: 0 0 280px; border-radius: 0; border-width: 0 0 0 1px; display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl">Propriedades</span>
+      <span>Contato NF · <span class="mono">LSHH-101</span></span>
+      <span class="muted">Entrada discreta 2 · Nível muito alto</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

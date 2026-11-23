@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T23 Nova aba</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.muted{color:#5f6368}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:40px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box;width:100%}
+.tool{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #dadce0;border-radius:8px;text-decoration:none;min-height:64px;box-sizing:border-box}
+.tool:hover{border-color:#202124;background:#f8f9fa}
+.ic{width:32px;height:32px;flex:none;border:2px solid #5f6368;border-radius:6px}
+.open{font-size:11px;font-weight:700;border:1px solid #5f6368;border-radius:4px;padding:0 4px;margin-left:4px}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="PlantBar" tab="process" open="process,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div style="position: relative; min-height: 900px">
+    <div class="ph" style="position: absolute; inset: 0; border: none; border-radius: 0">Processo (T06) continua atrás, sem escurecer</div>
+    <section role="dialog" aria-labelledby="t23-title" class="box" style="position: absolute; left: 330px; top: 4px; width: 640px; display: flex; flex-direction: column; gap: 14px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.2)">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <h2 id="t23-title" style="font-size: 18px">Abrir em nova aba</h2>
+        <span class="muted" style="margin-left: auto; font-size: 12px">Esc fecha</span>
+      </div>
+      <label for="t23-q" style="position: absolute; left: -9999px">Buscar ferramenta ou instrumento</label>
+      <input id="t23-q" class="inp" placeholder="Buscar: monitor, formato, LT-101…">
+
+      <span class="lbl">Processo</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <a class="tool" href="T25-Graficos.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Gráficos</strong><br><span class="muted">Tendências grandes, vários gráficos, zoom e cursor</span></span></a>
+      </div>
+      <span class="lbl">Comunicação com o mestre</span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <a class="tool" href="T05-Conexao.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Conexão</strong><br><span class="muted">IP, porta, Unit ID, guias e mestres autorizados</span></span></a>
+        <a class="tool" href="T08-Configuracoes.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Configurações</strong><br><span class="muted">Formato analógico, Unit ID, watchdog, diagnóstico</span></span></a>
+        <a class="tool" href="T09-Monitor.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Monitor</strong><span class="open">aberta</span><br><span class="muted">Registradores ao vivo, quem escreveu, forçar</span></span></a>
+        <a class="tool" href="T10-Log.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Log</strong><br><span class="muted">Conexões, pareamentos, exceções, mudanças</span></span></a>
+        <a class="tool" href="T11-MapaIO.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Mapa de I/O</strong> ↗<br><span class="muted">Endereços e escalas, para imprimir ou PDF</span></span></a>
+      </div>
+
+      <span class="lbl">Instrumentos</span>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+        <a class="tool" href="T07-Faceplate.dc.html" style="min-height: 48px"><strong>LT-101</strong></a>
+        <a class="tool" href="T07-Faceplate.dc.html" style="min-height: 48px"><strong>PT-101</strong></a>
+        <a class="tool" href="T07-Faceplate.dc.html" style="min-height: 48px"><strong>FT-101</strong></a>
+        <a class="tool" href="T07-Faceplate.dc.html" style="min-height: 48px"><strong>FT-102</strong></a>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <a class="tool" href="T12-HART.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Configurador HART</strong><br><span class="muted">Faixa, amortecimento, quadros, PACTware · Fase 3</span></span></a>
+        <a class="tool" href="T22-Ladder.dc.html"><span class="ic" aria-hidden="true"></span><span><strong>Programa Ladder</strong><br><span class="muted">Soft-PLC no servidor · Fase 4</span></span></a>
+      </div>
+      <p class="muted" style="font-size: 13px">Um clique abre (ou vai para a aba, se já estiver aberta). As abas abertas desta planta ficam lembradas neste navegador; arraste para reordenar, × fecha. Processo é fixa.</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

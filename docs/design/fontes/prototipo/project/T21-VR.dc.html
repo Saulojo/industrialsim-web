@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · VR</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.vr{position:relative;height:900px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,var(--color-surface) 0%,var(--color-bg) 55%,var(--color-border) 100%)}
+.vrp{position:absolute;background:var(--color-surface);border:1px solid var(--color-border);border-radius:16px;padding:22px;box-shadow:var(--shadow-dialog);font-size:20px}
+.app a.vb,.vb{display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;padding:0 20px;border:2px solid var(--color-border-strong);border-radius:12px;background:var(--color-surface);color:var(--color-text);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.app a.vb:hover,.vb:hover{border-color:var(--color-accent)}
+</style>
+</helmet>
+<div class="app">
+  <div class="vr" role="img" aria-label="Vista no óculos de realidade virtual com o menu do pulso e o detalhe flutuante do LT-101">
+    <span class="muted" style="position: absolute; left: 50%; top: 20px; transform: translateX(-50%); font-size: 14px">Vista no óculos (WebXR) · painéis presos ao mundo e ao pulso</span>
+    <svg viewBox="0 0 1440 900" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; inset: 0">
+      <rect x="560" y="520" width="520" height="220" rx="110" style="fill: var(--color-surface); stroke: var(--color-equipment)" stroke-width="5" opacity=".7"></rect>
+      <path d="M568 640 H1072 V650 C1072 700 1030 732 980 732 H660 C610 732 568 700 568 650 Z" style="fill: var(--color-water)" opacity=".7"></path>
+      <path d="M220 900 C260 760 300 700 360 660" fill="none" style="stroke: var(--color-equipment-on)" stroke-width="22" stroke-linecap="round" opacity=".5"></path>
+      <path d="M1220 900 C1150 780 1030 700 900 560" fill="none" style="stroke: var(--color-accent)" stroke-width="3" stroke-dasharray="8 8"></path>
+    </svg>
+
+    <div class="vrp col" style="left: 120px; top: 260px; width: 360px; gap: 12px; transform: perspective(900px) rotateY(16deg)">
+      <strong style="font-size: 24px">Menu do pulso</strong>
+      <a class="vb" href="T20-Cena3D.dc.html">Processo</a>
+      <button type="button" class="vb">Alarmes · 0</button>
+      <button type="button" class="vb">Distúrbios</button>
+      <a class="vb" href="T20-Cena3D.dc.html">Sair da VR</a>
+    </div>
+
+    <div class="vrp col" style="left: 620px; top: 150px; width: 460px; gap: 12px">
+      <span class="muted" style="font-size: 16px">Detalhe flutuante · aparece ao apontar</span>
+      <strong class="mono" style="font-size: 26px">LT-101 · Nível do tubulão</strong>
+      <span class="mono" style="font-size: 48px; font-weight: 600">{{ lt }}</span>
+      <span class="bar" style="width: 100%; height: 22px; border-width: 2px"><span class="band" style="left: 25%; width: 50%"></span><span class="ptr" style="{{ ptr }}"></span></span>
+      <span class="muted">{{ ma }} · faixa 0–1,2 m</span>
+      <div class="row" style="gap: 12px; flex-wrap: nowrap"><button type="button" class="vb grow">Fechar</button><button type="button" class="{{ pinCls }}" onClick="{{ togglePin }}" aria-pressed="{{ pinOn }}" style="flex: 1">{{ pinLabel }}</button></div>
+    </div>
+
+    <aside class="vrp col" style="right: 48px; bottom: 48px; width: 400px; gap: 8px; font-size: 15px">
+      <strong>Regras para VR (a confirmar na Etapa 19)</strong>
+      <span class="muted">Alvos de pelo menos 64 px no painel (cerca de 2 cm a 1 m); texto de pelo menos 20 px; painéis a 1–2 m, levemente inclinados; nada preso à cabeça.</span>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tick: 0, pinned: false };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => this.setState({ tick: this.state.tick + 1 }), 500);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  renderVals() {
+    const lv = 0.6 + 0.004 * Math.sin(this.state.tick * 0.35);
+    const fmt = (v, n) => v.toFixed(n).replace('.', ',');
+    const pinned = this.state.pinned;
+    return {
+      lt: fmt(lv, 3) + ' m', ma: fmt(4 + 16 * lv / 1.2, 2) + ' mA',
+      ptr: 'left: calc(' + (lv / 1.2 * 100).toFixed(1) + '% - 3px); width: 6px; height: 32px; top: -7px',
+      pinLabel: pinned ? 'Fixado' : 'Fixar', pinOn: pinned ? 'true' : 'false',
+      pinCls: pinned ? 'vb btn-primary' : 'vb',
+      togglePin: () => this.setState({ pinned: !pinned })
+    };
+  }
+}
+</script>
+</body>
+</html>

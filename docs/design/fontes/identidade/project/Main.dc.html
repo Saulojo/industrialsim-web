@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Logotipo: conceitos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1C5A91}a:hover{color:#154773}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1150px; box-sizing: border-box; padding: 40px; background: #E9EBED; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1A1D21; display: flex; flex-direction: column; gap: 28px">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 600">Logotipo · três conceitos</h1>
+    <p style="margin: 0; color: #4D555D; max-width: 900px">O nome fica “IndustrialSim Web”. Cada conceito tem símbolo e logotipo em texto, versões clara, escura e monocromática, e o símbolo nos tamanhos de ícone (64, 32 e 16 px). O azul é o acento da marca; na IHM ele não aparece no processo.</p>
+  </div>
+  <sc-for list="{{ concepts }}" as="c" hint-placeholder-count="3">
+    <section style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 24px; display: grid; grid-template-columns: 280px minmax(0, 1fr) minmax(0, 1fr) 220px; gap: 24px; align-items: center">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #4D555D">{{ c.letter }}</span>
+        <strong style="font-size: 20px">{{ c.name }}</strong>
+        <span style="color: #4D555D">{{ c.idea }}</span>
+        <sc-if value="{{ c.chosen }}" hint-placeholder-val="{{ false }}">
+          <strong style="align-self: flex-start; margin-top: 4px; padding: 2px 10px; border-radius: 999px; background: #1C5A91; color: #FFFFFF; font-size: 13px">Escolhido em 23/11/2026</strong>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 20px; border-radius: 8px; background: #FFFFFF; border: 1px dashed #CDD2D7">
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ big }}" ink="#1A1D21" accent="#1C5A91" hint-size="56px,56px"></dc-import>
+        <span style="font-size: 26px; font-weight: 600; white-space: nowrap">IndustrialSim<span style="font-weight: 400; color: #4D555D"> Web</span></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 20px; border-radius: 8px; background: #121518">
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ big }}" ink="#E7EAED" accent="#8CC2F2" hint-size="56px,56px"></dc-import>
+        <span style="font-size: 26px; font-weight: 600; white-space: nowrap; color: #E7EAED">IndustrialSim<span style="font-weight: 400; color: #A7AFB7"> Web</span></span>
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 16px">
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ s64 }}" ink="#1A1D21" accent="#1C5A91" hint-size="64px,64px"></dc-import>
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ s32 }}" ink="#1A1D21" accent="#1C5A91" hint-size="32px,32px"></dc-import>
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ s16 }}" ink="#1A1D21" accent="#1C5A91" hint-size="16px,16px"></dc-import>
+        <dc-import name="Simbolo" concept="{{ c.id }}" size="{{ s32 }}" ink="#1A1D21" accent="#1A1D21" hint-size="32px,32px"></dc-import>
+      </div>
+    </section>
+  </sc-for>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+    <div style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 16px"><strong>A · Tubulão</strong><p style="margin: 6px 0 0; color: #4D555D">Mais direto: o equipamento do primeiro cenário. Ótimo em 16 px. Fica preso à caldeira quando houver outros cenários.</p></div>
+    <div style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 16px"><strong>B · Instrumento</strong><p style="margin: 6px 0 0; color: #4D555D">Fala com quem é da área (balão da ISA-5.1) e vale para qualquer cenário. A curva some em 16 px; fica o balão.</p></div>
+    <div style="background: #FFFFFF; border: 1px solid #CDD2D7; border-radius: 12px; padding: 16px"><strong>C · Malha fechada</strong><p style="margin: 6px 0 0; color: #4D555D">Conta a ideia do produto: o seu controle fecha a malha. Lembra o ícone de “atualizar”, o que pode confundir em tamanho pequeno.</p></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      big: 56,
+      s64: 64,
+      s32: 32,
+      s16: 16,
+      concepts: [
+        { id: 'a', chosen: false, letter: 'Conceito A', name: 'Tubulão', idea: 'O tubulão com o nível de água e a saída de vapor.' },
+        { id: 'b', chosen: true, letter: 'Conceito B', name: 'Instrumento', idea: 'O balão de instrumento da ISA-5.1 com uma resposta ao degrau. Favicon simplificado: o degrau sem a curva.' },
+        { id: 'c', chosen: false, letter: 'Conceito C', name: 'Malha fechada', idea: 'A seta de realimentação em volta do tubulão.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

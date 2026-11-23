@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Abrir planta</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 900px">
+  <dc-import name="T03-Cenarios" hint-size="100%,900px"></dc-import>
+  <div class="scrim" style="position: fixed; overflow-y: auto">
+    <section role="dialog" aria-modal="true" aria-labelledby="t04-t" class="dialog" style="width: 600px">
+      <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+        <div class="col" style="gap: 18px">
+          <div class="row"><h2 id="t04-t" class="h2">Abrir planta</h2><a class="btn btn-ghost btn-icon push" href="T03-Cenarios.dc.html" aria-label="Fechar"><dc-import name="Icon" icon="x" size="{{ s20 }}" hint-size="20px,20px"></dc-import></a></div>
+          <p class="muted">Caldeira com tubulão</p>
+          <div class="notice notice-info"><dc-import name="Icon" icon="info" size="{{ s20 }}" hint-size="20px,20px"></dc-import><span>Como visitante, a planta dura até <strong>60 minutos</strong> e não é salva. <a href="T13-Entrar.dc.html">Entre</a> para salvar e compartilhar.</span></div>
+          <details class="sunken" style="padding: 12px 14px">
+            <summary style="cursor: pointer; font-weight: 600; min-height: 28px">Comunicação com o mestre (pode mudar depois)</summary>
+            <div class="col" style="padding-top: 12px">
+              <div class="field"><label for="t04-f">Formato analógico</label><select id="t04-f" class="select"><option>0–27648 (Siemens) · padrão</option><option>0–10000</option><option>0–32767</option><option>float32 em unidades de engenharia</option></select></div>
+              <div class="field"><label for="t04-u">Unit ID</label><input id="t04-u" class="input" value="1" style="width: 120px"></div>
+            </div>
+          </details>
+          <div class="row" style="justify-content: flex-end; gap: 12px">
+            <a class="btn" href="T03-Cenarios.dc.html">Cancelar</a>
+            <a class="btn btn-primary" href="E01-SemMestre.dc.html">Abrir planta</a>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isOpening }}" hint-placeholder-val="{{ false }}">
+        <div class="row" style="gap: 16px; padding: 8px 0">
+          <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--color-border); border-top-color: var(--color-accent)"></span>
+          <div class="col" style="gap: 2px"><strong class="h4" id="t04-t">Abrindo a planta…</strong><span class="muted">Reservando uma porta Modbus no servidor.</span></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+        <div class="col" style="gap: 16px">
+          <div class="row" style="gap: 10px; color: var(--color-alarm-1-text)"><dc-import name="Icon" icon="alert" size="{{ s24 }}" hint-size="24px,24px"></dc-import><h2 id="t04-t" class="h3" style="color: var(--color-text)">Não foi possível abrir a planta</h2></div>
+          <p>{{ errorText }}</p>
+          <div class="row" style="justify-content: flex-end; gap: 12px"><a class="btn" href="T03-Cenarios.dc.html">Voltar aos cenários</a><button type="button" class="btn btn-primary">Tentar de novo</button></div>
+        </div>
+      </sc-if>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"estado":{"editor":"enum","options":["formulario","abrindo","servidor-lotado","sem-porta"],"default":"formulario"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const e = this.props.estado ?? 'formulario';
+    return {
+      s20: 20, s24: 24,
+      isForm: e === 'formulario',
+      isOpening: e === 'abrindo',
+      isError: e === 'servidor-lotado' || e === 'sem-porta',
+      errorText: e === 'sem-porta'
+        ? 'Não há porta Modbus livre no servidor. Tente de novo em alguns minutos.'
+        : 'O servidor está com o máximo de plantas abertas. Tente de novo em alguns minutos.'
+    };
+  }
+}
+</script>
+</body>
+</html>

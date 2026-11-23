@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T16 Turmas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.inp{min-height:44px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.card{display:flex;flex-direction:column;gap:8px;text-decoration:none}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  <main class="wrap" style="display: flex; flex-direction: column; gap: 32px; padding-top: 28px; padding-bottom: 40px">
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+      <h1 style="font-size: 28px">Turmas</h1>
+      <button type="button" class="btn btn-p" style="margin-left: auto">Criar turma</button>
+    </div>
+
+    <section aria-labelledby="t16-teach" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="t16-teach" style="font-size: 18px">Turmas que leciono</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+        <a class="box card" href="T17-Turma.dc.html">
+          <strong style="font-size: 16px">[Disciplina] · turma A · 2026/2</strong>
+          <span class="muted">24 alunos · 2 atividades</span>
+          <span>Agora: 11 plantas rodando · <strong>2 com alarme</strong></span>
+        </a>
+        <a class="box card" href="T17-Turma.dc.html">
+          <strong style="font-size: 16px">[Disciplina] · turma B · 2026/2</strong>
+          <span class="muted">18 alunos · 1 atividade</span>
+          <span class="muted">Nenhuma planta rodando</span>
+        </a>
+      </div>
+    </section>
+
+    <section aria-labelledby="t16-learn" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="t16-learn" style="font-size: 18px">Turmas em que estou</h2>
+      <div class="box" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label for="t16-code" style="font-weight: 600">Entrar com código (turma ou planta)</label>
+          <input id="t16-code" class="inp mono" placeholder="Código, ex.: K7P-2QX" style="width: 220px">
+        </div>
+        <a class="btn" href="T17-Turma.dc.html">Entrar</a>
+        <span class="muted">Ou abra o link que o professor mandou.</span>
+      </div>
+      <p class="muted">Você ainda não está em nenhuma turma como aluno.</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
