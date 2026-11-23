@@ -33,6 +33,8 @@ Etapa D1, parte E. Este é o roteiro que o moderador (o autor) segue em cada ses
 
 1. No formulário, crie a sessão com o código do participante (marque "Teste piloto" para o P0).
 2. Abra o protótipo numa janela nova e deixe a prancha **T01 · Página inicial** em "Play full screen". Recarregar a página volta o protótipo ao estado inicial.
+   - Se o canvas abrir vazio (zoom de 1%, coisa do visualizador do claude.ai), use o menu de zoom › "Fit artboards" (Shift+1).
+   - Outro caminho: o botão ▷ no alto à direita lista as pranchas da página.
 3. Feche outras abas e notificações. Deixe o som do computador desligado.
 4. Tenha à mão as duas vias do termo e a folha do SUS impressa.
 

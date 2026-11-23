@@ -18,6 +18,8 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto; falta o teste piloto, e o termo precisa dos nomes e contatos |
 | E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto e conferido pelo autor no claude.ai em 23/11 (o CSV só tem o cabeçalho até o teste) |
+| F | Conferência do mapa contra o protótipo | `tools/design/mapa-prototipo.mjs`; fontes em [`fontes/`](fontes/) | pronta; todas as conferências passam |
+| F | Validação da etapa e decisões novas (D46 a D50) | [`docs/validacao/etapa-d1.md`](../validacao/etapa-d1.md) | rascunho; decisões ainda não estão no descritivo |
 | F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
 
 ## Links

@@ -106,7 +106,10 @@ Decisões de interface que os wireframes propõem e que a revisão (fim da parte
 5. **Aviso ao aluno quando o professor injeta falha:** o padrão proposto é não avisar (o aluno diagnostica); o professor escolhe em T19.
 6. **Prioridade de alarme:** a banda de alarmes (E03) mostra prioridade por forma e número, mas a seção `hmi.alarms` do cenário (D39) ainda não tem prioridade. Se a ideia ficar, a D2 ou a Etapa 15 acrescenta o campo ao `scenario.json` (decisão nova).
 7. **Pausar e Reiniciar** ficam na barra da planta; as exportações (ensaio CSV, mapa de I/O CSV e PDF) vão para um menu "Exportar".
-8. **Comandos do mestre** aparecem no sinóptico, ao lado da posição de cada válvula ("cmd do mestre 82,3 %"), em vez de um painel próprio, para sobrar espaço à planta (revisão de 23/11).
+8. **Comandos do mestre:** saíram do painel próprio, para sobrar espaço à planta (revisão de 23/11).
+   - Primeiro iam ao sinóptico, ao lado da posição de cada válvula ("cmd do mestre 82,3 %").
+   - Na conferência do protótipo (23/11), saíram também do sinóptico, porque a etiqueta cobria a tubulação.
+   - Hoje o comando aparece no detalhe do instrumento (T07), no monitor (T09, holding register com autor) e na aba Gráficos (T25, "FV-101 cmd" e "pos").
 9. **Compartilhamento sem papéis** (revisão de 23/11, pedido do autor): quem recebe o convite tem os mesmos direitos de quem compartilhou; só quem criou a planta a exclui e remove pessoas. O acesso só de leitura fica para o professor que observa a planta de um aluno pela turma. *(As duas regras foram confirmadas pelo autor em 23/11/2026.)* **Contraria a D15 e o RF09** (papéis dono, operador e observador) e a tabela "Compartilhamento" do descritivo; a decisão nova é registrada no descritivo ao fim da D1.
 10. **Histórico dos gráficos (T25)** *(decidido pelo autor em 23/11/2026)*:
     - **Só a sessão atual.** Não há histórico de sessões anteriores. Quem entra na planta depois (outro aluno, o professor, a mesma pessoa reabrindo a página) vê o histórico desde o início da sessão, mandado pelo servidor ao conectar.
