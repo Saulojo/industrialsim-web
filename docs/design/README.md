@@ -13,7 +13,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | C | Logotipo | [`logo/`](logo/) | conceito B escolhido em 23/11; falta converter o nome em curvas (autor, Inkscape ou Figma) |
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
-| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | em andamento |
+| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aguardando revisão |
 | D | Revisão ISA-101 das telas de IHM | `isa-101.md` | a fazer |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | `teste/` | a fazer |
 | E | Formulário do moderador | Artifact (link abaixo) e `teste/resultados.csv` | a fazer |
@@ -25,8 +25,20 @@ Os Artifacts são páginas no claude.ai; quem os publicou decide com quem compar
 
 - Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Identidade visual (logotipo, paleta, tipografia e ícones, cor na IHM): https://claude.ai/artifact/FNXXhg5dJGu3YXVAS4ZRsk
-- Protótipo (em construção; fluxos de T1, T2 e T3 prontos): https://claude.ai/artifact/BATxECGZStkjMLSwVSitZk
+- Protótipo (35 pranchas em 6 páginas: T1 e T2, T3, T4 e T5, Estados e outras telas, Fases 3 e 4, Componentes; fluxos das cinco tarefas principais navegáveis): https://claude.ai/artifact/BATxECGZStkjMLSwVSitZk
 - Formulário do moderador: *(preenchido na parte E)*
+
+### Ponto de partida de cada tarefa no protótipo
+
+Abrir a prancha em "Play full screen":
+
+| Tarefa | Começa em | Termina quando |
+| --- | --- | --- |
+| T1 Abrir uma planta | `Main` (T01) | a planta abre sem mestre (`E01`) |
+| T2 Parear um mestre | `E01` ou `T05b` | o mestre aparece conectado (`T06`) |
+| T3 Mudar o formato analógico | `T06` | aparece "Formato analógico aplicado" (`T08`) |
+| T4 Compartilhar a planta | `T06-Conta` ou `T14` | o convite é enviado ou o código é gerado (`T15`) |
+| T5 Injetar falha (professor) | `T16` | o cartão da planta mostra "FALHA · LT-101" (`T18`) |
 
 ### Limitações conhecidas do protótipo
 
