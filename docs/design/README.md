@@ -9,9 +9,10 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | A | Perfis e tarefas | [`perfis-e-tarefas.md`](perfis-e-tarefas.md) | pronto |
 | A | Mapa de telas e fluxos | [`mapa-de-telas.md`](mapa-de-telas.md) | pronto |
 | B | Wireframes de baixa fidelidade | Artifact (link abaixo) | pronto, aguardando revisão |
-| C | Guia de identidade visual | `identidade-visual.md` | a fazer |
-| C | Tokens (fonte para a D2) | `tokens.json` | a fazer |
-| C | Verificação de contraste WCAG 2.2 AA | `contraste.md` e `tools/design/contraste.mjs` | a fazer |
+| C | Guia de identidade visual | [`identidade-visual.md`](identidade-visual.md) e Artifact (link abaixo) | pronto, aguardando a escolha do logotipo |
+| C | Conceitos de logotipo | [`logo/`](logo/) | 3 conceitos, aguardando escolha |
+| C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
+| C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
 | D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | a fazer |
 | D | Revisão ISA-101 das telas de IHM | `isa-101.md` | a fazer |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | `teste/` | a fazer |
@@ -23,6 +24,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 Os Artifacts são páginas privadas no claude.ai; quem os publicou decide com quem compartilhar.
 
 - Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
+- Identidade visual (logotipo, paleta, tipografia e ícones, cor na IHM): https://claude.ai/artifact/FNXXhg5dJGu3YXVAS4ZRsk
 - Protótipo: *(preenchido na parte D)*
 - Formulário do moderador: *(preenchido na parte E)*
 
