@@ -13,7 +13,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | C | Logotipo | [`logo/`](logo/) | conceito B escolhido em 23/11; falta converter o nome em curvas (autor, Inkscape ou Figma) |
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
-| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | a fazer |
+| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | em andamento |
 | D | Revisão ISA-101 das telas de IHM | `isa-101.md` | a fazer |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | `teste/` | a fazer |
 | E | Formulário do moderador | Artifact (link abaixo) e `teste/resultados.csv` | a fazer |
@@ -25,7 +25,7 @@ Os Artifacts são páginas privadas no claude.ai; quem os publicou decide com qu
 
 - Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Identidade visual (logotipo, paleta, tipografia e ícones, cor na IHM): https://claude.ai/artifact/FNXXhg5dJGu3YXVAS4ZRsk
-- Protótipo: *(preenchido na parte D)*
+- Protótipo (em construção; fluxos de T1, T2 e T3 prontos): https://claude.ai/artifact/BATxECGZStkjMLSwVSitZk
 - Formulário do moderador: *(preenchido na parte E)*
 
 ## Convenções
