@@ -8,7 +8,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | --- | --- | --- | --- |
 | A | Perfis e tarefas | [`perfis-e-tarefas.md`](perfis-e-tarefas.md) | pronto |
 | A | Mapa de telas e fluxos | [`mapa-de-telas.md`](mapa-de-telas.md) | pronto |
-| B | Wireframes de baixa fidelidade | Artifact (link abaixo) | em andamento |
+| B | Wireframes de baixa fidelidade | Artifact (link abaixo) | pronto, aguardando revisão |
 | C | Guia de identidade visual | `identidade-visual.md` | a fazer |
 | C | Tokens (fonte para a D2) | `tokens.json` | a fazer |
 | C | Verificação de contraste WCAG 2.2 AA | `contraste.md` e `tools/design/contraste.mjs` | a fazer |
@@ -22,7 +22,7 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 
 Os Artifacts são páginas privadas no claude.ai; quem os publicou decide com quem compartilhar.
 
-- Wireframes: *(preenchido na parte B)*
+- Wireframes (29 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Protótipo: *(preenchido na parte D)*
 - Formulário do moderador: *(preenchido na parte E)*
 
