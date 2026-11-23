@@ -14,7 +14,8 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
 | D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aguardando revisão |
-| D | Revisão ISA-101 das telas de IHM | `isa-101.md` | a fazer |
+| D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo, 4 ressalvas para o orientador |
+| D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | `teste/` | a fazer |
 | E | Formulário do moderador | Artifact (link abaixo) e `teste/resultados.csv` | a fazer |
 | F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
