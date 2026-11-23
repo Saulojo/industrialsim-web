@@ -21,12 +21,20 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 
 ## Links
 
-Os Artifacts são páginas privadas no claude.ai; quem os publicou decide com quem compartilhar.
+Os Artifacts são páginas no claude.ai; quem os publicou decide com quem compartilhar. O protótipo está com o link público (23/11): foi conferido sem login, e a navegação funciona. Só aparece um aviso do claude.ai ("Faça login para ver os dados deste artefato"), que pode ser ignorado.
 
 - Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Identidade visual (logotipo, paleta, tipografia e ícones, cor na IHM): https://claude.ai/artifact/FNXXhg5dJGu3YXVAS4ZRsk
 - Protótipo (em construção; fluxos de T1, T2 e T3 prontos): https://claude.ai/artifact/BATxECGZStkjMLSwVSitZk
 - Formulário do moderador: *(preenchido na parte E)*
+
+### Limitações conhecidas do protótipo
+
+Avisar os participantes antes do teste:
+
+- Cada tela é uma prancha separada. O tempo simulado volta ao valor inicial ao trocar de aba, e as abas abertas são as previstas para cada tela, não as que a pessoa abriu.
+- O sinóptico foi desenhado para telas de 1280 px ou mais de largura. Em janelas mais estreitas, a ponta direita (rótulo "Vapor") fica cortada.
+- Valores e eventos do log são fictícios e fixos. O log mostra a troca 0–27648 → 0–10000, qualquer que seja o formato escolhido.
 
 ## Convenções
 
