@@ -20,13 +20,24 @@ Hoje a navegação é mínima, pelo caminho da URL (`web/src/ui/navigation.ts`),
 
 ## Modelo de navegação proposto
 
-Dois níveis, para o usuário saber sempre onde está:
+*(Revisto em 23/11/2026, a pedido do autor: abas como no navegador e planta sem barra global.)*
 
-1. **Barra global** (em todas as telas, menos o mapa de I/O impresso e a VR): logotipo (volta ao início), Cenários, Minhas plantas, Turmas, Ajuda (guias de mestres), idioma, tema claro ou escuro, conta (ou "Entrar" para o visitante). O visitante vê "Cenários", "Ajuda" e "Entrar".
-2. **Barra da planta** (dentro de uma planta): nome e cenário, **estado do mestre** em destaque (nenhum, aguardando pareamento, conectado, com erro), situação da planta (rodando, pausada), tempo simulado, controles da planta (Pausar ou Retomar, Reiniciar), menu Exportar (ensaio CSV, mapa de I/O CSV e PDF), Compartilhar (com conta) e, para o visitante, o tempo restante. O estado do WebSocket do navegador só aparece quando há problema (reconectando, incompatível).
-3. **Seções da planta** (abas): Processo · Conexão · Configurações · Monitor · Log · Instrumentos (HART, Fase 3) · Programa (Ladder, Fase 4). A cena 3D (Fase 3) é um modo de visualização do Processo, não uma aba à parte.
+Fora e dentro de uma planta a navegação muda, para a planta ocupar a tela:
 
-As rotas seguem o padrão atual (`/plants/{id}`, seção no fragmento), para que a D2 mude o mínimo de código.
+1. **Fora da planta: barra global** (início, cenários, minhas plantas, turmas, login): logotipo (volta ao início), Cenários, Minhas plantas, Turmas, Ajuda (guias de mestres), idioma, tema claro ou escuro, conta (ou "Entrar" para o visitante). O visitante vê "Cenários", "Ajuda" e "Entrar".
+2. **Dentro da planta: sem barra global.** No lugar dela, uma faixa de abas como a do navegador:
+   - **⌂** sai da planta para Minhas plantas (visitante: início).
+   - **Nome da planta ▾** abre o menu da planta (T24): Minhas plantas, abrir outra planta, turmas, renomear, ajuda, idioma, tema e conta. Avisa que sair não desliga a planta.
+   - **Abas:** Processo fica fixa (não fecha); as outras ferramentas abrem em abas que se fecham (×) e se reordenam (arrastar).
+   - **+** abre o menu de nova aba (T23), com busca e um clique por ferramenta: Conexão, Configurações, Monitor, Log, Mapa de I/O (abre a página de impressão), detalhe de cada instrumento, Configurador HART (Fase 3), Programa Ladder (Fase 4). Ferramenta já aberta: o clique vai para a aba dela.
+   - As abas abertas ficam lembradas por planta, só neste navegador.
+3. **Barra de estado da planta** (logo abaixo das abas, sempre visível em qualquer aba): **estado do mestre** em destaque (nenhum, aguardando pareamento, conectado, com erro), situação (rodando, pausada), tempo simulado, alarmes ativos, Pausar ou Retomar, Reiniciar, menu Exportar (ensaio CSV, mapa de I/O CSV e PDF), Compartilhar (com conta) e, para o visitante, o tempo restante. O estado do WebSocket do navegador só aparece quando há problema (reconectando, incompatível).
+
+A cena 3D (Fase 3) é um modo de visualização da aba Processo, não uma aba à parte.
+
+**Por que um clique e não duplo clique no menu de nova aba:** o duplo clique é difícil de descobrir, não existe em tela de toque e exige uma alternativa de teclado de qualquer forma (WCAG 2.1.1). Abrir com um clique segue a página de nova aba dos navegadores. O teste (parte E) confirma se as pessoas encontram as ferramentas pelo +.
+
+As rotas seguem o padrão atual (`/plants/{id}`, aba ativa no fragmento, ex.: `#monitor`), para que o Voltar do navegador funcione e a D2 mude o mínimo de código.
 
 ## Telas
 
@@ -49,14 +60,16 @@ Fidelidade no protótipo: **A** alta (identidade visual, dados realistas, intera
 | T12 | Configurador HART (instrumentos, parâmetros, quadros, ponte PACTware) | `/plants/{id}#instruments` | 17, 18 | PRF, ALU | 4 | M | não | wf: `T12-HART` |
 | T13 | Entrar e criar conta (e-mail, Google, Microsoft, GitHub; continuar como visitante) | `/login` | 10 | ALU, PRO, PRF | — | A | não | wf: `T13-Entrar` |
 | T14 | Minhas plantas | `/plants` | 10 | ALU, PRO, PRF | — | A | não | wf: `T14-MinhasPlantas` |
-| T15 | Compartilhar planta (link com papel e validade, e-mail, pessoas e papéis) | diálogo sobre T06 ou T14 | 11 | ALU, PRF | — | A | não | wf: `T15-Compartilhar` |
-| T16 | Turmas (minhas turmas, criar, entrar por código) | `/classes` | 12 | ALU, PRO | — | A | não | wf: `T16-Turmas` |
+| T15 | Compartilhar planta (e-mail ou código de 1 uso ou vários, com validade; pessoas com acesso; sem papéis) | diálogo sobre T06 ou T14 | 11 | ALU, PRF | — | A | não | wf: `T15-Compartilhar` |
+| T16 | Turmas (minhas turmas, criar, entrar com código de turma ou de planta) | `/classes` | 12 | ALU, PRO | — | A | não | wf: `T16-Turmas` |
 | T17 | Turma e atividades (professor cria; aluno abre a planta da atividade) | `/classes/{id}` | 12 | ALU, PRO | — | A | não | wf: `T17-Turma` |
 | T18 | Painel do professor (plantas da turma ao vivo) | `/classes/{id}/live` | 12 | PRO | 1 | A | não | wf: `T18-Painel` |
 | T19 | Injetar falha ou distúrbio (diálogo, em uma ou em todas as plantas) | diálogo sobre T18 ou T06 | 12 (falhas: 16) | PRO, ALU | — | A | não | wf: `T19-InjetarFalha` |
 | T20 | Painéis sobre a cena 3D (HUD: faceplate do instrumento apontado, alarmes, menu) | `/plants/{id}#process` (modo 3D) | 14 | todos | 2–3 | M | não | wf: `T20-Cena3D` |
 | T21 | Painel em VR (menu de pulso e faceplate flutuante) | sessão WebXR | 19 | todos | 3 | M | não | wf: `T21-VR` |
 | T22 | Editor Ladder (esboço) | `/plants/{id}#program` | 22 | PRF, ALU | — | M | não | wf: `T22-Ladder` |
+| T23 | Nova aba (menu do +: abrir ferramenta ou instrumento) | sobre a planta | D2 | todos | — | A | não | wf: `T23-NovaAba` |
+| T24 | Menu da planta (sair, outras plantas, turmas, idioma, tema, conta) | sobre a planta | D2 | todos | — | A | não | wf: `T24-MenuPlanta` |
 
 Fora do mapa por ora (sem tela própria na D1): conta e privacidade (exportar e excluir conta, LGPD, Etapas 10 e 13), termos de uso, editor FBD (Etapa 23, segue o modelo do T22), reprodução de ensaio gravado (entra como ação em T14 ou T06 quando a etapa existir).
 
@@ -74,7 +87,7 @@ Estados que mudam uma tela sem criar outra. Entram no protótipo como variantes 
 | E06 | Reconectando / versão incompatível / planta encerrada ou expirada | todas da planta | Faixa de aviso (reconectando) ou tela de erro com a ação certa (recarregar, abrir outra planta). |
 | E07 | Servidor lotado / sem porta Modbus livre | T04 | Erro no diálogo, com o que fazer (tentar de novo em minutos). |
 | E08 | Visitante perto do limite de 60 min | barra da planta | Tempo restante sempre visível; aviso aos 10 min, com convite para criar conta. |
-| E09 | Observador (sem permissão de comando) | T06, T08, T09 | Controles desabilitados com o motivo ("Você é observador nesta planta"). |
+| E09 | Professor observando (sem permissão de comando) | T06, T08, T09 | Controles desabilitados com o motivo ("Você está observando esta planta"). Só acontece pelo painel da turma (ver pergunta 9). |
 | E10 | Falha de instrumento injetada | T06, T07, T18 | Valor na corrente de falha NAMUR (3,6 ou 21 mA), marcado como falha; o professor sempre vê, o aluno só se o professor escolher avisar (T19). |
 
 Pranchas dos estados nos wireframes: E01 e E08 em `E01-SemMestre`; E02 em `T05b-Pareamento`; E03, E04 e E10 em `EA-Alarme`; E05 e E09 em `EB-Pausada`; E06 em `EC-Avisos`; E07 em `T04-CriarPlanta`.
@@ -85,12 +98,14 @@ Decisões de interface que os wireframes propõem e que a revisão (fim da parte
 
 1. **Sem mestre:** a IHM mostra uma faixa com IP, porta e Unit ID (E01). Basta, ou a planta deveria abrir direto na aba Conexão?
 2. **Pedido de pareamento:** diálogo modal; se a pessoa fechar sem responder, a barra da planta mantém o aviso até o prazo de 60 s (D38).
-3. **Comunicação dividida em Conexão e Configurações:** a tarefa T3 mede se as pessoas acham o formato analógico em Configurações.
+3. **Comunicação dividida em Conexão e Configurações**, abertas pelo + (T23): a tarefa T3 mede se as pessoas acham o formato analógico sem ver as seções listadas na tela.
 4. **Forçar** sai da linha do monitor (hoje um controle em cada linha) e vai para o menu da linha e para o faceplate (T07).
 5. **Aviso ao aluno quando o professor injeta falha:** o padrão proposto é não avisar (o aluno diagnostica); o professor escolhe em T19.
 6. **Prioridade de alarme:** a banda de alarmes (E03) mostra prioridade por forma e número, mas a seção `hmi.alarms` do cenário (D39) ainda não tem prioridade. Se a ideia ficar, a D2 ou a Etapa 15 acrescenta o campo ao `scenario.json` (decisão nova).
 7. **Pausar e Reiniciar** ficam na barra da planta; as exportações (ensaio CSV, mapa de I/O CSV e PDF) vão para um menu "Exportar".
-8. **Comandos do mestre** ganham um painel próprio na IHM (T06), só leitura, para o aluno ver o que o CLP está escrevendo sem abrir o monitor.
+8. **Comandos do mestre** aparecem no sinóptico, ao lado da posição de cada válvula ("cmd do mestre 82,3 %"), em vez de um painel próprio, para sobrar espaço à planta (revisão de 23/11).
+9. **Compartilhamento sem papéis** (revisão de 23/11, pedido do autor): quem recebe o convite tem os mesmos direitos de quem compartilhou; só quem criou a planta a exclui e remove pessoas. O acesso só de leitura fica para o professor que observa a planta de um aluno pela turma. **Contraria a D15 e o RF09** (papéis dono, operador e observador) e a tabela "Compartilhamento" do descritivo; a decisão nova é registrada ao fim da D1, com a confirmação do autor.
+10. **Código de acesso à planta**: gerado em T15, de 1 uso ou de vários usos, com validade e revogável; digitado em Minhas plantas ou Turmas, no mesmo campo que aceita código de turma, ou aberto como link.
 
 ## Fluxos
 
@@ -101,10 +116,11 @@ flowchart LR
   T01[T01 Início] -->|Experimentar sem conta| T03[T03 Cenários]
   T03 -->|Abrir planta| T04[T04 Criar planta]
   T04 -->|abrindo…| T06[T06 IHM · Processo<br/>E01 sem mestre]
-  T06 -->|Como conectar meu mestre| T05[T05 Conexão<br/>IP, porta, Unit ID, guias]
+  T06 -->|faixa: abrir a aba Conexão| T05[T05 Conexão<br/>IP, porta, Unit ID, guias]
   T05 -.->|o mestre conecta| T05b[T05b Pareamento]
   T05b -->|Aceitar| T06b[T06 IHM · mestre conectado]
-  T06b -->|Configurações| T08[T08 Formato analógico]
+  T06b -->|+ nova aba| T23[T23 Nova aba]
+  T23 -->|Configurações| T08[T08 Formato analógico]
   T08 -->|Aplicar| T10[T10 Log mostra a mudança]
   T04 -.->|E07 servidor lotado| T03
 ```

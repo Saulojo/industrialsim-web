@@ -63,8 +63,8 @@ As tarefas **T1 a T5** são as tarefas principais do critério de validação da
 | --- | --- | --- | --- | --- |
 | **T1** | Abrir uma planta da caldeira | Página inicial | A IHM da planta aparece rodando | T01, T03, T04, T06 |
 | **T2** | Parear um mestre Modbus | IHM da planta, sem mestre | O mestre aparece como conectado, depois de aceitar o pedido do IP certo | T05, T05b, T06 |
-| **T3** | Mudar o formato analógico para 0–10000 | IHM da planta | O formato novo está aplicado (e aparece no log) | T08, T10 |
-| **T4** | Compartilhar a planta com um colega, como operador | IHM da planta ou Minhas plantas | O convite (link ou e-mail) foi criado com o papel certo | T15, T14 |
+| **T3** | Mudar o formato analógico para 0–10000 | IHM da planta | O formato novo está aplicado (e aparece no log) | T23, T08, T10 |
+| **T4** | Compartilhar a planta com um colega | IHM da planta ou Minhas plantas | O convite por e-mail foi enviado ou o código foi gerado e copiado | T15, T14 |
 | **T5** | (Professor) Injetar falha "sensor aberto" no LT-101 de uma planta da turma | Painel da turma | A falha está ativa naquela planta (e só nela) | T18, T19 |
 | S1 | Achar o endereço Modbus e a escala do PT-101, na notação clássica | IHM | Diz o endereço (30002) e a faixa (0–16 bar) | T11, T09 |
 | S2 | Provocar um distúrbio em FV-103 e ver a resposta | IHM | Mudou FV-103 e aponta a vazão de vapor e a pressão na tendência | T06 |
