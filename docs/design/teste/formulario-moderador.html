@@ -1,0 +1,592 @@
+<title>Moderação do teste D1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: coluna única de trabalho (sessão aberta) com faixa de sessões no topo e resumo no fim. Paleta da identidade do IndustrialSim (docs/design/tokens.json). */
+:root {
+  --bg: #E9EBED; --surface: #FFFFFF; --sunken: #F3F4F6; --border: #CDD2D7; --border-strong: #6E7780;
+  --text: #1A1D21; --muted: #4D555D; --accent: #1C5A91; --accent-hover: #154773; --on-accent: #FFFFFF;
+  --warn: #8A4B00; --warn-surface: #FDF0DD; --ok: #1C5A91;
+  --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121518; --surface: #1C2024; --sunken: #16191C; --border: #353B42; --border-strong: #7C858E;
+  --text: #E7EAED; --muted: #A7AFB7; --accent: #8CC2F2; --accent-hover: #A9D3F7; --on-accent: #0B1A28;
+  --warn: #F5B66B; --warn-surface: #33260F; --ok: #8CC2F2; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121518; --surface: #1C2024; --sunken: #16191C; --border: #353B42; --border-strong: #7C858E;
+  --text: #E7EAED; --muted: #A7AFB7; --accent: #8CC2F2; --accent-hover: #A9D3F7; --on-accent: #0B1A28;
+  --warn: #F5B66B; --warn-surface: #33260F; --ok: #8CC2F2; color-scheme: dark }
+
+body { background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 20px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 24px; font-weight: 600; text-wrap: balance; }
+h2 { font-size: 18px; font-weight: 600; }
+h3 { font-size: 16px; font-weight: 600; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.lbl { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.grow { flex: 1 1 auto; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 6px; background: var(--surface); color: var(--text); font: inherit; font-weight: 500; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-sm { min-height: 32px; padding: 0 10px; font-size: 13px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+input[type=text], input[type=date], select, textarea { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 6px; min-height: 40px; padding: 0 10px; box-sizing: border-box; }
+textarea { padding: 8px 10px; min-height: 64px; width: 100%; resize: vertical; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field > label, .field > .field-label { font-weight: 500; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }
+.chip[aria-pressed="true"] { border: 2px solid var(--accent); padding: 0 11px; font-weight: 600; color: var(--accent); }
+.chip .tag { font-size: 11px; font-weight: 700; letter-spacing: .05em; color: var(--muted); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
+.seg button { min-width: 40px; min-height: 40px; border: none; border-right: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; font-family: var(--mono); cursor: pointer; }
+.seg button:last-child { border-right: none; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.task { border-left: 4px solid var(--border); }
+.task.is-done { border-left-color: var(--accent); }
+.task-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+.task-id { font-family: var(--mono); font-weight: 600; }
+.clock { font-family: var(--mono); font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 5ch; }
+.over { display: inline-flex; align-items: center; padding: 0 8px; border-radius: 4px; background: var(--warn-surface); color: var(--warn); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.notice { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--sunken); }
+.notice.warn { border-color: var(--warn); background: var(--warn-surface); }
+.sus-row { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.sus-row:last-child { border-bottom: none; }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 12px; font-weight: 600; color: var(--muted); }
+td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.status { font-weight: 600; }
+.status.yes { color: var(--ok); }
+.toast { position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); background: var(--text); color: var(--surface); padding: 10px 16px; border-radius: 8px; font-weight: 500; z-index: 20; }
+@media (prefers-reduced-motion: no-preference) { .toast { transition: opacity .2s; } }
+</style>
+
+<div class="wrap">
+  <header class="col" style="gap: 4px">
+    <span class="lbl">IndustrialSim Web · Etapa D1 · parte E</span>
+    <h1>Moderação do teste de usabilidade</h1>
+    <p class="muted">Uma sessão por participante. Cronometre cada tarefa, marque o resultado e a nota SEQ, e no fim registre as 10 respostas do SUS. Use só o código do participante (P1, P2…), nunca o nome.</p>
+  </header>
+
+  <p id="store-state" class="notice small" role="status">Conectando ao armazenamento…</p>
+
+  <section class="panel" aria-labelledby="sess-t">
+    <div class="row"><h2 id="sess-t" class="grow">Sessões</h2></div>
+    <div id="session-chips" class="chips" role="group" aria-label="Escolher a sessão"></div>
+    <form id="new-session" class="row" autocomplete="off">
+      <div class="field"><label for="new-code">Código do participante</label><input id="new-code" type="text" placeholder="P1" maxlength="12" style="width: 120px"></div>
+      <label class="row small" style="gap: 6px; align-self: flex-end; min-height: 40px"><input id="new-pilot" type="checkbox"> Teste piloto (não entra no resultado)</label>
+      <button class="btn btn-primary" type="submit" style="align-self: flex-end">Nova sessão</button>
+      <span id="new-error" class="small" style="color: var(--warn); align-self: flex-end" role="alert"></span>
+    </form>
+  </section>
+
+  <main id="session" class="col" style="gap: 16px"></main>
+
+  <section class="panel" aria-labelledby="sum-t">
+    <div class="row"><h2 id="sum-t" class="grow">Resultado até agora</h2><button id="export" class="btn" type="button">Exportar resultados.csv</button></div>
+    <p class="small muted">Critério da D1: em cada tarefa principal, pelo menos 4 de 5 participantes concluem sem ajuda. O teste piloto não entra na conta.</p>
+    <div class="table-wrap"><table id="summary"></table></div>
+    <p id="sus-summary" class="small"></p>
+    <div id="csv-fallback" class="col" hidden>
+      <p class="small">Este navegador não deixou salvar o arquivo. Copie o conteúdo abaixo para <span class="mono">docs/design/teste/resultados.csv</span>:</p>
+      <textarea id="csv-text" rows="6" class="mono small" readonly></textarea>
+      <button id="csv-copy" class="btn btn-sm" type="button" style="align-self: flex-start">Copiar</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Tarefas do roteiro (docs/design/teste/roteiro.md). Limite em segundos.
+  const TASKS = [
+    { id: 'T1', name: 'Abrir uma planta', limit: 180, main: true, start: 'Página inicial (prancha Main)', end: 'A planta abre, sem mestre (E01)' },
+    { id: 'T2', name: 'Parear o mestre 200.18.4.42', limit: 240, main: true, start: 'Planta sem mestre (E01)', end: 'Mestre conectado · 200.18.4.42 (T06)' },
+    { id: 'T3', name: 'Mudar o formato analógico para 0–10000', limit: 180, main: true, start: 'Processo (T06)', end: '“Formato analógico aplicado” (T08)' },
+    { id: 'T4', name: 'Compartilhar a planta com um colega', limit: 180, main: true, start: 'Processo com conta (T06-Conta)', end: 'Convite enviado ou código gerado (T15)' },
+    { id: 'T5', name: 'Injetar sensor aberto no LT-101 da Dupla 03', limit: 240, main: true, start: 'Turmas (T16)', end: 'Cartão da Dupla 03 com FALHA · LT-101 (T18)' },
+    { id: 'S1', name: 'Achar endereço e faixa do PT-101 (notação clássica)', limit: 180, main: false, start: 'Processo (T06)', end: 'Diz 30002 e 0–16 bar' },
+    { id: 'S2', name: 'Provocar distúrbio em FV-103 e ver a resposta', limit: 180, main: false, start: 'Processo (T06)', end: 'Aponta FT-102 e PT-101 na tendência' },
+    { id: 'S11', name: 'Identificar o alarme ativo e a causa', limit: 120, main: false, start: 'Alarme (prancha EA)', end: 'Diz LSHH-101 e que o LT-101 está forçado' }
+  ];
+  const RESULTS = [
+    ['sem_ajuda', 'Concluiu sem ajuda'],
+    ['com_ajuda', 'Concluiu com ajuda'],
+    ['nao_concluiu', 'Não concluiu'],
+    ['nao_aplicada', 'Não aplicada']
+  ];
+  const PROFILES = [['', '—'], ['aluno', 'Aluno'], ['professor', 'Professor'], ['profissional', 'Profissional'], ['outro', 'Outro']];
+  const EXPERIENCE = [['', '—'], ['nenhuma', 'Nenhuma'], ['basica', 'Básica'], ['intermediaria', 'Intermediária'], ['avancada', 'Avançada']];
+  const LS_KEY = 'moderacao-d1-sessoes';
+  const LS_CUR = 'moderacao-d1-atual';
+
+  const $ = (id) => document.getElementById(id);
+  let db = null, downloads = null;
+  let sessions = {};          // id -> dados
+  let current = null;         // id da sessão aberta
+  let builtFor = null;        // id da sessão desenhada em #session
+  let saveTimers = {};
+
+  // ---------- armazenamento ----------
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento local */ } }
+  function backup() { lsSet(LS_KEY, JSON.stringify(sessions)); }
+
+  function emptyTask() { return { tempoMs: 0, desde: null, resultado: '', erros: 0, seq: null, notas: '' }; }
+  function newSession(code, pilot) {
+    const tarefas = {};
+    TASKS.forEach((t) => { tarefas[t.id] = emptyTask(); });
+    return {
+      participante: code, piloto: !!pilot, perfil: '', experiencia: '', mestre: '',
+      data: new Date().toISOString().slice(0, 10), consentimento: false,
+      tarefas, sus: Array(10).fill(null), observacoes: '', criadoEm: Date.now()
+    };
+  }
+  function mergeDeep(target, patch) {
+    Object.keys(patch).forEach((k) => {
+      const v = patch[k];
+      if (v && typeof v === 'object' && !Array.isArray(v) && target[k] && typeof target[k] === 'object' && !Array.isArray(target[k])) mergeDeep(target[k], v);
+      else target[k] = v;
+    });
+  }
+  function save(id, patch, debounceKey) {
+    const s = sessions[id];
+    if (!s) return;
+    mergeDeep(s, patch);
+    backup();
+    renderSummary();
+    if (!db) return;
+    const run = () => db.doc('sessoes/' + id).update(patch).catch(storeError);
+    if (debounceKey) {
+      clearTimeout(saveTimers[debounceKey]);
+      saveTimers[debounceKey] = setTimeout(run, 600);
+    } else run();
+  }
+  function storeError(e) {
+    const code = e && e.code;
+    const msg = code === 'quota_exceeded' ? 'O armazenamento está cheio. Exporte o CSV e apague sessões de teste.' :
+      code === 'revoked' ? 'O acesso ao armazenamento foi retirado nesta página. Exporte o CSV para não perder dados.' :
+      'Não consegui salvar a última mudança no armazenamento. Ela está guardada neste navegador; exporte o CSV por garantia.';
+    setStoreState(msg, true);
+  }
+  function setStoreState(text, warn) {
+    const el = $('store-state');
+    el.textContent = text;
+    el.className = 'notice small' + (warn ? ' warn' : '');
+  }
+
+  // ---------- utilidades ----------
+  function el(tag, attrs, children) {
+    const n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach((k) => {
+      const v = attrs[k];
+      if (v === null || v === undefined || v === false) return;
+      if (k === 'text') n.textContent = v;
+      else if (k === 'class') n.className = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : String(v));
+    });
+    (children || []).forEach((c) => { if (c !== null && c !== undefined) n.append(c); });
+    return n;
+  }
+  function elapsed(t) { return t.tempoMs + (t.desde ? Date.now() - t.desde : 0); }
+  function fmtClock(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function fmtNum(v, d) { return v.toFixed(d).replace('.', ','); }
+  function susScore(arr) {
+    // Brooke (1996): ímpares contam (nota − 1), pares (5 − nota); soma × 2,5.
+    if (!arr || arr.some((v) => v === null || v === undefined)) return null;
+    return arr.reduce((sum, v, i) => sum + (i % 2 === 0 ? v - 1 : 5 - v), 0) * 2.5;
+  }
+  let toastTimer = null;
+  function toast(text) {
+    let t = document.querySelector('.toast');
+    if (!t) { t = el('div', { class: 'toast', role: 'status' }); document.body.append(t); }
+    t.textContent = text;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 2500);
+  }
+
+  // ---------- sessões ----------
+  function renderChips() {
+    const box = $('session-chips');
+    box.replaceChildren();
+    const ids = Object.keys(sessions).sort((a, b) => (sessions[a].criadoEm || 0) - (sessions[b].criadoEm || 0));
+    if (!ids.length) { box.append(el('span', { class: 'small muted', text: 'Nenhuma sessão ainda. Crie a do teste piloto primeiro.' })); return; }
+    ids.forEach((id) => {
+      const s = sessions[id];
+      const done = TASKS.filter((t) => t.main && s.tarefas && s.tarefas[t.id] && s.tarefas[t.id].resultado).length;
+      box.append(el('button', {
+        type: 'button', class: 'chip', 'aria-pressed': id === current ? 'true' : 'false',
+        onclick: () => openSession(id)
+      }, [
+        el('span', { text: s.participante }),
+        s.piloto ? el('span', { class: 'tag', text: 'PILOTO' }) : null,
+        el('span', { class: 'small muted', text: done + '/5' })
+      ]));
+    });
+  }
+  function openSession(id) {
+    current = id;
+    lsSet(LS_CUR, id);
+    builtFor = null;
+    renderChips();
+    renderSession();
+  }
+
+  $('new-session').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const raw = $('new-code').value.trim().toUpperCase();
+    const err = $('new-error');
+    err.textContent = '';
+    if (!/^[A-Z0-9_-]{1,12}$/.test(raw)) { err.textContent = 'Use letras, números, - ou _ (ex.: P1). Nada de nomes.'; return; }
+    if (sessions[raw]) { err.textContent = 'Já existe uma sessão ' + raw + '.'; return; }
+    const s = newSession(raw, $('new-pilot').checked);
+    sessions[raw] = s;
+    backup();
+    if (db) db.doc('sessoes/' + raw).set(s).catch(storeError);
+    $('new-code').value = '';
+    $('new-pilot').checked = false;
+    openSession(raw);
+    renderSummary();
+  });
+
+  // ---------- sessão aberta ----------
+  function selectField(id, label, options, value, onchange) {
+    const sel = el('select', { id }, options.map(([v, t]) => el('option', { value: v, text: t })));
+    sel.value = value || '';
+    sel.addEventListener('change', () => onchange(sel.value));
+    return el('div', { class: 'field' }, [el('label', { for: id, text: label }), sel]);
+  }
+
+  function renderSession() {
+    const root = $('session');
+    if (!current || !sessions[current]) { root.replaceChildren(); builtFor = null; return; }
+    if (builtFor === current) return;
+    builtFor = current;
+    const id = current;
+    const s = sessions[id];
+    root.replaceChildren();
+
+    // Dados do participante
+    const consent = el('input', { type: 'checkbox', id: 'f-consent' });
+    consent.checked = !!s.consentimento;
+    const masterIn = el('input', { type: 'text', id: 'f-master', placeholder: 'ex.: CODESYS, TIA Portal' });
+    masterIn.value = s.mestre || '';
+    masterIn.addEventListener('input', () => save(id, { mestre: masterIn.value }, id + 'mestre'));
+    const dateIn = el('input', { type: 'date', id: 'f-date' });
+    dateIn.value = s.data || '';
+    dateIn.addEventListener('change', () => save(id, { data: dateIn.value }));
+    const delBtn = el('button', { type: 'button', class: 'btn btn-sm', text: 'Apagar sessão…' });
+    let delArmed = false;
+    delBtn.addEventListener('click', () => {
+      if (!delArmed) { delArmed = true; delBtn.textContent = 'Confirmar: apagar ' + s.participante; setTimeout(() => { delArmed = false; delBtn.textContent = 'Apagar sessão…'; }, 4000); return; }
+      delete sessions[id];
+      backup();
+      if (db) db.doc('sessoes/' + id).delete().catch(storeError);
+      current = null; builtFor = null; lsSet(LS_CUR, '');
+      renderChips(); renderSession(); renderSummary();
+      toast('Sessão ' + s.participante + ' apagada');
+    });
+    const consentNote = el('p', { class: 'notice warn small', text: 'Antes da primeira tarefa: leia o termo com o participante e marque que ele foi assinado.' });
+    consentNote.hidden = !!s.consentimento;
+    consent.addEventListener('change', () => { save(id, { consentimento: consent.checked }); consentNote.hidden = consent.checked; });
+
+    root.append(el('section', { class: 'panel', 'aria-labelledby': 'p-t' }, [
+      el('div', { class: 'row' }, [
+        el('h2', { id: 'p-t', class: 'grow', text: 'Sessão ' + s.participante + (s.piloto ? ' · teste piloto' : '') }),
+        delBtn
+      ]),
+      el('div', { class: 'grid' }, [
+        selectField('f-profile', 'Perfil', PROFILES, s.perfil, (v) => save(id, { perfil: v })),
+        selectField('f-exp', 'Experiência com CLP', EXPERIENCE, s.experiencia, (v) => save(id, { experiencia: v })),
+        el('div', { class: 'field' }, [el('label', { for: 'f-master', text: 'Mestre que costuma usar' }), masterIn]),
+        el('div', { class: 'field' }, [el('label', { for: 'f-date', text: 'Data' }), dateIn])
+      ]),
+      el('label', { class: 'row', style: 'gap: 8px' }, [consent, el('span', { text: 'Termo de consentimento assinado' })]),
+      consentNote
+    ]));
+
+    // Tarefas
+    root.append(el('h2', { text: 'Tarefas' }));
+    TASKS.forEach((t) => root.append(taskCard(id, t)));
+
+    // SUS
+    root.append(susPanel(id));
+
+    // Observações
+    const obs = el('textarea', { id: 'f-obs', rows: '4', placeholder: 'Comentários do participante na conversa final, problemas que se repetiram, ideias.' });
+    obs.value = s.observacoes || '';
+    obs.addEventListener('input', () => save(id, { observacoes: obs.value }, id + 'obs'));
+    root.append(el('section', { class: 'panel', 'aria-labelledby': 'o-t' }, [
+      el('h2', { id: 'o-t', text: 'Conversa final e observações' }),
+      el('label', { for: 'f-obs', class: 'small muted', text: 'Perguntas da conversa final no roteiro, seção 6.' }),
+      obs
+    ]));
+  }
+
+  function taskCard(id, t) {
+    const s = sessions[id];
+    const d = s.tarefas[t.id] || (s.tarefas[t.id] = emptyTask());
+    const card = el('section', { class: 'panel task' + (d.resultado ? ' is-done' : ''), 'aria-labelledby': 'tk-' + t.id });
+    const clock = el('span', { class: 'clock', 'aria-live': 'off', text: fmtClock(elapsed(d)) });
+    const over = el('span', { class: 'over', text: 'PASSOU DO LIMITE' });
+    const startBtn = el('button', { type: 'button', class: 'btn btn-primary' });
+    const resetBtn = el('button', { type: 'button', class: 'btn btn-sm', text: 'Zerar' });
+    function paint() {
+      const ms = elapsed(d);
+      clock.textContent = fmtClock(ms);
+      over.hidden = ms <= t.limit * 1000;
+      startBtn.textContent = d.desde ? 'Parar' : (d.tempoMs ? 'Continuar' : 'Iniciar');
+      card.classList.toggle('is-done', !!d.resultado);
+    }
+    card._paint = paint;
+    startBtn.addEventListener('click', () => {
+      if (d.desde) save(id, { tarefas: { [t.id]: { tempoMs: elapsed(d), desde: null } } });
+      else save(id, { tarefas: { [t.id]: { desde: Date.now() } } });
+      paint();
+    });
+    let resetArmed = false;
+    resetBtn.addEventListener('click', () => {
+      if (!resetArmed) { resetArmed = true; resetBtn.textContent = 'Confirmar zerar'; setTimeout(() => { resetArmed = false; resetBtn.textContent = 'Zerar'; }, 4000); return; }
+      resetArmed = false; resetBtn.textContent = 'Zerar';
+      save(id, { tarefas: { [t.id]: { tempoMs: 0, desde: null } } });
+      paint();
+    });
+
+    const resultChips = el('div', { class: 'chips', role: 'group', 'aria-label': 'Resultado de ' + t.id });
+    RESULTS.forEach(([v, label]) => {
+      const b = el('button', { type: 'button', class: 'chip', 'aria-pressed': d.resultado === v ? 'true' : 'false', text: label });
+      b.addEventListener('click', () => {
+        const next = d.resultado === v ? '' : v;
+        const patch = { resultado: next };
+        if (next && d.desde) { patch.tempoMs = elapsed(d); patch.desde = null; }
+        save(id, { tarefas: { [t.id]: patch } });
+        resultChips.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+        if (next) b.setAttribute('aria-pressed', 'true');
+        paint();
+      });
+      resultChips.append(b);
+    });
+
+    const errCount = el('span', { class: 'mono', style: 'min-width: 2ch; text-align: center; font-weight: 600', text: String(d.erros || 0) });
+    const minus = el('button', { type: 'button', class: 'btn btn-sm', 'aria-label': 'Menos um erro em ' + t.id, text: '−' });
+    const plus = el('button', { type: 'button', class: 'btn btn-sm', 'aria-label': 'Mais um erro em ' + t.id, text: '+' });
+    minus.addEventListener('click', () => { const n = Math.max(0, (d.erros || 0) - 1); save(id, { tarefas: { [t.id]: { erros: n } } }); errCount.textContent = String(n); });
+    plus.addEventListener('click', () => { const n = (d.erros || 0) + 1; save(id, { tarefas: { [t.id]: { erros: n } } }); errCount.textContent = String(n); });
+
+    const seq = el('div', { class: 'seg', role: 'group', 'aria-label': 'SEQ de ' + t.id + ', de 1 (muito difícil) a 7 (muito fácil)' });
+    for (let i = 1; i <= 7; i++) {
+      const b = el('button', { type: 'button', 'aria-pressed': d.seq === i ? 'true' : 'false', text: String(i) });
+      b.addEventListener('click', () => {
+        const next = d.seq === i ? null : i;
+        save(id, { tarefas: { [t.id]: { seq: next } } });
+        seq.querySelectorAll('button').forEach((x, k) => x.setAttribute('aria-pressed', next === k + 1 ? 'true' : 'false'));
+      });
+      seq.append(b);
+    }
+
+    const notes = el('textarea', { id: 'n-' + t.id, rows: '2', placeholder: 'O que a pessoa fez, onde hesitou, o que disse em voz alta.' });
+    notes.value = d.notas || '';
+    notes.addEventListener('input', () => save(id, { tarefas: { [t.id]: { notas: notes.value } } }, id + t.id + 'n'));
+
+    card.append(
+      el('div', { class: 'task-head' }, [
+        el('span', { class: 'task-id', text: t.id }),
+        el('h3', { id: 'tk-' + t.id, class: 'grow', text: t.name }),
+        el('span', { class: 'small muted', text: t.main ? 'principal · limite ' + fmtClock(t.limit * 1000) : 'secundária, se der tempo · limite ' + fmtClock(t.limit * 1000) })
+      ]),
+      el('p', { class: 'small muted' }, [el('strong', { text: 'Começa: ' }), document.createTextNode(t.start + '. '), el('strong', { text: 'Termina: ' }), document.createTextNode(t.end + '.')]),
+      el('div', { class: 'row', style: 'gap: 12px' }, [clock, over, startBtn, resetBtn]),
+      el('div', { class: 'field' }, [el('span', { class: 'field-label', text: 'Resultado' }), resultChips]),
+      el('div', { class: 'row', style: 'gap: 24px; align-items: flex-end' }, [
+        el('div', { class: 'field' }, [el('span', { class: 'field-label', text: 'Erros e desvios' }), el('div', { class: 'row', style: 'gap: 6px' }, [minus, errCount, plus])]),
+        el('div', { class: 'field' }, [el('span', { class: 'field-label', text: 'SEQ: quão fácil foi? (1 a 7)' }), seq])
+      ]),
+      el('div', { class: 'field' }, [el('label', { for: 'n-' + t.id, text: 'Observações' }), notes])
+    );
+    paint();
+    return card;
+  }
+
+  function susPanel(id) {
+    const s = sessions[id];
+    const scoreEl = el('p', { class: 'status' });
+    function paintScore() {
+      const sc = susScore(s.sus);
+      const missing = s.sus.filter((v) => v === null || v === undefined).length;
+      scoreEl.textContent = sc === null ? 'Pontuação SUS: faltam ' + missing + ' respostas.' : 'Pontuação SUS: ' + fmtNum(sc, 1) + ' de 100.';
+    }
+    const rows = el('div', {});
+    for (let i = 0; i < 10; i++) {
+      const seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Item ' + (i + 1) + ' do SUS, de 1 (discordo totalmente) a 5 (concordo totalmente)' });
+      for (let v = 1; v <= 5; v++) {
+        const b = el('button', { type: 'button', 'aria-pressed': s.sus[i] === v ? 'true' : 'false', text: String(v) });
+        b.addEventListener('click', () => {
+          const arr = s.sus.slice();
+          arr[i] = arr[i] === v ? null : v;
+          save(id, { sus: arr });
+          seg.querySelectorAll('button').forEach((x, k) => x.setAttribute('aria-pressed', arr[i] === k + 1 ? 'true' : 'false'));
+          paintScore();
+        });
+        seg.append(b);
+      }
+      rows.append(el('div', { class: 'sus-row' }, [el('span', { class: 'mono', text: 'Item ' + (i + 1) }), seg]));
+    }
+    paintScore();
+    return el('section', { class: 'panel', 'aria-labelledby': 's-t' }, [
+      el('h2', { id: 's-t', text: 'SUS (System Usability Scale)' }),
+      el('p', { class: 'small muted', text: 'O participante responde na folha da versão brasileira (Lourenço, Carmona e Lopes, 2022); aqui você só passa as notas, de 1 (discordo totalmente) a 5 (concordo totalmente). A pontuação segue Brooke (1996).' }),
+      rows, scoreEl
+    ]);
+  }
+
+  // Relógios das tarefas em andamento
+  setInterval(() => { document.querySelectorAll('.task').forEach((c) => c._paint && c._paint()); }, 500);
+
+  // ---------- resumo ----------
+  function counted() { return Object.values(sessions).filter((s) => !s.piloto); }
+  function renderSummary() {
+    renderChips();
+    const list = counted();
+    const table = $('summary');
+    table.replaceChildren();
+    table.append(el('thead', {}, [el('tr', {}, ['Tarefa', 'Sem ajuda', 'Com ajuda', 'Não concluiu', 'Tempo médio', 'SEQ médio', 'Critério'].map((h, i) => el('th', { text: h, style: i > 0 && i < 6 ? 'text-align: right' : null })))]));
+    const body = el('tbody');
+    TASKS.forEach((t) => {
+      const ds = list.map((s) => s.tarefas && s.tarefas[t.id]).filter((d) => d && d.resultado && d.resultado !== 'nao_aplicada');
+      const n = ds.length;
+      const c = (r) => ds.filter((d) => d.resultado === r).length;
+      const times = ds.filter((d) => d.resultado !== 'nao_concluiu').map((d) => elapsed(d) / 1000).filter((x) => x > 0);
+      const seqs = ds.map((d) => d.seq).filter((x) => typeof x === 'number');
+      const ok = c('sem_ajuda');
+      let crit = '—';
+      let critCls = 'status';
+      if (t.main) {
+        if (n === 0) crit = 'sem dados';
+        else if (ok >= 4 && ok / n >= 0.8) { crit = 'atende'; critCls = 'status yes'; }
+        else if (n < 5) crit = 'faltam participantes';
+        else crit = 'não atende';
+      }
+      body.append(el('tr', {}, [
+        el('td', {}, [el('span', { class: 'mono', text: t.id + ' ' }), document.createTextNode(t.name)]),
+        el('td', { class: 'num', text: n ? ok + ' de ' + n : '—' }),
+        el('td', { class: 'num', text: n ? String(c('com_ajuda')) : '—' }),
+        el('td', { class: 'num', text: n ? String(c('nao_concluiu')) : '—' }),
+        el('td', { class: 'num', text: times.length ? fmtClock(times.reduce((a, b) => a + b, 0) / times.length * 1000) : '—' }),
+        el('td', { class: 'num', text: seqs.length ? fmtNum(seqs.reduce((a, b) => a + b, 0) / seqs.length, 1) : '—' }),
+        el('td', { class: critCls, text: crit })
+      ]));
+    });
+    table.append(body);
+    const scores = list.map((s) => susScore(s.sus)).filter((x) => x !== null);
+    $('sus-summary').textContent = scores.length
+      ? 'SUS médio: ' + fmtNum(scores.reduce((a, b) => a + b, 0) / scores.length, 1) + ' (' + scores.length + ' participante' + (scores.length > 1 ? 's' : '') + '). Referência: a média de muitos estudos fica perto de 68 (Sauro, 2011).'
+      : 'SUS médio: ainda sem respostas completas.';
+  }
+
+  // ---------- exportação ----------
+  function csvCell(v) {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function buildCsv() {
+    const head = ['participante', 'piloto', 'perfil', 'experiencia', 'mestre', 'data', 'consentimento'];
+    TASKS.forEach((t) => ['resultado', 'tempo_s', 'erros', 'seq', 'notas'].forEach((f) => head.push(t.id + '_' + f)));
+    for (let i = 1; i <= 10; i++) head.push('sus_' + i);
+    head.push('sus_pontos', 'observacoes');
+    const lines = [head.join(',')];
+    Object.values(sessions).sort((a, b) => (a.criadoEm || 0) - (b.criadoEm || 0)).forEach((s) => {
+      const row = [s.participante, s.piloto ? 'sim' : 'nao', s.perfil, s.experiencia, s.mestre, s.data, s.consentimento ? 'sim' : 'nao'];
+      TASKS.forEach((t) => {
+        const d = (s.tarefas && s.tarefas[t.id]) || emptyTask();
+        const ms = elapsed(d);
+        row.push(d.resultado, ms ? Math.round(ms / 1000) : '', d.erros || 0, d.seq === null || d.seq === undefined ? '' : d.seq, d.notas);
+      });
+      (s.sus || []).forEach((v) => row.push(v === null || v === undefined ? '' : v));
+      const sc = susScore(s.sus);
+      row.push(sc === null ? '' : sc, s.observacoes);
+      lines.push(row.map(csvCell).join(','));
+    });
+    return lines.join('\r\n') + '\r\n';
+  }
+  $('export').addEventListener('click', async () => {
+    const csv = buildCsv();
+    if (downloads) {
+      try {
+        await downloads.save({ filename: 'resultados.csv', data: '﻿' + csv });
+        toast('resultados.csv salvo');
+        return;
+      } catch (e) {
+        if (e && e.code === 'declined') return;
+      }
+    }
+    $('csv-text').value = csv;
+    $('csv-fallback').hidden = false;
+  });
+  $('csv-copy').addEventListener('click', async () => {
+    const ta = $('csv-text');
+    try { await navigator.clipboard.writeText(ta.value); toast('CSV copiado'); }
+    catch (e) { ta.focus(); ta.select(); toast('Selecionado: use Ctrl+C'); }
+  });
+
+  // ---------- início ----------
+  try { const saved = JSON.parse(lsGet(LS_KEY) || '{}'); if (saved && typeof saved === 'object') sessions = saved; } catch (e) { sessions = {}; }
+  const cur = lsGet(LS_CUR);
+  if (cur && sessions[cur]) current = cur;
+  renderSummary();
+  renderSession();
+
+  if (window.claude && window.claude.use) {
+    window.claude.use('downloads').then((d) => { downloads = d; }).catch(() => {});
+    window.claude.use('db').then((d) => {
+      db = d;
+      if (!db) { setStoreState('Sem armazenamento compartilhado nesta visualização: os dados ficam só neste navegador. Exporte o CSV ao fim de cada sessão.', true); return; }
+      setStoreState('Salvando no armazenamento do formulário. Cada mudança é guardada na hora.', false);
+      let synced = false;
+      db.collection('sessoes').onSnapshot((snap) => {
+        const fromStore = {};
+        snap.docs.forEach((doc) => { if (doc.exists) fromStore[doc.id] = JSON.parse(JSON.stringify(doc.data())); });
+        // Na primeira resposta definitiva, sobem as sessões que só existiam neste navegador.
+        if (!synced && !snap.metadata.fromCache) {
+          synced = true;
+          Object.keys(sessions).forEach((k) => {
+            if (!fromStore[k]) { db.doc('sessoes/' + k).set(sessions[k]).catch(storeError); fromStore[k] = sessions[k]; }
+          });
+        }
+        // Mescla no objeto que já existe, para os cartões abertos continuarem ligados a ele.
+        const next = {};
+        Object.keys(fromStore).forEach((k) => {
+          if (sessions[k]) {
+            if (!(k === current && snap.metadata.hasPendingWrites) && sessions[k] !== fromStore[k]) mergeDeep(sessions[k], fromStore[k]);
+            next[k] = sessions[k];
+          } else next[k] = fromStore[k];
+        });
+        if (synced) sessions = next; else Object.assign(sessions, next);
+        backup();
+        if (current && !sessions[current]) { current = null; builtFor = null; }
+        if (!current) { const c2 = lsGet(LS_CUR); if (c2 && sessions[c2]) current = c2; }
+        if (builtFor !== current) renderSession();
+        renderSummary();
+      }, storeError);
+    }).catch(() => setStoreState('Sem armazenamento compartilhado: os dados ficam só neste navegador. Exporte o CSV ao fim de cada sessão.', true));
+  } else {
+    setStoreState('Aberto fora do claude.ai: os dados ficam só neste navegador. Exporte o CSV ao fim de cada sessão.', true);
+  }
+})();
+</script>

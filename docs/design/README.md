@@ -16,8 +16,8 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aguardando revisão |
 | D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo, 4 ressalvas para o orientador |
 | D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
-| E | Roteiro, tarefas cronometradas e termo de consentimento | `teste/` | a fazer |
-| E | Formulário do moderador | Artifact (link abaixo) e `teste/resultados.csv` | a fazer |
+| E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto; falta o teste piloto, e o termo precisa dos nomes e contatos |
+| E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto (o CSV só tem o cabeçalho até o teste) |
 | F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
 
 ## Links
@@ -27,7 +27,7 @@ Os Artifacts são páginas no claude.ai; quem os publicou decide com quem compar
 - Wireframes (32 pranchas em 4 páginas: Fase 1, Fase 2, Fases 3 e 4, Componentes; revistos em 23/11 com abas na planta, aba Gráficos e compartilhamento por código): https://claude.ai/artifact/5mtQasLaySPNUq3wMcSQLY
 - Identidade visual (logotipo, paleta, tipografia e ícones, cor na IHM): https://claude.ai/artifact/FNXXhg5dJGu3YXVAS4ZRsk
 - Protótipo (35 pranchas em 6 páginas: T1 e T2, T3, T4 e T5, Estados e outras telas, Fases 3 e 4, Componentes; fluxos das cinco tarefas principais navegáveis): https://claude.ai/artifact/BATxECGZStkjMLSwVSitZk
-- Formulário do moderador: *(preenchido na parte E)*
+- Formulário do moderador (privado, só o autor abre; guarda as sessões no próprio Artifact e exporta `resultados.csv`): https://claude.ai/artifact/XFWD466p3YkcWjiqaB4e1z
 
 ### Ponto de partida de cada tarefa no protótipo
 
