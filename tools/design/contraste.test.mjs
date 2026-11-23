@@ -58,7 +58,9 @@ test('checkTokens marca o par que reprova e exige tokens existentes', () => {
 });
 
 test('a paleta do projeto passa em todos os pares, nos dois temas', () => {
-  const tokens = JSON.parse(readFileSync(new URL('../../docs/design/tokens.json', import.meta.url), 'utf8'));
+  const tokens = JSON.parse(
+    readFileSync(new URL('../../docs/design/tokens.json', import.meta.url), 'utf8'),
+  );
   const results = checkTokens(tokens);
   const failed = results.filter((r) => !r.pass).map((r) => `${r.theme}: ${r.fg} sobre ${r.bg}`);
   assert.deepEqual(failed, []);

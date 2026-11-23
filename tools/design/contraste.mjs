@@ -59,7 +59,9 @@ export function checkTokens(tokens) {
   const themes = tokens?.color;
   const pairs = tokens?.contrastPairs;
   if (!themes || typeof themes !== 'object' || !Array.isArray(pairs) || pairs.length === 0) {
-    throw new Error('tokens.json precisa de "color" (temas) e de "contrastPairs" (lista não vazia)');
+    throw new Error(
+      'tokens.json precisa de "color" (temas) e de "contrastPairs" (lista não vazia)',
+    );
   }
   const results = [];
   for (const [theme, colors] of Object.entries(themes)) {
@@ -105,7 +107,9 @@ export function toMarkdown(results) {
     lines.push('');
   }
   const failed = results.filter((r) => !r.pass).length;
-  lines.push(`Total: ${results.length} pares conferidos, ${results.length - failed} passam, ${failed} reprovam.`);
+  lines.push(
+    `Total: ${results.length} pares conferidos, ${results.length - failed} passam, ${failed} reprovam.`,
+  );
   return lines.join('\n') + '\n';
 }
 
