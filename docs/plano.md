@@ -337,7 +337,7 @@ Evidências: `docs/validacao/etapa-08.md`.
 
 ### Etapa 9 — Implantação (Marco 1: MVP)
 
-*(Replanejada em 21/11/2026: o servidor passa a rodar numa VM Linux no PC do laboratório (D10, alterada nesta data), e a etapa foi dividida em duas partes. As duas aguardam o PC do laboratório, que a universidade ainda está providenciando; enquanto isso, segue a trilha de design.)*
+*(Replanejada em 21/11/2026: o servidor passa a rodar numa VM Linux no PC do laboratório (D10, alterada nesta data), e a etapa foi dividida em duas partes. As duas aguardam o PC do laboratório, que a universidade ainda está providenciando; enquanto isso, segue a trilha de design. Em 24/11/2026 chegou um PC provisório, e a 9A começou nele; veja a nota da 9A.)*
 
 Conversar com a TI antes da Etapa 9B; como DNS, certificado e IP público costumam demorar, vale abrir a conversa já.
 
@@ -348,6 +348,8 @@ Conversar com a TI antes da Etapa 9B; como DNS, certificado e IP público costum
 **Depende de:** Etapa 8.
 
 **Máquina de teste:** a VM Linux no PC do laboratório. A etapa só começa quando ele chegar; não se monta VM de teste no PC de desenvolvimento (decisão do autor em 23/11/2026: a VM pesa demais nele).
+
+*(Alterado em 24/11/2026: o PC do laboratório chegou, provisório, e a 9A é feita nele. Ele fica abaixo da meta do RNF07 (Core i7-4790, de 2014, com 4 núcleos e 8 threads; 8 GB de RAM em 2 × 4 GB DDR3; Windows 10 Pro), o que torna os testes de carga uma medida conservadora. O sistema vai depois para um computador definitivo, repetindo o roteiro de `docs/implantacao.md`; ao começar a 9B, decide-se se ela é feita neste PC ou no definitivo.)*
 
 **Escopo**
 
