@@ -20,3 +20,11 @@ dotnet_style_readonly_field = true:warning
 
 [*.md]
 trim_trailing_whitespace = false
+
+[*.ps1]
+# O Windows PowerShell 5.1 lê .ps1 sem BOM como ANSI e estraga os acentos.
+charset = utf-8-bom
+indent_size = 4
+
+[*.sh]
+indent_size = 4

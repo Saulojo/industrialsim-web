@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   dotnet:
-    # Windows é o sistema do servidor do laboratório (D10); Linux continua para manter o código multiplataforma.
+    # Linux é o sistema do servidor (VM no PC do laboratório, D10); Windows continua para manter o código multiplataforma.
     name: .NET (build e testes, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
@@ -197,3 +197,80 @@ jobs:
       - name: Log do servidor
         if: always()
         run: cat server.log || true
+
+  deploy:
+    # Etapa 9A: arquivos de implantação conferidos e o pacote da VM gerado e posto para rodar como na VM.
+    name: Implantação (scripts, Caddyfile, serviço e pacote)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: ShellCheck dos scripts
+        run: shellcheck deploy/scripts/*.sh
+
+      - name: Caddyfile válido (imagem oficial do Caddy)
+        run: |
+          docker run --rm -e INDUSTRIALSIM_SITE=10.0.0.10 \
+            -v "$PWD/deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro" \
+            caddy:2 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+
+      - name: Unidade do systemd válida
+        run: |
+          sudo useradd --system --no-create-home --shell /usr/sbin/nologin industrialsim
+          sudo install -d /opt/industrialsim/current /etc/industrialsim
+          sudo install -m 0755 /bin/true /opt/industrialsim/current/IndustrialSim.Server
+          sudo install -m 0640 deploy/config/industrialsim.env /etc/industrialsim/industrialsim.env
+          systemd-analyze verify deploy/systemd/industrialsim.service
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Pacote (publish.sh)
+        run: sh deploy/scripts/publish.sh "ci-${GITHUB_SHA::7}"
+
+      - name: O pacote roda como na VM (self-contained, configuração do industrialsim.env)
+        run: |
+          mkdir -p /tmp/pkg /tmp/state
+          tar -C /tmp/pkg -xzf "artifacts/industrialsim-ci-${GITHUB_SHA::7}.tar.gz"
+          app="/tmp/pkg/industrialsim-ci-${GITHUB_SHA::7}/app"
+          test "$(cat "$app/VERSION")" = "ci-${GITHUB_SHA::7}"
+          chmod +x "$app/IndustrialSim.Server"
+          set -a
+          . deploy/config/industrialsim.env
+          set +a
+          export Simulation__Instances__RecordingDirectory=/tmp/state/recordings
+          (cd "$app" && ./IndustrialSim.Server > /tmp/server.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:5080/api/health > health.json && break
+            sleep 1
+          done
+          cat health.json
+          curl -sf http://127.0.0.1:5080/ | grep -q '<div id="root">'
+          curl -sf http://127.0.0.1:5080/api/scenarios | grep -q '"id":"caldeira"'
+          # Kestrel só no loopback (o site entra pelo Caddy).
+          ss -ltn | grep ':5080 ' | tee listen.txt
+          grep -q '127.0.0.1:5080' listen.txt
+          # (um "! grep" não pararia o passo: o bash -e ignora comandos negados)
+          if grep -qE '(0\.0\.0\.0|\*|\[::\]):5080' listen.txt; then
+            echo "O Kestrel está aberto para a rede."
+            exit 1
+          fi
+          pkill -TERM -f IndustrialSim.Server
+          echo "Pacote no ar e encerrado."
+
+      - name: Log do servidor do pacote
+        if: always()
+        run: cat /tmp/server.log || true
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: industrialsim-linux-x64
+          path: artifacts/*.tar.gz
+          retention-days: 14

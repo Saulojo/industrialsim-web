@@ -1,0 +1,57 @@
+# Serviço do servidor do IndustrialSim Web na VM Linux (D10, Etapa 9A).
+# Instalado em /etc/systemd/system/ pelo deploy/scripts/install.sh.
+# Um processo serve site, API, WebSocket (atrás do Caddy, em 127.0.0.1:5080) e o Modbus das plantas (15000-15999).
+
+[Unit]
+Description=IndustrialSim Web: servidor (site, WebSocket e Modbus das plantas)
+Documentation=https://github.com/Saulojo/industrialsim-web/blob/main/docs/implantacao.md
+After=network-online.target
+Wants=network-online.target
+# Com Restart=always, nunca desistir depois de várias falhas seguidas.
+StartLimitIntervalSec=0
+
+[Service]
+Type=exec
+User=industrialsim
+Group=industrialsim
+EnvironmentFile=/etc/industrialsim/industrialsim.env
+# "current" é um link para a versão em uso, em /opt/industrialsim/releases (update.sh e rollback.sh trocam o link).
+WorkingDirectory=/opt/industrialsim/current
+ExecStart=/opt/industrialsim/current/IndustrialSim.Server
+Restart=always
+RestartSec=2
+
+# SIGTERM: o host encerra as plantas e espera as threads do laço (verificado no CI desde a Etapa 5).
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+# Gravações de ensaio em /var/lib/industrialsim (criada pelo systemd, só deste usuário).
+StateDirectory=industrialsim
+StateDirectoryMode=0750
+
+# Até 1000 portas Modbus com até 8 conexões cada, mais os WebSockets.
+LimitNOFILE=65536
+
+# Proteções: o processo só escreve em /var/lib/industrialsim e não ganha privilégios.
+# (MemoryDenyWriteExecute fica de fora: o JIT do .NET precisa de memória executável.)
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

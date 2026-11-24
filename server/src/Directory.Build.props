@@ -1,0 +1,11 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!--
+    Projetos do produto: o restore já inclui o alvo da VM Linux (D10, Etapa 9A), para o "dotnet publish -r linux-x64"
+    gerar os mesmos packages.lock.json do restore comum e o restore travado do CI continuar passando.
+  -->
+  <PropertyGroup>
+    <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+</Project>

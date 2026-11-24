@@ -1,0 +1,31 @@
+# Caddy na VM do servidor (D10, Etapa 9A): HTTPS na 443 e proxy reverso para o Kestrel em 127.0.0.1:5080.
+# Instalado em /etc/caddy/Caddyfile pelo deploy/scripts/install.sh.
+# O endereço do site vem de /etc/industrialsim/caddy.env (INDUSTRIALSIM_SITE: o IP da VM na 9A; o domínio na 9B).
+
+{
+	# A porta 80 fica fechada no firewall (RNF06): sem redirecionamento de HTTP para HTTPS.
+	auto_https disable_redirects
+}
+
+{$INDUSTRIALSIM_SITE} {
+	# 9A: certificado da CA interna do Caddy. A raiz fica em
+	# /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt e é importada nos PCs de teste.
+	# Na 9B, com domínio e certificado válido, esta linha sai.
+	tls internal
+
+	encode zstd gzip
+
+	# Também passa o WebSocket da planta (/api/plants/{id}/ws). O Caddy acrescenta X-Forwarded-For com o IP do
+	# navegador e ignora o que o navegador mandar nesse cabeçalho; o servidor só aceita o cabeçalho vindo do
+	# loopback (ProxyForwarding.cs).
+	reverse_proxy 127.0.0.1:5080
+
+	# Log de acesso com retenção curta (LGPD): até 14 arquivos de 10 MiB, apagados depois de 14 dias.
+	log {
+		output file /var/log/caddy/industrialsim-access.log {
+			roll_size 10MiB
+			roll_keep 14
+			roll_keep_for 336h
+		}
+	}
+}

@@ -1,0 +1,4 @@
+# Teste de carga (simrun carga-rede --ssh, Etapa 9A): o administrador da VM reinicia o serviço sem senha,
+# só com este comando. Instalado em /etc/sudoers.d/industrialsim-loadtest pelo install.sh (__ADMIN__ vira o
+# usuário dado em --admin).
+__ADMIN__ ALL=(root) NOPASSWD: /usr/bin/systemctl restart industrialsim

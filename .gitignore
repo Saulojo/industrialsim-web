@@ -31,3 +31,6 @@ Thumbs.db
 
 # Saída de compilação do OpenPLC Editor (Etapa 6)
 tools/openplc/**/build/
+
+# Pacotes de implantação (deploy/scripts/publish.sh, Etapa 9A)
+artifacts/
