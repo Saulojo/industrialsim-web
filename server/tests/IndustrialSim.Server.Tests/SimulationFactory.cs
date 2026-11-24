@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IndustrialSim.Server.Tests;
 
@@ -27,11 +28,19 @@ internal sealed class SimulationFactory : WebApplicationFactory<Program>
 
     public string RecordingDirectory { get; }
 
+    /// <summary>Serviços extras do teste (ex.: um <c>IStartupFilter</c> que põe middleware antes do app).</summary>
+    public Action<IServiceCollection>? ConfigureTestServices { get; init; }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         foreach (var (key, value) in _settings)
         {
             builder.UseSetting(key, value);
+        }
+
+        if (ConfigureTestServices is not null)
+        {
+            builder.ConfigureServices(ConfigureTestServices);
         }
     }
 

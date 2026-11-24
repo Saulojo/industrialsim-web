@@ -9,7 +9,13 @@ builder.Services.AddSingleton(TimeProvider.System);
 // Plantas em execução: cenários, laço de tempo real e gerenciador (Etapa 5).
 builder.Services.AddSimulation(builder.Configuration, builder.Environment);
 
+// IP real do navegador atrás do Caddy (Etapa 9A), aceito só do loopback.
+builder.Services.AddProxyForwarding();
+
 var app = builder.Build();
+
+// Primeiro de tudo: o resto do pipeline (API, WebSocket, log) já vê o IP do navegador.
+app.UseForwardedHeaders();
 
 // Build do web (Vite) copiado para wwwroot.
 app.UseDefaultFiles();
