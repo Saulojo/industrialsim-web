@@ -10,4 +10,19 @@
     <ProjectReference Include="..\IndustrialSim.Core\IndustrialSim.Core.csproj" />
     <ProjectReference Include="..\IndustrialSim.Sessions\IndustrialSim.Sessions.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Mestre Modbus do teste de carga pela rede (simrun carga-rede, Etapa 9A): independente do servidor do projeto (D36). -->
+    <PackageReference Include="FluentModbus" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Amostrador de CPU e RAM da VM, mandado pelo ssh no teste de carga. -->
+    <EmbeddedResource Include="..\..\..\deploy\scripts\sample-resources.sh" LogicalName="sample-resources.sh" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IndustrialSim.SimRun.Tests" />
+    <InternalsVisibleTo Include="IndustrialSim.Server.Tests" />
+  </ItemGroup>
 </Project>

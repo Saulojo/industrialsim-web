@@ -25,6 +25,10 @@ public static class SimRunApp
                                                 reproduz uma gravação de ensaio do servidor e compara os SHA-256
           simrun carga --cenario <scenario.json> [--plantas 30] [--minutos 10] [--threads 2] [--relatorio <rel.json>]
                                                 ensaio de carga em tempo real: deriva, atraso do passo e CPU
+          simrun carga-rede --servidor <https://host> [--plantas 30 | 30,60,100,200] [--minutos 30] [--ssh <usuario@host>] [--ca <raiz.crt>]
+                                                teste de carga do servidor implantado, pela rede, com mestres Modbus TCP
+          simrun portas --host <ip> [--faixa 1-65535] [--esperadas 22,443,15000-15999]
+                                                varredura de portas TCP de fora da VM; falha se houver porta aberta não esperada
 
         Opções:
           --entradas   roteiro CSV: coluna 'time' (s) e uma coluna por entrada do cenário; cada linha vale a partir do seu instante
@@ -48,6 +52,16 @@ public static class SimRunApp
         if (args.Length > 0 && args[0] == LoadCommand.Name)
         {
             return LoadCommand.Run(args[1..], stdout, stderr);
+        }
+
+        if (args.Length > 0 && args[0] == NetworkLoadCommand.Name)
+        {
+            return NetworkLoadCommand.Run(args[1..], stdout, stderr);
+        }
+
+        if (args.Length > 0 && args[0] == PortScanCommand.Name)
+        {
+            return PortScanCommand.Run(args[1..], stdout, stderr);
         }
 
         if (!Options.TryParse(args, out Options? options, out string? usageError))

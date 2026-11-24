@@ -513,6 +513,15 @@
           "Microsoft.Extensions.Logging.Abstractions": "[10.0.15, )"
         }
       },
+      "simrun": {
+        "type": "Project",
+        "dependencies": {
+          "FluentModbus": "[5.3.2, )",
+          "IndustrialSim.Contracts": "[0.1.0, )",
+          "IndustrialSim.Core": "[0.1.0, )",
+          "IndustrialSim.Sessions": "[0.1.0, )"
+        }
+      },
       "Microsoft.Extensions.Logging.Abstractions": {
         "type": "CentralTransitive",
         "requested": "[10.0.15, )",

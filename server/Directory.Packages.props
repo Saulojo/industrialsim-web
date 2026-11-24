@@ -10,7 +10,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.15" />
     <!-- MIT; mesma versão do runtime ASP.NET Core 10.0.15 -->
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
-    <!-- MIT; só nos testes, como mestre Modbus independente do servidor do projeto (D36) -->
+    <!-- MIT; só nos testes e na ferramenta de carga (simrun carga-rede), como mestre Modbus independente do servidor do projeto (D36) -->
     <PackageVersion Include="FluentModbus" Version="5.3.2" />
   </ItemGroup>
 </Project>

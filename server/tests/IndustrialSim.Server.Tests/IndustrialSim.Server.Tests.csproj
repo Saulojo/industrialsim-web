@@ -5,6 +5,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\IndustrialSim.Server\IndustrialSim.Server.csproj" />
+    <!-- simrun carga-rede contra o servidor em memória (Etapa 9A); com alias, porque os dois têm um Program global -->
+    <ProjectReference Include="..\..\src\IndustrialSim.SimRun\IndustrialSim.SimRun.csproj" Aliases="simrun" />
   </ItemGroup>
 
   <!-- Mestre Modbus de socket dos testes do Modbus. -->
