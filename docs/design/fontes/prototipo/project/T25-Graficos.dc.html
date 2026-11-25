@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Gráficos</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 1100px">
+  <dc-import name="PlantBar" tab="trends" open="process,trends,connection" role="visitante" hint-size="100%,104px"></dc-import>
+  <div role="toolbar" aria-label="Controles dos gráficos" class="row" style="gap: 12px; padding: 10px 16px; background: var(--color-surface); border-bottom: 1px solid var(--color-border)">
+    <span class="muted">Janela</span>
+    <span class="row" style="gap: 0; border: 1px solid var(--color-border-strong); border-radius: 6px; overflow: hidden" role="group" aria-label="Janela de tempo">
+      <sc-for list="{{ windows }}" as="w" hint-placeholder-count="5"><button type="button" class="{{ w.cls }}" aria-pressed="{{ w.on }}" onClick="{{ w.pick }}" style="border: none; border-radius: 0">{{ w.label }}</button></sc-for>
+    </span>
+    <span class="muted">Escala</span>
+    <span class="row" style="gap: 0; border: 1px solid var(--color-border-strong); border-radius: 6px; overflow: hidden" role="group" aria-label="Escala">
+      <button type="button" class="{{ pctCls }}" aria-pressed="{{ isPct }}" onClick="{{ setPct }}" style="border: none; border-radius: 0">% da faixa</button>
+      <button type="button" class="{{ engCls }}" aria-pressed="{{ isEng }}" onClick="{{ setEng }}" style="border: none; border-radius: 0">Engenharia</button>
+    </span>
+    <button type="button" class="btn btn-sm" aria-pressed="{{ frozenStr }}" onClick="{{ toggleFreeze }}"><dc-import name="Icon" icon="{{ freezeIcon }}" size="{{ s16 }}" hint-size="16px,16px"></dc-import>{{ freezeLabel }}</button>
+    <button type="button" class="btn btn-sm btn-icon" aria-label="Aproximar"><dc-import name="Icon" icon="plus" size="{{ s16 }}" hint-size="16px,16px"></dc-import></button>
+    <button type="button" class="btn btn-sm btn-icon" aria-label="Afastar"><span aria-hidden="true" style="font-weight: 700">−</span></button>
+    <span class="push row" style="gap: 8px"><button type="button" class="btn btn-sm"><dc-import name="Icon" icon="plus" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Gráfico</button><button type="button" class="btn btn-sm"><dc-import name="Icon" icon="download" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Exportar trecho (CSV)</button></span>
+  </div>
+  <div style="display: flex; flex-wrap: wrap">
+    <aside aria-label="Sinais" class="col" style="flex: 0 0 270px; gap: 2px; padding: 14px 16px; border-right: 1px solid var(--color-border); background: var(--color-surface); min-height: 900px">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+        <span class="lbl" style="margin-top: 10px">{{ g.name }}</span>
+        <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="3">
+          <label class="check"><input type="checkbox" checked="{{ i.on }}" onChange="{{ i.toggle }}"><span class="sw" style="{{ i.sw }}"></span>{{ i.label }}</label>
+        </sc-for>
+      </sc-for>
+      <p class="hint" style="margin-top: 12px">As linhas diferem pela cor e pelo traço. Histórico desde o início desta sessão da planta.</p>
+    </aside>
+    <main class="col grow" style="flex: 999 1 700px; gap: 12px; padding: 14px 16px 24px">
+      <section class="panel col" aria-labelledby="g1" style="gap: 8px">
+        <div class="row"><h2 id="g1" class="panel-title">Malha de nível</h2><span class="muted small">LT-101 · FV-101 comando e posição · FT-102</span><button type="button" class="btn btn-ghost btn-icon btn-sm push" aria-label="Opções do gráfico Malha de nível"><dc-import name="Icon" icon="more" size="{{ s18 }}" hint-size="18px,18px"></dc-import></button></div>
+        <div style="position: relative">
+          <svg width="100%" height="240" viewBox="0 0 1000 240" preserveAspectRatio="none" role="img" aria-label="Gráfico da malha de nível" style="display: block; background: var(--color-surface-sunken); border-radius: 6px">
+            <path d="M0 60 H1000 M0 120 H1000 M0 180 H1000" style="stroke: var(--color-border)" stroke-width="1"></path>
+            <path d="M580 0 V240" style="stroke: var(--color-text-muted)" stroke-width="1.5" stroke-dasharray="5 4"></path>
+            <sc-if value="{{ showLT }}" hint-placeholder-val="{{ true }}"><polyline points="{{ lt }}" fill="none" style="stroke: var(--color-trend-1)" stroke-width="2.5"></polyline></sc-if>
+            <sc-if value="{{ showCmd }}" hint-placeholder-val="{{ true }}"><polyline points="{{ cmd }}" fill="none" style="stroke: var(--color-trend-2)" stroke-width="2" stroke-dasharray="8 4"></polyline></sc-if>
+            <sc-if value="{{ showPos }}" hint-placeholder-val="{{ true }}"><polyline points="{{ pos }}" fill="none" style="stroke: var(--color-trend-5)" stroke-width="2" stroke-dasharray="2 3"></polyline></sc-if>
+            <sc-if value="{{ showF2 }}" hint-placeholder-val="{{ true }}"><polyline points="{{ f2 }}" fill="none" style="stroke: var(--color-trend-4)" stroke-width="2" stroke-dasharray="12 3 2 3"></polyline></sc-if>
+            <path d="M720 0 V240" style="stroke: var(--color-text)" stroke-width="1"></path>
+          </svg>
+          <span class="chip small" style="position: absolute; left: calc(58% + 6px); top: 6px">FV-103 50 → 70 %</span>
+          <div class="panel small" style="position: absolute; left: calc(72% + 10px); top: 40px; padding: 8px 12px; box-shadow: var(--shadow-popover)">
+            <strong class="mono">t = 1 262,4 s</strong><br>LT-101 <span class="mono">0,641 m</span><br>FV-101 cmd <span class="mono">74,0 %</span> · pos <span class="mono">75,2 %</span><br>FT-102 <span class="mono">2,58 kg/s</span>
+          </div>
+        </div>
+        <div class="row small muted" style="justify-content: space-between"><span>−2 min</span><span>−1 min</span><span>agora</span></div>
+      </section>
+      <section class="panel col" aria-labelledby="g2" style="gap: 8px">
+        <div class="row"><h2 id="g2" class="panel-title">Malha de pressão</h2><span class="muted small">PT-101 · FV-103 · faixa normal ao fundo</span></div>
+        <svg width="100%" height="180" viewBox="0 0 1000 180" preserveAspectRatio="none" role="img" aria-label="Gráfico da malha de pressão" style="display: block; background: var(--color-surface-sunken); border-radius: 6px">
+          <rect x="0" y="40" width="1000" height="70" style="fill: var(--color-border); opacity: .5"></rect>
+          <path d="M580 0 V180" style="stroke: var(--color-text-muted)" stroke-width="1.5" stroke-dasharray="5 4"></path>
+          <sc-if value="{{ showPT }}" hint-placeholder-val="{{ true }}"><polyline points="{{ pt }}" fill="none" style="stroke: var(--color-trend-2)" stroke-width="2.5"></polyline></sc-if>
+          <sc-if value="{{ showF3 }}" hint-placeholder-val="{{ true }}"><polyline points="{{ f3 }}" fill="none" style="stroke: var(--color-trend-3)" stroke-width="2" stroke-dasharray="8 4"></polyline></sc-if>
+        </svg>
+      </section>
+      <section class="panel col" aria-labelledby="g3" style="gap: 8px">
+        <h2 id="g3" class="panel-title">Discretos</h2>
+        <div class="col" style="gap: 6px">
+          <div class="row" style="gap: 12px; flex-wrap: nowrap"><span class="mono small" style="width: 110px">P-101</span><span style="flex: 1; height: 16px; background: var(--color-equipment-on); border-radius: 3px"></span></div>
+          <div class="row" style="gap: 12px; flex-wrap: nowrap"><span class="mono small" style="width: 110px">LSHH-101</span><span style="flex: 1; height: 16px; background: var(--color-surface-sunken); border-radius: 3px; position: relative"><span style="position: absolute; left: 80%; width: 8%; top: 0; bottom: 0; background: var(--color-alarm-2-surface); border: 1px solid var(--color-alarm-2-edge)"></span><span class="small" style="position: absolute; left: 80%; top: -1px; padding-left: 4px; font-weight: 700; color: var(--color-alarm-2-text)">ALARME</span></span></div>
+          <div class="row" style="gap: 12px; flex-wrap: nowrap"><span class="mono small" style="width: 110px">LSLL-101</span><span style="flex: 1; height: 16px; background: var(--color-surface-sunken); border-radius: 3px"></span></div>
+        </div>
+      </section>
+      <p class="hint">Marcas no eixo do tempo: distúrbios, pausas, reinícios, valores forçados e mudanças de configuração. Arraste para dar zoom num trecho, ou use os botões + e −.</p>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tick: 0, win: '2m', eng: false, frozen: false, off: [] };
+  }
+  componentDidMount() {
+    this.timer = setInterval(() => { if (!this.state.frozen) this.setState({ tick: this.state.tick + 1 }); }, 500);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const s = this.state;
+    const k = s.tick * 0.4;
+    const H = (h, fn) => {
+      const pts = [];
+      for (let i = 0; i <= 100; i++) {
+        const x = i * 10;
+        const step = i > 58 ? 1 : 0;
+        pts.push(x + ',' + (h - fn(i, step) * h).toFixed(1));
+      }
+      return pts.join(' ');
+    };
+    const sig = (id) => !s.off.includes(id);
+    const toggle = (id) => () => this.setState({ off: sig(id) ? [...s.off, id] : s.off.filter((x) => x !== id) });
+    const item = (id, label, sw) => ({ label, sw, on: sig(id), toggle: toggle(id) });
+    const wdefs = [['1m', '1 min'], ['2m', '2 min'], ['10m', '10 min'], ['30m', '30 min'], ['all', 'Toda a sessão']];
+    return {
+      s16: 16, s18: 18,
+      windows: wdefs.map(([id, label]) => ({ label, on: s.win === id ? 'true' : 'false', cls: s.win === id ? 'btn btn-sm btn-primary' : 'btn btn-sm', pick: () => this.setState({ win: id }) })),
+      isPct: s.eng ? 'false' : 'true', isEng: s.eng ? 'true' : 'false',
+      pctCls: s.eng ? 'btn btn-sm' : 'btn btn-sm btn-primary', engCls: s.eng ? 'btn btn-sm btn-primary' : 'btn btn-sm',
+      setPct: () => this.setState({ eng: false }), setEng: () => this.setState({ eng: true }),
+      frozenStr: s.frozen ? 'true' : 'false',
+      freezeLabel: s.frozen ? 'Continuar' : 'Congelar', freezeIcon: s.frozen ? 'play' : 'pause',
+      toggleFreeze: () => this.setState({ frozen: !s.frozen }),
+      groups: [
+        { name: 'Medições', items: [item('LT', 'LT-101 · Nível', 'border-color: var(--color-trend-1)'), item('PT', 'PT-101 · Pressão', 'border-color: var(--color-trend-2)'), item('F1', 'FT-101 · Vazão de água', 'border-color: var(--color-trend-3); border-top-style: dotted'), item('F2', 'FT-102 · Vazão de vapor', 'border-color: var(--color-trend-4); border-top-style: dashed')] },
+        { name: 'Válvulas: posição', items: [item('POS', 'FV-101', 'border-color: var(--color-trend-5); border-top-style: dotted'), item('F3', 'FV-103 (distúrbio)', 'border-color: var(--color-trend-3); border-top-style: dashed')] },
+        { name: 'Comandos do mestre', items: [item('CMD', 'FV-101 · comando', 'border-color: var(--color-trend-2); border-top-style: dashed')] },
+        { name: 'Discretos', items: [item('D', 'P-101, LSHH-101, LSLL-101', 'border-color: var(--color-equipment-on)')] }
+      ],
+      showLT: sig('LT'), showCmd: sig('CMD'), showPos: sig('POS'), showF2: sig('F2'), showPT: sig('PT'), showF3: sig('F3'),
+      lt: H(240, (i, st) => 0.5 + 0.03 * Math.sin((i + k) * 0.2) + st * 0.06 * (1 - Math.exp(-(i - 58) / 8))),
+      cmd: H(240, (i, st) => 0.68 - st * 0.08 * (1 - Math.exp(-(i - 58) / 6)) + 0.01 * Math.sin((i + k) * 0.3)),
+      pos: H(240, (i, st) => 0.67 - st * 0.07 * (1 - Math.exp(-(i - 58) / 9)) + 0.008 * Math.sin((i + k) * 0.3)),
+      f2: H(240, (i, st) => 0.4 + st * 0.12 + 0.015 * Math.sin((i + k) * 0.4)),
+      pt: H(180, (i, st) => 0.6 - st * 0.08 * (1 - Math.exp(-(i - 58) / 10)) + 0.02 * Math.sin((i + k) * 0.25)),
+      f3: H(180, (i, st) => 0.5 + st * 0.2)
+    };
+  }
+}
+</script>
+</body>
+</html>

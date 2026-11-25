@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>E03 E04 E10 Alarme, forçado e falha</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.abn{border:3px solid #202124}
+.prio{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:2px solid #202124;font-weight:700;font-size:12px}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #dadce0;vertical-align:middle}
+th{font-size:12px;font-weight:600;color:#5f6368}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="process" open="process,monitor" master="connected" status="running" role="membro" alarms="{{ two }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 32px">
+    <section aria-labelledby="ea-al" class="box abn" style="padding: 0">
+      <h2 id="ea-al" style="font-size: 15px; padding: 10px 16px; border-bottom: 1px solid #9aa0a6">E03 · Alarmes ativos (2)</h2>
+      <table>
+        <thead><tr><th style="width: 70px">Prior.</th><th>Alarme</th><th style="width: 160px">Desde</th><th style="width: 200px">Sinal</th></tr></thead>
+        <tbody>
+          <tr><td><span class="prio" style="border-radius: 50%" aria-label="Prioridade alta">1</span></td><td><strong>Watchdog disparado (estado seguro)</strong> · FV-101 aberta, FV-102 fechada</td><td class="mono">t = 1 280,2 s</td><td>Entrada discreta 5</td></tr>
+          <tr><td><span class="prio" aria-label="Prioridade média">2</span></td><td><strong>LSHH-101 · Nível muito alto</strong></td><td class="mono">t = 1 276,9 s</td><td><a href="T07-Faceplate.dc.html">LT-101 · FORÇADO</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 16px">
+      <div class="ph" style="flex: 999 1 640px; min-height: 420px; flex-direction: column; gap: 12px">
+        <span>Sinóptico como em T06, com:</span>
+        <span>• símbolo de prioridade (forma + número) ao lado da tag em alarme, piscando só até ser visto</span>
+        <span>• LT-101 com a marca “FORÇADO” e contorno de valor forçado</span>
+        <span>• PT-101 com “FALHA · 21,0 mA” no lugar do valor</span>
+      </div>
+      <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 16px">
+        <section class="box abn" aria-labelledby="ea-frc" style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="ea-frc" style="font-size: 15px">E04 · Valores forçados (1)</h2>
+          <div style="display: flex; align-items: center; gap: 8px"><span>LT-101 · Nível do tubulão: <strong class="mono">1,000 m</strong></span><button type="button" class="btn" style="margin-left: auto">Liberar</button></div>
+          <p class="muted">O mestre lê este valor no lugar da medição, até ser liberado.</p>
+        </section>
+        <section class="box abn" aria-labelledby="ea-flt" style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="ea-flt" style="font-size: 15px">E10 · Falha de instrumento</h2>
+          <p><strong>PT-101</strong> · falha de eletrônica · corrente 21,0 mA (NAMUR NE43) · valor no Modbus <span class="mono">29376</span></p>
+          <p class="muted">Injetada pelo professor às 09:21. Só aparece aqui se o professor escolheu avisar o aluno (T19).</p>
+        </section>
+      </div>
+    </div>
+    <p class="muted">Codificação dupla (WCAG 1.4.1 e ISA-101): prioridade por forma e número, não só por cor; forçado e falha por texto. As cores entram na parte C.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { two: 2 };
+  }
+}
+</script>
+</body>
+</html>

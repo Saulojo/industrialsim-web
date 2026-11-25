@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T17 Turma e atividades</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:40px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box;width:100%}
+.fld{display:flex;flex-direction:column;gap:4px}
+.tab{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;text-decoration:none;color:#5f6368}
+.tab-on{color:#202124;font-weight:700;box-shadow:inset 0 -3px 0 #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap">
+    <main style="flex: 999 1 700px; min-width: 0; display: flex; flex-direction: column; gap: 16px; padding: 24px">
+      <span class="muted">Turmas ›</span>
+      <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+        <h1 style="font-size: 26px">[Disciplina] · turma A · 2026/2</h1>
+        <span class="box" style="padding: 6px 12px">Código <strong class="mono">K7P-2QX</strong></span>
+        <button type="button" class="btn">Copiar link de convite</button>
+      </div>
+      <nav aria-label="Seções da turma" style="display: flex; gap: 4px; border-bottom: 1px solid #9aa0a6">
+        <a class="tab tab-on" href="#atividades" aria-current="page">Atividades</a><a class="tab" href="#alunos">Alunos · 24</a><a class="tab" href="#ensaios">Ensaios</a>
+      </nav>
+      <article class="box" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+        <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 4px">
+          <strong style="font-size: 16px">Malha de nível LIC-101</strong>
+          <span class="muted">Caldeira com tubulão · plantas por dupla (12) · formato 0–27648 · diagnóstico desligado</span>
+          <span>Agora: 11 rodando · 9 com mestre · <strong>2 com alarme</strong></span>
+        </div>
+        <a class="btn btn-p" href="T18-Painel.dc.html">Acompanhar ao vivo</a>
+        <button type="button" class="btn">Editar</button>
+      </article>
+      <article class="box" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+        <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 4px">
+          <strong style="font-size: 16px">Malha de pressão PIC-101 com falha</strong>
+          <span class="muted">Começa em 30/11 · falha inicial: FT-102 travado</span>
+        </div>
+        <button type="button" class="btn">Editar</button>
+      </article>
+      <section class="box" style="display: flex; flex-direction: column; gap: 6px; border-style: dashed">
+        <span class="lbl" style="color: #202124">Visão do aluno nesta mesma tela</span>
+        <p>O aluno vê as atividades com “Abrir minha planta” (ou “da minha dupla”) no lugar de Acompanhar e Editar, e não vê o código nem as abas Alunos e Ensaios.</p>
+        <a class="btn" href="T06-IHM.dc.html" style="align-self: flex-start">Abrir minha planta</a>
+      </section>
+    </main>
+
+    <aside aria-labelledby="t17-new" style="flex: 0 0 420px; box-sizing: border-box; border-left: 2px solid #5f6368; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+      <h2 id="t17-new" style="font-size: 18px">Nova atividade</h2>
+      <div class="fld"><label for="t17-name">Nome</label><input id="t17-name" class="inp"></div>
+      <div class="fld"><label for="t17-scen">Cenário</label><select id="t17-scen" class="inp"><option>Caldeira com tubulão</option></select></div>
+      <fieldset style="border: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px"><legend style="margin-bottom: 4px">Uma planta para</legend>
+        <label><input type="radio" name="t17-who" checked> cada aluno</label><label><input type="radio" name="t17-who"> cada dupla ou equipe</label></fieldset>
+      <span class="lbl">Configuração inicial</span>
+      <div class="fld"><label for="t17-fmt">Formato analógico</label><select id="t17-fmt" class="inp"><option>0–27648 (Siemens)</option><option>0–10000</option><option>0–32767</option><option>float32</option></select></div>
+      <label><input type="checkbox"> Watchdog ligado</label>
+      <label><input type="checkbox"> Publicar bloco de diagnóstico</label>
+      <div class="fld"><label for="t17-flt">Falha inicial</label><select id="t17-flt" class="inp"><option>Nenhuma</option><option>Sensor aberto em LT-101</option><option>FT-102 travado</option></select></div>
+      <div class="fld"><label for="t17-when">Disponível de / até</label><input id="t17-when" class="inp" placeholder="dd/mm/aaaa hh:mm – dd/mm/aaaa hh:mm"></div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end"><button type="button" class="btn">Cancelar</button><button type="button" class="btn btn-p">Criar atividade</button></div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="t">
+  <title id="t">IndustrialSim Web</title>
+  <!-- Símbolo (conceito B, escolhido em 23/11/2026): balão de instrumento da ISA-5.1 com uma resposta ao degrau.
+       Versão clara: traço em --color-text e curva em --color-accent do tema claro. Só caminhos, sem texto. -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#1A1D21" stroke-width="5"/>
+  <path d="M6 32 H58" fill="none" stroke="#1A1D21" stroke-width="5"/>
+  <path d="M13 26 H21 C25 26 25 13 31 13 C37 13 37 19 51 19" fill="none" stroke="#1C5A91" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

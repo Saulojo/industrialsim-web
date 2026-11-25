@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Avisos da planta</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:20px;height:20px;flex:none;border:3px solid var(--color-border);border-top-color:var(--color-text);border-radius:50%;animation:spin 1s linear infinite}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+.frozen{opacity:.55;filter:grayscale(1);pointer-events:none}
+</style>
+</helmet>
+<div class="app" style="min-height: 1000px">
+  <sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}"><dc-import name="GlobalBar" active="cenarios" user="visitante" hint-size="100%,64px"></dc-import></sc-if>
+  <sc-if value="{{ notExpired }}" hint-placeholder-val="{{ true }}"><dc-import name="PlantBar" tab="process" role="visitante" minutes-left="{{ minutes }}" sim-time="1 311,8 s" hint-size="100%,104px"></dc-import></sc-if>
+  <main class="col" style="gap: 12px; padding: 16px">
+    <div class="row" role="group" aria-label="Escolher o aviso (só no protótipo)" style="gap: 8px">
+      <span class="lbl">Aviso mostrado</span>
+      <sc-for list="{{ choices }}" as="c" hint-placeholder-count="4">
+        <button type="button" class="{{ c.cls }}" aria-pressed="{{ c.on }}" onClick="{{ c.pick }}" style="min-height: 36px; cursor: pointer">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isLimit }}" hint-placeholder-val="{{ true }}">
+      <section class="notice" role="status" aria-labelledby="ec-lim" style="align-items: center">
+        <dc-import name="Icon" icon="clock" size="{{ s20 }}" hint-size="20px,20px"></dc-import>
+        <span class="grow"><strong id="ec-lim">A planta temporária termina em 9 minutos.</strong> Visitantes têm até 60 minutos. Crie uma conta para salvar esta planta com o estado atual e continuar depois.</span>
+        <a class="btn btn-primary" href="T13-Entrar.dc.html">Criar conta e salvar</a>
+        <button type="button" class="btn btn-ghost" onClick="{{ dismiss }}">Agora não</button>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isReconnect }}" hint-placeholder-val="{{ false }}">
+      <section class="notice" role="status" style="align-items: center">
+        <span class="spin" aria-hidden="true"></span>
+        <span><strong>Conexão com o servidor perdida; reconectando…</strong> Os valores na tela estão parados desde 09:21:14. A planta continua rodando no servidor, e o mestre Modbus continua conectado a ela.</span>
+      </section>
+      <p class="hint">Aparece só depois de 1 s sem reconectar, para não piscar em quedas curtas.</p>
+    </sc-if>
+
+    <sc-if value="{{ isPage }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; justify-content: center; padding: 48px 0">
+        <section class="card col" role="alert" aria-labelledby="ec-t" style="max-width: 640px; gap: 14px; padding: 28px; border: 2px solid var(--color-text)">
+          <h1 id="ec-t" class="h2">{{ pageTitle }}</h1>
+          <p>{{ pageText }}</p>
+          <div class="row" style="gap: 12px">
+            <sc-if value="{{ isVersion }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-primary"><dc-import name="Icon" icon="rotate" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Recarregar a página</button></sc-if>
+            <sc-if value="{{ isExpired }}" hint-placeholder-val="{{ false }}"><a class="btn btn-primary" href="T03-Cenarios.dc.html">Abrir outra planta</a><a class="btn" href="T13-Entrar.dc.html">Entrar ou criar conta</a></sc-if>
+          </div>
+        </section>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showPlant }}" hint-placeholder-val="{{ true }}">
+      <div class="{{ plantCls }}">
+        <section class="panel col" style="gap: 8px; background: var(--color-bg)">
+          <h2 class="panel-title">Caldeira · tubulão TB-101</h2>
+          <div class="row" style="gap: 32px; padding: 24px 8px">
+            <div class="col"><span class="muted small mono">LT-101 · nível</span><span class="mono h3">0,601 m</span></div>
+            <div class="col"><span class="muted small mono">PT-101 · pressão</span><span class="mono h3">10,02 bar</span></div>
+            <div class="col"><span class="muted small mono">FT-101 · água</span><span class="mono h3">1,99 kg/s</span></div>
+            <div class="col"><span class="muted small mono">FT-102 · vapor</span><span class="mono h3">2,00 kg/s</span></div>
+          </div>
+          <p class="hint">Sinóptico resumido: o desenho completo está na tela Processo (T06).</p>
+        </section>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"estado":{"editor":"enum","options":["limite","reconectando","versao","expirada"],"default":"limite"},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { st: null, dismissed: false };
+  }
+  renderVals() {
+    const st = this.state.st ?? this.props.estado ?? 'limite';
+    const defs = [['limite', 'E08 · Visitante perto do limite'], ['reconectando', 'E06 · Reconectando'], ['versao', 'E06 · Versão incompatível'], ['expirada', 'E06 · Planta encerrada']];
+    const page = st === 'versao' || st === 'expirada';
+    return {
+      s18: 18, s20: 20,
+      minutes: st === 'limite' ? '9' : '52',
+      choices: defs.map(([id, label]) => ({ label, on: st === id ? 'true' : 'false', cls: st === id ? 'chip is-on' : 'chip', pick: () => this.setState({ st: id, dismissed: false }) })),
+      isLimit: st === 'limite' && !this.state.dismissed,
+      isReconnect: st === 'reconectando',
+      isPage: page, isVersion: st === 'versao', isExpired: st === 'expirada', notExpired: st !== 'expirada',
+      showPlant: !page,
+      plantCls: st === 'reconectando' ? 'frozen' : '',
+      pageTitle: st === 'versao' ? 'O site foi atualizado' : 'Esta planta não existe mais',
+      pageText: st === 'versao'
+        ? 'Esta página usa a versão 2 do protocolo, mas o servidor já usa a versão 3. Recarregue a página para carregar a versão atual. A planta continua rodando.'
+        : 'Ela pode ter expirado (sem ninguém nem mestre conectado por 30 minutos) ou chegado ao limite de 60 minutos de visitante. Com conta, as plantas hibernam em vez de expirar.',
+      dismiss: () => this.setState({ dismissed: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

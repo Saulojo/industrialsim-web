@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cor na IHM</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1C5A91}a:hover{color:#154773}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 1000px; box-sizing: border-box; padding: 40px; background: #E9EBED; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #1A1D21; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 32px; font-weight: 600">Cor na IHM · ISA-101</h1>
+    <p style="margin: 0; color: #4D555D; max-width: 980px">O normal é cinza; só o anormal tem cor, e sempre com um segundo sinal (forma, número ou texto). Prioridades de alarme por exemplo: o cenário ainda não define prioridade (pergunta aberta 6 do mapa de telas).</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+      <section style="{{ th.panel }}">
+        <span style="{{ th.label }}">{{ th.name }}</span>
+        <sc-for list="{{ th.tiles }}" as="t" hint-placeholder-count="7">
+          <div style="{{ t.row }}">
+            <span style="width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center">
+              <sc-if value="{{ t.circle }}" hint-placeholder-val="{{ false }}">
+                <svg width="30" height="30" viewBox="0 0 30 30" role="img" aria-label="Prioridade 1"><circle cx="15" cy="15" r="13" fill="{{ t.fill }}" stroke="{{ t.edge }}" stroke-width="1.5"></circle><text x="15" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="{{ t.on }}">1</text></svg>
+              </sc-if>
+              <sc-if value="{{ t.triangle }}" hint-placeholder-val="{{ false }}">
+                <svg width="32" height="30" viewBox="0 0 32 30" role="img" aria-label="Prioridade 2"><path d="M16 2 L30 28 H2 Z" fill="{{ t.fill }}" stroke="{{ t.edge }}" stroke-width="1.5" stroke-linejoin="round"></path><text x="16" y="24" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="600" fill="{{ t.on }}">2</text></svg>
+              </sc-if>
+              <sc-if value="{{ t.square }}" hint-placeholder-val="{{ false }}">
+                <svg width="30" height="30" viewBox="0 0 30 30" role="img" aria-label="Prioridade 3"><rect x="3" y="3" width="24" height="24" rx="2" fill="{{ t.fill }}" stroke="{{ t.edge }}" stroke-width="1.5"></rect><text x="15" y="20" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="14" font-weight="600" fill="{{ t.on }}">3</text></svg>
+              </sc-if>
+            </span>
+            <span style="flex: 1; display: flex; flex-direction: column">
+              <span style="{{ t.tagStyle }}">{{ t.tag }}</span>
+              <span style="{{ t.noteStyle }}">{{ t.note }}</span>
+            </span>
+            <span style="{{ t.valueStyle }}">{{ t.value }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const palettes = [
+      { name: 'Tema claro', c: { bg: '#E9EBED', surface: '#FFFFFF', border: '#CDD2D7', borderStrong: '#6E7780', text: '#1A1D21', muted: '#4D555D',
+        a1: '#C8102E', a1on: '#FFFFFF', a1text: '#B00020', a1surf: '#FDE8EA', a1edge: '#C8102E',
+        a2: '#F28C00', a2on: '#1A1D21', a2text: '#954700', a2surf: '#FFF0DC', a2edge: '#1A1D21',
+        a3: '#F5D000', a3on: '#1A1D21', a3text: '#6B5800', a3surf: '#FFF8D6', a3edge: '#1A1D21',
+        forced: '#8E2A7A', forcedSurf: '#F6E6F3', fault: '#006B73', faultSurf: '#E0F2F3' } },
+      { name: 'Tema escuro', c: { bg: '#121518', surface: '#1C2024', border: '#353B42', borderStrong: '#7C858E', text: '#E7EAED', muted: '#A7AFB7',
+        a1: '#FF5C5C', a1on: '#121518', a1text: '#FF8A80', a1surf: '#3D1A1C', a1edge: '#FF5C5C',
+        a2: '#FF9F1A', a2on: '#121518', a2text: '#FFB45C', a2surf: '#3A2610', a2edge: '#FF9F1A',
+        a3: '#F5D000', a3on: '#121518', a3text: '#F2D64B', a3surf: '#33300F', a3edge: '#F5D000',
+        forced: '#E59AD6', forcedSurf: '#3A1D35', fault: '#5CCFD8', faultSurf: '#12343A' } }
+    ];
+    const mono = "font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 18px; white-space: nowrap;";
+    const themes = palettes.map(({ name, c }) => {
+      const row = (bg, border) => 'display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; background: ' + bg + '; border: ' + border + ';';
+      const t = (o) => ({ circle: false, triangle: false, square: false, fill: '', edge: '', on: '', ...o });
+      return {
+        name,
+        panel: 'display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 12px; background: ' + c.bg + '; border: 1px solid ' + c.border + ';',
+        label: 'font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: ' + c.muted + ';',
+        tiles: [
+          t({ row: row(c.surface, '1px solid ' + c.border), tag: 'LT-101 · Nível do tubulão', note: 'Normal: sem cor', value: '0,600 m',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; color: ' + c.muted, valueStyle: mono + ' color: ' + c.text }),
+          t({ circle: true, fill: c.a1, edge: c.a1edge, on: c.a1on, row: row(c.a1surf, '1px solid ' + c.a1edge), tag: 'Watchdog disparado', note: 'Alarme · prioridade 1 (exemplo)', value: 'ALARME',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; color: ' + c.a1text, valueStyle: mono + ' color: ' + c.a1text }),
+          t({ triangle: true, fill: c.a2, edge: c.a2edge, on: c.a2on, row: row(c.a2surf, '1px solid ' + c.border), tag: 'LSHH-101 · Nível muito alto', note: 'Alarme · prioridade 2 (exemplo)', value: 'ALARME',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; color: ' + c.a2text, valueStyle: mono + ' color: ' + c.a2text }),
+          t({ square: true, fill: c.a3, edge: c.a3edge, on: c.a3on, row: row(c.a3surf, '1px solid ' + c.border), tag: 'PSV-101 · Válvula de alívio aberta', note: 'Alarme · prioridade 3 (exemplo)', value: 'ALARME',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; color: ' + c.a3text, valueStyle: mono + ' color: ' + c.a3text }),
+          t({ row: row(c.forcedSurf, '2px solid ' + c.forced), tag: 'LT-101 · Nível do tubulão', note: 'FORÇADO: o mestre lê este valor', value: '1,000 m',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; font-weight: 600; color: ' + c.forced, valueStyle: mono + ' color: ' + c.forced }),
+          t({ row: row(c.faultSurf, '2px dashed ' + c.fault), tag: 'PT-101 · Pressão do vapor', note: 'FALHA de instrumento (NAMUR NE43)', value: '21,0 mA',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; font-weight: 600; color: ' + c.fault, valueStyle: mono + ' color: ' + c.fault }),
+          t({ row: row(c.surface, '2px solid ' + c.borderStrong), tag: 'Planta PAUSADA', note: 'Estado anormal sem cor própria: texto e borda', value: '1 284,6 s',
+            tagStyle: 'font-weight: 600; color: ' + c.text, noteStyle: 'font-size: 13px; color: ' + c.muted, valueStyle: mono + ' color: ' + c.text })
+        ]
+      };
+    });
+    return { themes };
+  }
+}
+</script>
+</body>
+</html>

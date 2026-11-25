@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Planta · Conexão</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="min-height: 1100px">
+  <dc-import name="PlantBar" tab="connection" open="{{ openTabs }}" master="{{ masterState }}" role="{{ role }}" pending-text="{{ pendingText }}" hint-size="100%,104px"></dc-import>
+  <main style="display: flex; flex-wrap: wrap; gap: 16px; padding: 16px">
+    <div class="col" style="flex: 999 1 640px; min-width: 0; gap: 16px">
+      <section class="panel col" aria-labelledby="c-data" style="gap: 14px">
+        <h2 id="c-data" class="h3">Dados para configurar no seu mestre</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+          <div class="col" style="gap: 4px"><span class="lbl">Servidor</span><span class="mono" style="font-size: 22px; font-weight: 600">192.168.10.20</span><button type="button" class="btn btn-sm" style="align-self: flex-start" onClick="{{ copyIp }}"><dc-import name="Icon" icon="copy" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Copiar</button></div>
+          <div class="col" style="gap: 4px"><span class="lbl">Porta</span><span class="mono" style="font-size: 22px; font-weight: 600">15003</span><button type="button" class="btn btn-sm" style="align-self: flex-start" onClick="{{ copyPort }}"><dc-import name="Icon" icon="copy" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Copiar</button></div>
+          <div class="col" style="gap: 4px"><span class="lbl">Unit ID</span><span class="mono" style="font-size: 22px; font-weight: 600">1</span><a href="T08-Configuracoes.dc.html" class="small">Mudar em Configurações</a></div>
+          <div class="col" style="gap: 4px"><span class="lbl">Formato analógico</span><span style="font-size: 16px; font-weight: 600">0–27648 (Siemens)</span><a href="T08-Configuracoes.dc.html" class="small">Mudar em Configurações</a></div>
+        </div>
+        <p class="hint">Endereços em base 0 (CODESYS, OpenPLC, pymodbus) ou na notação clássica (MB_CLIENT e muitos SCADAs: coil 0 = 1, input register 0 = 30001). <a href="T11-MapaIO.dc.html">Ver o mapa de I/O</a></p>
+      </section>
+
+      <section class="panel col" aria-labelledby="c-guide" style="gap: 14px">
+        <h2 id="c-guide" class="h3">Como conectar</h2>
+        <div role="tablist" aria-label="Escolha o seu mestre" class="row" style="gap: 8px">
+          <sc-for list="{{ guides }}" as="g" hint-placeholder-count="4">
+            <button type="button" role="tab" aria-selected="{{ g.on }}" class="{{ g.cls }}" onClick="{{ g.pick }}">{{ g.label }}</button>
+          </sc-for>
+        </div>
+        <ol class="col" style="gap: 8px; margin: 0; padding-left: 22px">
+          <sc-for list="{{ steps }}" as="st" hint-placeholder-count="4"><li>{{ st.text }}</li></sc-for>
+        </ol>
+        <a href="#ajuda">Guia completo: {{ guideName }}</a>
+      </section>
+    </div>
+
+    <div class="col" style="flex: 1 1 380px; gap: 16px">
+      <sc-if value="{{ connected }}" hint-placeholder-val="{{ true }}">
+        <section class="panel col" aria-labelledby="c-auth" style="gap: 8px">
+          <h2 id="c-auth" class="panel-title">Mestres autorizados</h2>
+          <p class="hint">Modo: vários ao mesmo tempo · <a href="T08-Configuracoes.dc.html">mudar</a></p>
+          <table class="table"><thead><tr><th>IP</th><th>Desde</th><th><span class="sr">Ação</span></th></tr></thead>
+            <tbody><tr><td class="mono">200.18.4.42</td><td>09:12</td><td style="text-align: right"><button type="button" class="btn btn-sm">Retirar…</button></td></tr></tbody></table>
+        </section>
+        <section class="panel col" aria-labelledby="c-conn" style="gap: 8px">
+          <h2 id="c-conn" class="panel-title">Conexões abertas</h2>
+          <table class="table"><thead><tr><th>Origem</th><th class="num">Req/s</th><th class="num">Exceções</th></tr></thead>
+            <tbody><tr><td class="mono">200.18.4.42:50109</td><td class="num">20</td><td class="num">0</td></tr></tbody></table>
+          <p class="hint">Requisições atendidas: <span class="mono">18 422</span></p>
+        </section>
+      </sc-if>
+      <sc-if value="{{ waiting }}" hint-placeholder-val="{{ false }}">
+        <section class="panel col" aria-labelledby="c-wait" style="gap: 10px">
+          <h2 id="c-wait" class="panel-title">Aguardando o seu mestre</h2>
+          <div class="row" style="gap: 12px"><span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--color-border); border-top-color: var(--color-accent)"></span><span>Nenhuma conexão ainda. Quando o mestre conectar, aparece aqui um pedido para você aceitar.</span></div>
+          <sc-if value="{{ refused }}" hint-placeholder-val="{{ false }}"><p class="hint">Você recusou 200.18.4.42. Ele fica bloqueado por 60 s.</p></sc-if>
+        </section>
+      </sc-if>
+      <section class="panel col" aria-labelledby="c-help" style="gap: 6px">
+        <h2 id="c-help" class="panel-title">Não conecta?</h2>
+        <p class="muted">O pedido não apareceu: confira o IP e a porta, e se a rede libera a porta 15003. Mestre conectado mas sem dados: veja as exceções no <a href="T10-Log.dc.html">log</a> (Unit ID errado aparece como exceção 11).</p>
+      </section>
+    </div>
+  </main>
+
+  <sc-if value="{{ dialog }}" hint-placeholder-val="{{ false }}">
+    <div class="scrim" style="position: fixed; overflow-y: auto">
+      <section role="alertdialog" aria-modal="true" aria-labelledby="pd-t" aria-describedby="pd-d" class="dialog" style="width: 540px">
+        <div class="row" style="gap: 10px"><dc-import name="Icon" icon="plug" size="{{ s24 }}" hint-size="24px,24px"></dc-import><h2 id="pd-t" class="h3">Pedido de conexão Modbus</h2></div>
+        <p id="pd-d" style="font-size: 18px">Aceitar conexão de <strong class="mono">200.18.4.42</strong>?</p>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px">
+          <span class="muted">Porta da planta</span><span class="mono">15003</span>
+          <span class="muted">Chegou às</span><span class="mono">09:12:07</span>
+          <span class="muted">Fecha sozinho em</span><strong class="mono">{{ secs }} s</strong>
+        </div>
+        <p class="hint">Aceite só se for o seu mestre. Não sabe o IP do seu mestre? É o IP público da rede onde ele está; em caso de dúvida, recuse e veja o log.</p>
+        <div class="row" style="justify-content: flex-end; gap: 12px">
+          <button type="button" class="btn" onClick="{{ refuse }}">Recusar</button>
+          <a class="btn btn-primary" href="T06-IHM.dc.html">Aceitar</a>
+        </div>
+      </section>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+    <div class="toast" role="status" style="position: fixed; top: 24px; bottom: auto"><dc-import name="Icon" icon="check" size="{{ s18 }}" hint-size="18px,18px"></dc-import>{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pairing":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { guide: 'codesys', pending: false, secs: 60, refused: false, toast: '' };
+  }
+  isPairing() {
+    const v = this.props.pairing;
+    return v === true || v === 'sim' || v === 'true';
+  }
+  componentDidMount() {
+    if (this.isPairing()) {
+      this.arrive = setTimeout(() => this.setState({ pending: true, secs: 60 }), 6000);
+      this.tick = setInterval(() => {
+        if (!this.state.pending) return;
+        if (this.state.secs > 1) { this.setState({ secs: this.state.secs - 1 }); return; }
+        // Sem resposta no prazo: a conexão é fechada e o mestre tenta de novo logo depois.
+        this.setState({ pending: false, secs: 60 });
+        this.retry = setTimeout(() => this.setState({ pending: true, secs: 60 }), 6000);
+      }, 1000);
+    }
+  }
+  componentWillUnmount() {
+    clearTimeout(this.arrive);
+    clearInterval(this.tick);
+    clearTimeout(this.retry);
+    clearTimeout(this.toastTimer);
+  }
+  showToast(text) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: text });
+    this.toastTimer = setTimeout(() => this.setState({ toast: '' }), 3000);
+  }
+  renderVals() {
+    const s = this.state;
+    const pairing = this.isPairing();
+    const G = {
+      codesys: ['CODESYS', [
+        'No dispositivo Ethernet, adicione um Modbus TCP Client (“Master” antes da V3.5 SP22) e marque Reconexão automática.',
+        'Embaixo dele, adicione um Modbus TCP Server com o IP 192.168.10.20 e a porta 15003; o Unit-ID (1) fica na aba de parâmetros.',
+        'Crie os canais em base 0: Read Input Registers 0 a 5, Write Single Register 0 e 10, Write Single Coil 0.',
+        'Baixe e rode o programa. Nesta página, aceite o pedido de conexão do seu IP.'
+      ]],
+      openplc: ['OpenPLC', [
+        'No OpenPLC Editor, crie um Remote Device com protocolo Modbus, transporte TCP/IP.',
+        'Use o IP 192.168.10.20, a porta 15003 e o Slave ID 1.',
+        'Em IO Tag Mapping, leia os input registers 0 a 5 (função 4) e escreva o holding register 0, o 10 e o coil 0.',
+        'Rode no OpenPLC Runtime v4 (o Simulator do Editor não abre conexões TCP) e aceite o pedido nesta página.'
+      ]],
+      tia: ['TIA Portal · MB_CLIENT', [
+        'Crie uma variável TCON_IP_v4 com o IP 192.168.10.20 e a porta 15003 para cada MB_CLIENT.',
+        'O MB_CLIENT usa o Unit ID 255 por padrão: ponha MB_UNIT_ID := 1 no DB de instância, ou mude o Unit ID da planta para 255 em Configurações.',
+        'Endereços na notação clássica: input registers a partir de 30001, holding registers a partir de 40001.',
+        'Baixe o programa e aceite o pedido de conexão nesta página.'
+      ]],
+      python: ['Python · pymodbus', [
+        'Instale o pymodbus e crie um ModbusTcpClient para 192.168.10.20, porta 15003.',
+        'Leia os input registers 0 a 5 e escreva o holding register 0 (FV-101) e o 10 (heartbeat), com device_id=1 (slave=1 antes da versão 3.10).',
+        'Rode o script e aceite o pedido de conexão nesta página.'
+      ]]
+    };
+    const guides = Object.keys(G).map((id) => ({
+      label: G[id][0], on: s.guide === id ? 'true' : 'false',
+      cls: s.guide === id ? 'btn btn-sm btn-primary' : 'btn btn-sm',
+      pick: () => this.setState({ guide: id })
+    }));
+    const connected = !pairing;
+    return {
+      s16: 16, s18: 18, s24: 24,
+      role: this.props.role ?? 'visitante',
+      openTabs: 'process,trends,connection',
+      masterState: connected ? 'connected' : (s.pending ? 'pending' : 'none'),
+      pendingText: 'Pedido de conexão de 200.18.4.42 · ' + s.secs + ' s',
+      guides,
+      steps: G[s.guide][1].map((text) => ({ text })),
+      guideName: G[s.guide][0],
+      connected, waiting: !connected,
+      refused: s.refused,
+      dialog: pairing && s.pending,
+      secs: s.secs,
+      refuse: () => {
+        this.setState({ pending: false, refused: true });
+        this.showToast('Conexão de 200.18.4.42 recusada');
+        // O IP fica bloqueado por 60 s; depois o mestre tenta de novo e o pedido volta.
+        clearTimeout(this.retry);
+        this.retry = setTimeout(() => this.setState({ pending: true, secs: 60, refused: false }), 60000);
+      },
+      copyIp: () => this.showToast('Endereço do servidor copiado'),
+      copyPort: () => this.showToast('Porta copiada'),
+      hasToast: s.toast !== '', toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

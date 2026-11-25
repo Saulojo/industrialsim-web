@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T12 Configurador HART</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:40px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.fld{display:flex;flex-direction:column;gap:4px}
+.inst{display:flex;flex-direction:column;padding:10px 12px;border-bottom:1px solid #eceff1;text-decoration:none}
+.inst-on{background:#e8eaed;box-shadow:inset 4px 0 0 #202124}
+.tab{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;color:#5f6368}
+.tab-on{color:#202124;font-weight:700;box-shadow:inset 0 -3px 0 #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="instruments" open="process,monitor,instruments" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 24px 32px">
+    <nav aria-label="Instrumentos HART" class="box" style="flex: 0 0 240px; padding: 0">
+      <span class="lbl" style="display: block; padding: 10px 12px">Instrumentos · HART 7</span>
+      <a class="inst" href="#"><strong>LT-101</strong><span class="muted">Nível · endereço 1</span></a>
+      <a class="inst inst-on" href="#" aria-current="true"><strong>PT-101</strong><span class="muted">Pressão · endereço 2</span></a>
+      <a class="inst" href="#"><strong>FT-101</strong><span class="muted">Vazão de água · endereço 3</span></a>
+      <a class="inst" href="#" style="border-bottom: none"><strong>FT-102</strong><span class="muted">Vazão de vapor · endereço 4</span></a>
+    </nav>
+
+    <section class="box" aria-labelledby="t12-title" style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+        <h2 id="t12-title" style="font-size: 18px">PT-101 · Pressão do vapor</h2>
+        <span class="muted">PV <span class="mono">10,00 bar</span> · <span class="mono">14,00 mA</span> · status: normal</span>
+        <button type="button" class="btn" style="margin-left: auto">Ler tudo</button>
+      </div>
+      <nav aria-label="Grupos de parâmetros" style="display: flex; gap: 4px; border-bottom: 1px solid #9aa0a6">
+        <span class="tab">Identificação</span><span class="tab tab-on">Faixa e unidade</span><span class="tab">Teste de malha</span><span class="tab">Trim</span><span class="tab">Status</span>
+      </nav>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+        <div class="fld"><label for="t12-lrv">LRV (4 mA)</label><div><input id="t12-lrv" class="inp" value="0,00" style="width: 140px"> bar</div></div>
+        <div class="fld"><label for="t12-urv">URV (20 mA)</label><div><input id="t12-urv" class="inp" value="16,00" style="width: 140px"> bar</div></div>
+        <div class="fld"><label for="t12-unit">Unidade da PV</label><select id="t12-unit" class="inp"><option>bar</option><option>kPa</option><option>psi</option></select></div>
+        <div class="fld"><label for="t12-damp">Amortecimento</label><div><input id="t12-damp" class="inp" value="0,2" style="width: 140px"> s</div></div>
+        <div class="fld"><label for="t12-tf">Função de transferência</label><select id="t12-tf" class="inp"><option>Linear</option></select></div>
+      </div>
+      <p class="muted">Mudar a faixa muda a corrente e o valor que o mestre lê (comandos 35, 36, 37). A unidade só muda o que o HART reporta.</p>
+      <div style="display: flex; gap: 8px; justify-content: flex-end"><button type="button" class="btn">Desfazer</button><button type="button" class="btn btn-p">Gravar no instrumento</button></div>
+    </section>
+
+    <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 16px">
+      <section class="box" aria-labelledby="t12-frames" style="display: flex; flex-direction: column; gap: 8px">
+        <div style="display: flex; align-items: center"><h2 id="t12-frames" style="font-size: 16px">Quadros trocados</h2><label style="margin-left: auto"><input type="checkbox" checked> Modo didático</label></div>
+        <div class="mono" style="font-size: 12px; background: #f1f3f4; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px">
+          <span>→ cmd 35 · [preâmbulo][delim.][endereço][cmd][nº bytes][dados][checksum]</span>
+          <span>← cmd 35 · [resposta em hexadecimal, campo a campo]</span>
+        </div>
+        <p class="muted" style="font-size: 12px">Cada campo do quadro com nome ao passar o mouse.</p>
+      </section>
+      <section class="box" aria-labelledby="t12-bridge" style="display: flex; flex-direction: column; gap: 8px">
+        <h2 id="t12-bridge" style="font-size: 16px">Ponte para o PACTware</h2>
+        <p class="muted">Liga uma porta COM virtual (com0com) a esta planta pela Web Serial: 1200 baud, 8 bits, paridade ímpar, 1 stop bit. Só Chrome e Edge.</p>
+        <div style="display: flex; gap: 8px; align-items: center"><button type="button" class="btn">Escolher porta COM…</button><span class="muted">Desligada</span></div>
+        <a href="#ajuda">Guia: PACTware com com0com</a>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

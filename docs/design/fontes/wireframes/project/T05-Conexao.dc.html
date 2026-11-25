@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T05 Conexão do mestre</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-s{min-height:36px;padding:0 12px}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #dadce0;vertical-align:middle}
+th{font-size:12px;font-weight:600;color:#5f6368}
+.tab{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid #9aa0a6;border-radius:6px;background:#fff}
+.tab-on{border:2px solid #202124;font-weight:700}
+ol{margin:0;padding-left:20px}
+li{margin:4px 0}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="connection" open="process,connection" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-wrap: wrap; gap: 16px; padding: 16px 24px 32px">
+    <div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+      <section class="box" aria-labelledby="t05-data" style="display: flex; flex-direction: column; gap: 14px">
+        <h2 id="t05-data" style="font-size: 18px">Dados para configurar no seu mestre</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+          <div><span class="lbl">Servidor</span><br><span class="mono" style="font-size: 20px">192.168.10.20</span><br><button type="button" class="btn btn-s">Copiar</button></div>
+          <div><span class="lbl">Porta</span><br><span class="mono" style="font-size: 20px">15003</span><br><button type="button" class="btn btn-s">Copiar</button></div>
+          <div><span class="lbl">Unit ID</span><br><span class="mono" style="font-size: 20px">1</span><br><a href="T08-Configuracoes.dc.html">Mudar</a></div>
+          <div><span class="lbl">Formato analógico</span><br><span>0–27648 (Siemens)</span><br><a href="T08-Configuracoes.dc.html">Mudar</a></div>
+        </div>
+        <p class="muted">Endereços: base 0 (CODESYS, pymodbus) ou notação clássica (MB_CLIENT, muitos SCADAs: coil 0 = 1, input register 0 = 30001). <a href="T11-MapaIO.dc.html">Ver o mapa de I/O</a></p>
+      </section>
+
+      <section class="box" aria-labelledby="t05-guide" style="display: flex; flex-direction: column; gap: 12px">
+        <h2 id="t05-guide" style="font-size: 18px">Como conectar</h2>
+        <div role="tablist" aria-label="Mestre" style="display: flex; gap: 8px; flex-wrap: wrap">
+          <button type="button" role="tab" aria-selected="true" class="tab tab-on">CODESYS</button>
+          <button type="button" role="tab" aria-selected="false" class="tab">OpenPLC</button>
+          <button type="button" role="tab" aria-selected="false" class="tab">TIA Portal · MB_CLIENT</button>
+          <button type="button" role="tab" aria-selected="false" class="tab">Python · pymodbus</button>
+          <button type="button" role="tab" aria-selected="false" class="tab">Outro</button>
+        </div>
+        <ol>
+          <li>No CODESYS, adicione um <em>Modbus TCP Client</em> (“Master” antes da V3.5 SP22) e um <em>Modbus TCP Server Device</em> embaixo dele.</li>
+          <li>No dispositivo, use o IP <span class="mono">192.168.10.20</span>, a porta <span class="mono">15003</span> e o Unit ID <span class="mono">1</span>.</li>
+          <li>Crie os canais: coil 0, entradas discretas 0–5, holding registers 0–1 e 10, input registers 0–5 (base 0).</li>
+          <li>Baixe e rode o programa. Nesta página, aceite o pedido de conexão do seu IP.</li>
+        </ol>
+        <a href="#ajuda">Guia completo do CODESYS</a>
+      </section>
+    </div>
+
+    <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 16px">
+      <section class="box" aria-labelledby="t05-auth">
+        <h2 id="t05-auth" style="font-size: 16px; margin-bottom: 4px">Mestres autorizados</h2>
+        <p class="muted" style="margin-bottom: 8px">Modo: vários ao mesmo tempo · <a href="T08-Configuracoes.dc.html">mudar</a></p>
+        <table>
+          <thead><tr><th>IP</th><th>Desde</th><th><span style="position: absolute; left: -9999px">Ação</span></th></tr></thead>
+          <tbody><tr><td class="mono">200.18.4.42</td><td>09:12</td><td style="text-align: right"><button type="button" class="btn btn-s">Retirar…</button></td></tr></tbody>
+        </table>
+      </section>
+      <section class="box" aria-labelledby="t05-conn">
+        <h2 id="t05-conn" style="font-size: 16px; margin-bottom: 8px">Conexões abertas</h2>
+        <table>
+          <thead><tr><th>Origem</th><th>Req/s</th><th>Exceções</th></tr></thead>
+          <tbody><tr><td class="mono">200.18.4.42:50109</td><td class="mono">20</td><td class="mono">0</td></tr></tbody>
+        </table>
+        <p class="muted" style="margin-top: 8px">Requisições atendidas: <span class="mono">18 422</span></p>
+      </section>
+      <section class="box" aria-labelledby="t05-help" style="display: flex; flex-direction: column; gap: 6px">
+        <h2 id="t05-help" style="font-size: 16px">Não conecta?</h2>
+        <p class="muted">O pedido não apareceu: confira IP e porta e se a rede libera a porta 15003. Mestre conectado mas sem dados: veja exceções no <a href="T10-Log.dc.html">log</a> (Unit ID errado aparece como exceção 11).</p>
+        <a href="T05b-Pareamento.dc.html" class="muted" style="font-size: 12px">(protótipo) simular um pedido de conexão</a>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

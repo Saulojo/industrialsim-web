@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Barra da planta com abas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+</style>
+</helmet>
+<div style="box-sizing: border-box; font-family: system-ui, sans-serif; font-size: 14px; color: #202124; background: #fff; border-bottom: 1px solid #9aa0a6">
+  <div style="display: flex; align-items: flex-end; gap: 4px; padding: 6px 12px 0; background: #dadce0; flex-wrap: wrap">
+    <a href="{{ homeHref }}" aria-label="{{ homeLabel }}" title="{{ homeLabel }}" style="width: 40px; height: 36px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 6px; margin-bottom: 4px; font-size: 18px">⌂</a>
+    <a href="T24-MenuPlanta.dc.html" style="height: 36px; display: inline-flex; align-items: center; gap: 6px; padding: 0 10px; margin: 0 8px 4px 0; text-decoration: none; border-radius: 6px; font-weight: 700">{{ plantName }} <span aria-hidden="true">▾</span></a>
+    <nav aria-label="Abas da planta" style="display: flex; align-items: flex-end; gap: 2px; flex-wrap: wrap">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+        <span style="{{ t.style }}">
+          <a href="{{ t.href }}" aria-current="{{ t.current }}" style="text-decoration: none; padding: 0 4px">{{ t.label }}</a>
+          <sc-if value="{{ t.closable }}" hint-placeholder-val="{{ true }}">
+            <button type="button" aria-label="Fechar aba {{ t.label }}" style="width: 24px; height: 24px; border: none; border-radius: 12px; background: transparent; font: inherit; color: #5f6368">×</button>
+          </sc-if>
+        </span>
+      </sc-for>
+      <a href="T23-NovaAba.dc.html" aria-label="Abrir nova aba" title="Abrir nova aba" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; border-radius: 6px; margin-bottom: 2px; font-size: 20px">+</a>
+    </nav>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 8px 16px">
+    <span style="{{ masterStyle }}">{{ masterText }}</span>
+    <span style="color: #5f6368">Situação: <strong style="{{ statusStyle }}">{{ statusText }}</strong></span>
+    <span style="color: #5f6368">Tempo simulado: <span style="font-family: ui-monospace, Consolas, monospace; color: #202124">1 284,6 s</span></span>
+    <span style="{{ alarmStyle }}">Alarmes ativos: {{ alarms }}</span>
+    <sc-if value="{{ isVisitor }}" hint-placeholder-val="{{ false }}">
+      <span style="border: 1px dashed #5f6368; border-radius: 4px; padding: 2px 8px">Visitante · 52 min restantes</span>
+    </sc-if>
+    <sc-if value="{{ isObserver }}" hint-placeholder-val="{{ false }}">
+      <span style="border: 1px solid #5f6368; border-radius: 4px; padding: 2px 8px">Observando (turma)</span>
+    </sc-if>
+    <div style="margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap">
+      <button type="button" disabled="{{ isObserver }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #5f6368; border-radius: 6px; background: #fff; font: inherit">{{ pauseLabel }}</button>
+      <button type="button" disabled="{{ isObserver }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #5f6368; border-radius: 6px; background: #fff; font: inherit">Reiniciar…</button>
+      <button type="button" style="min-height: 36px; padding: 0 12px; border: 1px solid #5f6368; border-radius: 6px; background: #fff; font: inherit">Exportar ▾</button>
+      <sc-if value="{{ canShare }}" hint-placeholder-val="{{ true }}">
+        <a href="T15-Compartilhar.dc.html" style="min-height: 36px; display: inline-flex; align-items: center; padding: 0 12px; border: 2px solid #202124; border-radius: 6px; text-decoration: none; font-weight: 600">Compartilhar</a>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["process","trends","connection","settings","monitor","log","instruments","program","LT-101"],"default":"process"},"open":{"editor":"text","default":"process,connection,monitor"},"master":{"editor":"enum","options":["none","pending","connected","error"],"default":"connected"},"status":{"editor":"enum","options":["running","paused"],"default":"running"},"role":{"editor":"enum","options":["visitante","membro","observador"],"default":"membro"},"alarms":{"editor":"int","default":0},"$preview":{"width":1440,"height":100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tab = this.props.tab ?? 'process';
+    const open = String(this.props.open ?? 'process,connection,monitor').split(',').map((s) => s.trim()).filter(Boolean);
+    const master = this.props.master ?? 'connected';
+    const status = this.props.status ?? 'running';
+    const role = this.props.role ?? 'membro';
+    const alarms = Number(this.props.alarms ?? 0);
+    const defs = {
+      process: ['Processo', 'T06-IHM.dc.html'],
+      trends: ['Gráficos', 'T25-Graficos.dc.html'],
+      connection: ['Conexão', 'T05-Conexao.dc.html'],
+      settings: ['Configurações', 'T08-Configuracoes.dc.html'],
+      monitor: ['Monitor', 'T09-Monitor.dc.html'],
+      log: ['Log', 'T10-Log.dc.html'],
+      instruments: ['Instrumentos HART', 'T12-HART.dc.html'],
+      program: ['Programa', 'T22-Ladder.dc.html'],
+      'LT-101': ['LT-101', 'T07-Faceplate.dc.html']
+    };
+    if (!open.includes('process')) open.unshift('process');
+    if (!open.includes(tab)) open.push(tab);
+    const base = 'display: inline-flex; align-items: center; gap: 2px; height: 38px; padding: 0 6px 0 10px; border-radius: 8px 8px 0 0; min-width: 96px;';
+    const tabs = open.filter((id) => defs[id]).map((id) => ({
+      label: defs[id][0],
+      href: defs[id][1],
+      closable: id !== 'process',
+      current: id === tab ? 'page' : 'false',
+      style: base + (id === tab ? ' background: #fff; font-weight: 700;' : ' background: #eceff1; color: #5f6368;')
+    }));
+    const pill = 'display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border-radius: 15px; font-weight: 600;';
+    const masters = {
+      none: { text: '○ Nenhum mestre conectado', style: pill + ' border: 3px solid #202124;' },
+      pending: { text: '◌ Pedido de conexão de 200.18.4.42 · 52 s', style: pill + ' border: 3px solid #202124;' },
+      connected: { text: '● Mestre conectado · 200.18.4.42', style: pill + ' border: 1px solid #9aa0a6;' },
+      error: { text: '▲ Mestre com exceções Modbus', style: pill + ' border: 3px solid #202124;' }
+    };
+    const m = masters[master] ?? masters.connected;
+    const visitor = role === 'visitante';
+    return {
+      tabs,
+      homeHref: visitor ? 'Main.dc.html' : 'T14-MinhasPlantas.dc.html',
+      homeLabel: visitor ? 'Sair da planta para o início' : 'Sair da planta para Minhas plantas',
+      plantName: visitor ? 'Caldeira (temporária)' : 'Caldeira · bancada 3',
+      masterText: m.text,
+      masterStyle: m.style,
+      statusText: status === 'paused' ? 'PAUSADA' : 'Rodando',
+      statusStyle: status === 'paused' ? 'border: 3px solid #202124; padding: 0 6px; border-radius: 4px; color: #202124;' : 'color: #202124;',
+      alarms,
+      alarmStyle: alarms > 0 ? 'font-weight: 700; border: 3px solid #202124; padding: 2px 8px; border-radius: 4px;' : 'color: #5f6368;',
+      isVisitor: visitor,
+      isObserver: role === 'observador',
+      canShare: !visitor && role !== 'observador',
+      pauseLabel: status === 'paused' ? 'Retomar' : 'Pausar'
+    };
+  }
+}
+</script>
+</body>
+</html>

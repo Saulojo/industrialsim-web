@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T08 Configurações da planta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.inp{min-height:40px;border:1px solid #5f6368;border-radius:6px;padding:0 10px;font:inherit;background:#fff;box-sizing:border-box}
+.opt{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid #dadce0;border-radius:6px}
+.opt-on{border:2px solid #202124}
+.sec{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;padding:20px 0;border-bottom:1px solid #dadce0}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1200px">
+  <dc-import name="PlantBar" tab="settings" open="process,connection,settings" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="max-width: 1100px; padding: 8px 24px 120px; box-sizing: border-box">
+    <p class="muted" style="padding: 12px 0">As mudanças valem no passo seguinte, sem reiniciar a planta, e vão para o log de comunicação. Valem enquanto a planta existir (com conta, ficam salvas).</p>
+
+    <section class="sec" aria-labelledby="t08-fmt">
+      <div><h2 id="t08-fmt" style="font-size: 16px">Formato analógico</h2><p class="muted">Como o mestre lê medições e escreve comandos analógicos. Escolha o do cartão ou controlador que você usa.</p></div>
+      <fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+        <legend style="position: absolute; left: -9999px">Formato analógico</legend>
+        <label class="opt"><input type="radio" name="fmt"><span><strong>0–27648 (Siemens)</strong> · padrão<br><span class="muted">LT-101 em 0,600 m chega como <span class="mono">13824</span></span></span></label>
+        <label class="opt opt-on"><input type="radio" name="fmt" checked><span><strong>0–10000</strong> · alteração não aplicada<br><span class="muted">LT-101 em 0,600 m chega como <span class="mono">5000</span></span></span></label>
+        <label class="opt"><input type="radio" name="fmt"><span><strong>0–32767</strong><br><span class="muted">LT-101 em 0,600 m chega como <span class="mono">16384</span></span></span></label>
+        <label class="opt"><input type="radio" name="fmt"><span><strong>float32 em unidades de engenharia</strong><br><span class="muted">LT-101 chega como <span class="mono">0,600</span> em 2 registradores (30001–30002); cada sinal ocupa 2, então PT-101 passa para 30003–30004</span></span></label>
+        <div class="fld" style="display: flex; gap: 12px; align-items: center; padding-left: 36px">
+          <label for="t08-wo" class="muted">Ordem das palavras do float32</label>
+          <select id="t08-wo" class="inp" disabled><option>Normal (big-endian)</option><option>Invertida (word swap)</option></select>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="sec" aria-labelledby="t08-uid">
+      <div><h2 id="t08-uid" style="font-size: 16px">Unit ID</h2><p class="muted">Requisições com outro Unit ID recebem a exceção 11. O MB_CLIENT da Siemens usa 255 por padrão.</p></div>
+      <div><input id="t08-uid-in" class="inp" value="1" aria-labelledby="t08-uid" style="width: 120px"> <span class="muted">1 a 255</span></div>
+    </section>
+
+    <section class="sec" aria-labelledby="t08-wd">
+      <div><h2 id="t08-wd" style="font-size: 16px">Watchdog</h2><p class="muted">Se o heartbeat (holding register 10) ficar parado, a planta vai ao estado seguro: FV-101 abre, FV-102 fecha.</p></div>
+      <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap">
+        <label><input type="checkbox"> Ligado</label>
+        <label class="muted" for="t08-wdt">Tempo limite</label><input id="t08-wdt" class="inp" value="2" style="width: 80px"><span>s</span>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="t08-mp">
+      <div><h2 id="t08-mp" style="font-size: 16px">Mestres permitidos</h2><p class="muted">No modo um por vez, aceitar outro mestre desconecta o anterior.</p></div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label><input type="radio" name="mp" checked> Vários ao mesmo tempo</label>
+        <label><input type="radio" name="mp"> Um por vez</label>
+      </div>
+    </section>
+
+    <section class="sec" aria-labelledby="t08-diag">
+      <div><h2 id="t08-diag" style="font-size: 16px">Bloco de diagnóstico</h2><p class="muted">Input registers 100–109 com nível, pressão, vazões e FV-103 em unidades de engenharia. Desligue em avaliações.</p></div>
+      <label><input type="checkbox" checked> Publicar</label>
+    </section>
+
+    <div role="region" aria-label="Alterações pendentes" class="box" style="position: sticky; bottom: 16px; display: flex; align-items: center; gap: 12px; margin-top: 24px; border: 2px solid #202124; box-shadow: 0 4px 16px rgba(0,0,0,.15)">
+      <strong>1 alteração não aplicada</strong><span class="muted">Formato analógico: 0–27648 → 0–10000</span>
+      <button type="button" class="btn" style="margin-left: auto">Desfazer</button>
+      <a class="btn btn-p" href="T10-Log.dc.html">Aplicar</a>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

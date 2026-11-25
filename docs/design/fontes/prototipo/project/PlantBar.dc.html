@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Barra da planta</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="app" style="background: transparent; position: relative; z-index: 20">
+  <div class="tabstrip">
+    <a class="homebtn" href="{{ homeHref }}" aria-label="{{ homeLabel }}" title="{{ homeLabel }}"><dc-import name="Icon" icon="house" size="{{ s20 }}" hint-size="20px,20px"></dc-import></a>
+    <span style="position: relative; display: inline-flex">
+      <button type="button" class="{{ menuCls }}" aria-haspopup="menu" aria-expanded="{{ menuOpen }}" onClick="{{ toggleMenu }}">{{ plantName }} <dc-import name="Icon" icon="chevron-down" size="{{ s16 }}" hint-size="16px,16px"></dc-import></button>
+      <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+        <nav class="pop menu" aria-label="Menu da planta" style="top: 42px; left: 0; width: 320px">
+          <div style="padding: 8px 14px 10px"><strong>{{ plantName }}</strong><br><span class="muted small">Caldeira com tubulão · porta Modbus 15003</span></div>
+          <div class="divider"></div>
+          <sc-if value="{{ isVisitor }}" hint-placeholder-val="{{ false }}">
+            <a href="Main.dc.html"><dc-import name="Icon" icon="house" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Início</a>
+            <a href="T03-Cenarios.dc.html"><dc-import name="Icon" icon="cube" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Cenários</a>
+          </sc-if>
+          <sc-if value="{{ isMember }}" hint-placeholder-val="{{ true }}">
+            <a href="T14-MinhasPlantas.dc.html"><dc-import name="Icon" icon="list" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Minhas plantas</a>
+            <a href="T03-Cenarios.dc.html"><dc-import name="Icon" icon="plus" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Abrir outra planta…</a>
+            <a href="T16-Turmas.dc.html"><dc-import name="Icon" icon="users" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Turmas</a>
+            <div class="divider"></div>
+            <a href="#renomear"><dc-import name="Icon" icon="settings" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Renomear planta</a>
+          </sc-if>
+          <a href="#ajuda"><dc-import name="Icon" icon="book" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Ajuda e guias</a>
+          <span class="mi"><dc-import name="Icon" icon="globe" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Idioma: Português</span>
+          <span class="mi"><dc-import name="Icon" icon="sun" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Tema: automático</span>
+          <div class="divider"></div>
+          <sc-if value="{{ isVisitor }}" hint-placeholder-val="{{ false }}">
+            <a href="T13-Entrar.dc.html"><dc-import name="Icon" icon="log-in" size="{{ s18 }}" hint-size="18px,18px"></dc-import><strong>Entrar para salvar esta planta</strong></a>
+          </sc-if>
+          <sc-if value="{{ isMember }}" hint-placeholder-val="{{ true }}">
+            <span class="mi"><dc-import name="Icon" icon="user" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Ana Ribeiro</span>
+          </sc-if>
+          <p class="muted small" style="padding: 8px 14px">{{ leaveText }}</p>
+        </nav>
+      </sc-if>
+    </span>
+    <nav aria-label="Abas da planta" style="display: flex; align-items: flex-end; gap: 2px; flex-wrap: wrap">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+        <span class="{{ t.cls }}">
+          <a href="{{ t.href }}" aria-current="{{ t.current }}"><dc-import name="Icon" icon="{{ t.icon }}" size="{{ s16 }}" hint-size="16px,16px"></dc-import>{{ t.label }}</a>
+          <sc-if value="{{ t.closable }}" hint-placeholder-val="{{ false }}">
+            <button type="button" class="tab-x" aria-label="Fechar a aba {{ t.label }}" onClick="{{ t.close }}"><dc-import name="Icon" icon="x" size="{{ s14 }}" hint-size="14px,14px"></dc-import></button>
+          </sc-if>
+        </span>
+      </sc-for>
+      <span style="display: inline-flex">
+        <button type="button" class="{{ addCls }}" aria-label="Abrir nova aba" title="Abrir nova aba" aria-expanded="{{ launcherOpen }}" onClick="{{ toggleLauncher }}"><dc-import name="Icon" icon="plus" size="{{ s20 }}" hint-size="20px,20px"></dc-import></button>
+        <sc-if value="{{ launcherOpen }}" hint-placeholder-val="{{ false }}">
+          <section class="pop" role="dialog" aria-label="Abrir em nova aba" style="top: calc(100% + 4px); left: 12px; width: min(640px, calc(100% - 24px)); box-sizing: border-box; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+            <div class="row"><strong class="h4">Abrir em nova aba</strong><span class="muted small push">Esc fecha</span></div>
+            <label class="sr" for="pb-q">Buscar ferramenta ou instrumento</label>
+            <input id="pb-q" class="input" placeholder="Buscar: formato, monitor, LT-101…">
+            <span class="lbl">Processo e comunicação</span>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{ tools }}" as="o" hint-placeholder-count="6">
+                <a class="tool" href="{{ o.href }}"><span class="tool-ic"><dc-import name="Icon" icon="{{ o.icon }}" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span><span class="col" style="gap: 2px"><strong>{{ o.label }} <span class="chip" style="{{ o.openStyle }}">aberta</span></strong><span class="muted small">{{ o.desc }}</span></span></a>
+              </sc-for>
+            </div>
+            <span class="lbl">Instrumentos</span>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+              <a class="tool" href="T07-Faceplate.dc.html" style="align-items: center"><dc-import name="Icon" icon="gauge" size="{{ s18 }}" hint-size="18px,18px"></dc-import><strong class="mono">LT-101</strong></a>
+              <a class="tool" href="T07-Faceplate.dc.html" style="align-items: center"><dc-import name="Icon" icon="gauge" size="{{ s18 }}" hint-size="18px,18px"></dc-import><strong class="mono">PT-101</strong></a>
+              <a class="tool" href="T07-Faceplate.dc.html" style="align-items: center"><dc-import name="Icon" icon="gauge" size="{{ s18 }}" hint-size="18px,18px"></dc-import><strong class="mono">FT-101</strong></a>
+              <a class="tool" href="T07-Faceplate.dc.html" style="align-items: center"><dc-import name="Icon" icon="gauge" size="{{ s18 }}" hint-size="18px,18px"></dc-import><strong class="mono">FT-102</strong></a>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <a class="tool" href="T12-HART.dc.html"><span class="tool-ic"><dc-import name="Icon" icon="settings" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span><span class="col" style="gap: 2px"><strong>Configurador HART</strong><span class="muted small">Faixa, amortecimento, PACTware · Fase 3</span></span></a>
+              <a class="tool" href="T22-Ladder.dc.html"><span class="tool-ic"><dc-import name="Icon" icon="book" size="{{ s20 }}" hint-size="20px,20px"></dc-import></span><span class="col" style="gap: 2px"><strong>Programa Ladder</strong><span class="muted small">Soft-PLC no servidor · Fase 4</span></span></a>
+            </div>
+            <p class="muted small">Um clique abre a ferramenta numa aba (ou vai para ela, se já estiver aberta). As abas ficam lembradas neste navegador.</p>
+          </section>
+        </sc-if>
+      </span>
+    </nav>
+  </div>
+  <div class="statusbar">
+    <span class="{{ masterCls }}" role="status"><span class="dot" aria-hidden="true"></span>{{ masterText }}</span>
+    <span class="muted">Situação: <sc-if value="{{ isPaused }}" hint-placeholder-val="{{ false }}"><span class="state-paused"><dc-import name="Icon" icon="pause" size="{{ s14 }}" hint-size="14px,14px"></dc-import>PAUSADA</span></sc-if><sc-if value="{{ isRunning }}" hint-placeholder-val="{{ true }}"><strong style="color: var(--color-text)">rodando</strong></sc-if></span>
+    <span class="muted">Tempo simulado <strong class="mono" style="color: var(--color-text)">{{ simTime }}</strong></span>
+    <span class="{{ alarmCls }}">{{ alarmText }}</span>
+    <sc-if value="{{ isVisitor }}" hint-placeholder-val="{{ false }}"><span class="{{ leftCls }}"><dc-import name="Icon" icon="clock" size="{{ s14 }}" hint-size="14px,14px"></dc-import>Visitante · {{ minutesLeft }} min restantes</span></sc-if>
+    <sc-if value="{{ isObserver }}" hint-placeholder-val="{{ false }}"><span class="chip"><dc-import name="Icon" icon="eye" size="{{ s14 }}" hint-size="14px,14px"></dc-import>Observando (turma)</span></sc-if>
+    <div class="row push" style="gap: 8px">
+      <button type="button" class="btn btn-sm" disabled="{{ isObserver }}"><dc-import name="Icon" icon="{{ pauseIcon }}" size="{{ s16 }}" hint-size="16px,16px"></dc-import>{{ pauseLabel }}</button>
+      <button type="button" class="btn btn-sm" disabled="{{ isObserver }}"><dc-import name="Icon" icon="rotate" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Reiniciar…</button>
+      <button type="button" class="btn btn-sm"><dc-import name="Icon" icon="download" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Exportar<dc-import name="Icon" icon="chevron-down" size="{{ s14 }}" hint-size="14px,14px"></dc-import></button>
+      <sc-if value="{{ canShare }}" hint-placeholder-val="{{ true }}"><a class="btn btn-sm btn-primary" href="T15-Compartilhar.dc.html"><dc-import name="Icon" icon="share" size="{{ s16 }}" hint-size="16px,16px"></dc-import>Compartilhar</a></sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tab":{"editor":"enum","options":["process","trends","connection","settings","monitor","log","instruments","program","LT-101"],"default":"process"},"open":{"editor":"text","default":"process,trends,connection"},"master":{"editor":"enum","options":["none","pending","connected","error"],"default":"connected"},"status":{"editor":"enum","options":["running","paused"],"default":"running"},"role":{"editor":"enum","options":["visitante","membro","observador"],"default":"membro"},"alarms":{"editor":"int","default":0},"startMenu":{"editor":"boolean","default":false},"startLauncher":{"editor":"boolean","default":false},"pendingText":{"editor":null},"$preview":{"width":1440,"height":104}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { menu: null, launcher: null, closed: [] };
+  }
+  renderVals() {
+    const p = this.props;
+    const yes = (v) => v === true || v === 'sim' || v === 'true';
+    const menuOpen = this.state.menu ?? yes(p.startMenu);
+    const launcherOpen = this.state.launcher ?? yes(p.startLauncher);
+    const tab = p.tab ?? 'process';
+    const role = p.role ?? 'membro';
+    const master = p.master ?? 'connected';
+    const status = p.status ?? 'running';
+    const alarms = Number(p.alarms ?? 0);
+    const defs = {
+      process: ['Processo', 'T06-IHM.dc.html', 'cube'],
+      trends: ['Gráficos', 'T25-Graficos.dc.html', 'activity'],
+      // Sem mestre, a aba Conexão leva à prancha em que o pedido de pareamento chega (fluxo da T2).
+      connection: ['Conexão', master === 'none' || master === 'pending' ? 'T05b-Pareamento.dc.html' : 'T05-Conexao.dc.html', 'plug'],
+      settings: ['Configurações', 'T08-Configuracoes.dc.html', 'settings'],
+      monitor: ['Monitor', 'T09-Monitor.dc.html', 'table'],
+      log: ['Log', 'T10-Log.dc.html', 'list'],
+      instruments: ['Instrumentos HART', 'T12-HART.dc.html', 'gauge'],
+      program: ['Programa', 'T22-Ladder.dc.html', 'book'],
+      'LT-101': ['LT-101', 'T07-Faceplate.dc.html', 'gauge']
+    };
+    let open = String(p.open ?? 'process,trends,connection').split(',').map((s) => s.trim()).filter((id) => defs[id]);
+    if (!open.includes('process')) open.unshift('process');
+    if (!open.includes(tab)) open.push(tab);
+    open = open.filter((id) => !this.state.closed.includes(id) || id === tab);
+    const tabs = open.map((id) => ({
+      label: defs[id][0], href: defs[id][1], icon: defs[id][2],
+      cls: id === tab ? 'tab is-active' : 'tab',
+      current: id === tab ? 'page' : 'false',
+      closable: id !== 'process' && id !== tab,
+      close: () => this.setState({ closed: [...this.state.closed, id] })
+    }));
+    const toolDefs = [
+      ['trends', 'Gráficos', 'activity', 'Tendências grandes, vários gráficos, zoom'],
+      ['connection', 'Conexão', 'plug', 'IP, porta, Unit ID, guias e mestres'],
+      ['settings', 'Configurações', 'settings', 'Formato analógico, Unit ID, watchdog'],
+      ['monitor', 'Monitor', 'table', 'Registradores ao vivo e quem escreveu'],
+      ['log', 'Log', 'list', 'Conexões, pareamentos, exceções, mudanças'],
+      ['iomap', 'Mapa de I/O', 'external', 'Endereços e escalas para imprimir ou PDF']
+    ];
+    const tools = toolDefs.map(([id, label, icon, desc]) => ({
+      label, icon, desc,
+      href: id === 'iomap' ? 'T11-MapaIO.dc.html' : defs[id][1],
+      openStyle: open.includes(id) ? 'margin-left: 6px; min-height: 20px; font-size: 11px' : 'display: none'
+    }));
+    const masters = {
+      none: ['master is-none', 'Nenhum mestre conectado'],
+      pending: ['master is-pending', p.pendingText ?? 'Pedido de conexão de 200.18.4.42'],
+      connected: ['master', 'Mestre conectado · 200.18.4.42'],
+      error: ['master is-none', 'Mestre com exceções Modbus']
+    };
+    const m = masters[master] ?? masters.connected;
+    const visitor = role === 'visitante';
+    return {
+      s14: 14, s16: 16, s18: 18, s20: 20,
+      tabs, tools,
+      menuOpen, launcherOpen,
+      menuCls: menuOpen ? 'plantmenu is-open' : 'plantmenu',
+      addCls: launcherOpen ? 'tab-add is-open' : 'tab-add',
+      toggleMenu: () => this.setState({ menu: !menuOpen, launcher: false }),
+      toggleLauncher: () => this.setState({ launcher: !launcherOpen, menu: false }),
+      homeHref: visitor ? 'Main.dc.html' : 'T14-MinhasPlantas.dc.html',
+      homeLabel: visitor ? 'Sair da planta para o início' : 'Sair da planta para Minhas plantas',
+      plantName: visitor ? 'Caldeira (temporária)' : 'Caldeira · bancada 3',
+      leaveText: visitor
+        ? 'Planta temporária: sem ninguém nem mestre conectado, encerra em 30 minutos; no máximo 60 minutos no total.'
+        : 'Sair da planta não a desliga: sem ninguém nem mestre conectado, ela hiberna em 30 minutos.',
+      masterCls: m[0], masterText: m[1],
+      isPaused: status === 'paused', isRunning: status !== 'paused',
+      simTime: status === 'paused' ? '1 284,6 s' : (p.simTime ?? '1 284,6 s'),
+      alarmCls: alarms > 0 ? 'chip' : 'muted',
+      alarmText: alarms > 0 ? 'Alarmes ativos: ' + alarms : 'Sem alarmes',
+      minutesLeft: String(p.minutesLeft ?? 52),
+      leftCls: Number(p.minutesLeft ?? 52) <= 10 ? 'chip is-on' : 'chip',
+      isVisitor: visitor, isMember: !visitor, isObserver: role === 'observador',
+      canShare: !visitor && role !== 'observador',
+      pauseLabel: status === 'paused' ? 'Retomar' : 'Pausar',
+      pauseIcon: status === 'paused' ? 'play' : 'pause'
+    };
+  }
+}
+</script>
+</body>
+</html>

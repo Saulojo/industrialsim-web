@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T03 Seleção de cenários</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.chip{display:inline-flex;align-items:center;height:28px;padding:0 10px;border:1px solid #9aa0a6;border-radius:14px;font-size:13px}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 900px">
+  <dc-import name="GlobalBar" active="cenarios" user="visitante" hint-size="100%,64px"></dc-import>
+  <main class="wrap" style="display: flex; flex-direction: column; gap: 24px; padding-top: 32px; padding-bottom: 40px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="font-size: 28px">Abrir uma planta</h1>
+      <p class="muted" style="max-width: 760px">Escolha um cenário. A planta roda no servidor e é controlada pelo seu mestre Modbus (CLP, CODESYS, OpenPLC, SCADA ou script).</p>
+    </div>
+
+    <article class="box" style="display: flex; flex-wrap: wrap; gap: 24px; padding: 24px">
+      <div class="ph" style="flex: 0 0 360px; height: 240px">Sinóptico ou imagem 3D da caldeira</div>
+      <div style="flex: 1 1 480px; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="font-size: 22px">Caldeira com tubulão</h2>
+        <p class="muted">Controle de nível (LT-101 → FV-101) e de pressão (PT-101 → FV-102) no seu CLP; a carga é a válvula de vapor FV-103.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <span class="chip">Malhas: LIC-101, PIC-101</span>
+          <span class="chip">Avançado: nível a três elementos</span>
+          <span class="chip">Instrumentos HART: 4</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+          <div><span class="lbl">Coils</span><br><span class="mono">1</span> <span class="muted">P-101</span></div>
+          <div><span class="lbl">Entradas discretas</span><br><span class="mono">6</span> <span class="muted">chaves e estados</span></div>
+          <div><span class="lbl">Holding registers</span><br><span class="mono">3</span> <span class="muted">FV-101, FV-102, heartbeat</span></div>
+          <div><span class="lbl">Input registers</span><br><span class="mono">6 + 10</span> <span class="muted">medições e diagnóstico</span></div>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px">
+          <a class="btn btn-p" href="T04-CriarPlanta.dc.html">Abrir planta</a>
+          <a class="btn" href="T11-MapaIO.dc.html">Ver o mapa de I/O</a>
+          <a class="btn" href="#ajuda">Descrição do cenário</a>
+        </div>
+      </div>
+    </article>
+
+    <p class="muted">Novos cenários entram como pacotes de arquivos (modelo 3D e descrição), sem mudar o site.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

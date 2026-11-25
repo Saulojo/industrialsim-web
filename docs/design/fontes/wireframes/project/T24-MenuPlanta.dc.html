@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T24 Menu da planta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.muted{color:#5f6368}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.mi{display:flex;align-items:center;min-height:40px;padding:0 14px;text-decoration:none}
+.mi:hover{background:#eceff1}
+.sep{height:1px;background:#dadce0;margin:4px 0}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 900px">
+  <dc-import name="PlantBar" tab="process" open="process,connection,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div style="position: relative; min-height: 800px">
+    <div class="ph" style="position: absolute; inset: 0; border: none; border-radius: 0">Processo (T06) atrás</div>
+
+    <nav aria-label="Menu da planta" class="box" style="position: absolute; left: 52px; top: 4px; width: 300px; padding: 6px 0; box-shadow: 0 8px 24px rgba(0,0,0,.2)">
+      <div style="padding: 6px 14px 8px"><strong>Caldeira · bancada 3</strong><br><span class="muted" style="font-size: 12px">Caldeira com tubulão · porta 15003</span></div>
+      <div class="sep"></div>
+      <a class="mi" href="T14-MinhasPlantas.dc.html">Minhas plantas</a>
+      <a class="mi" href="T03-Cenarios.dc.html">Abrir outra planta…</a>
+      <a class="mi" href="T16-Turmas.dc.html">Turmas</a>
+      <div class="sep"></div>
+      <a class="mi" href="#renomear">Renomear planta</a>
+      <a class="mi" href="#ajuda">Ajuda e guias</a>
+      <span class="mi">Idioma: Português ▸</span>
+      <span class="mi">Tema: automático ▸</span>
+      <div class="sep"></div>
+      <span class="mi">[Nome do aluno] ▸</span>
+      <div class="sep"></div>
+      <p class="muted" style="padding: 6px 14px; font-size: 12px">Sair da planta não a desliga: ela continua rodando no servidor e, sem ninguém nem mestre conectado, hiberna em 30 minutos.</p>
+    </nav>
+
+    <section style="position: absolute; left: 420px; top: 24px; width: 340px; display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl" style="color: #202124">Variante: visitante</span>
+      <nav aria-label="Menu da planta (visitante)" class="box" style="padding: 6px 0">
+        <a class="mi" href="Main.dc.html">Início</a>
+        <a class="mi" href="T03-Cenarios.dc.html">Cenários</a>
+        <a class="mi" href="#ajuda">Ajuda e guias</a>
+        <span class="mi">Idioma ▸ · Tema ▸</span>
+        <div class="sep"></div>
+        <a class="mi" href="T13-Entrar.dc.html"><strong>Entrar para salvar esta planta</strong></a>
+        <p class="muted" style="padding: 6px 14px; font-size: 12px">Planta temporária: sem ninguém nem mestre conectado, encerra em 30 minutos; no máximo 60 minutos no total.</p>
+      </nav>
+    </section>
+
+    <section class="box" style="position: absolute; left: 820px; top: 24px; width: 520px; display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl" style="color: #202124">Como sair e voltar sem a barra global</span>
+      <p>Dentro de uma planta não há barra global (Cenários, Minhas plantas, Turmas): a planta ocupa a tela.</p>
+      <p><strong>⌂</strong> volta direto para Minhas plantas (visitante: Início).</p>
+      <p><strong>Nome da planta ▾</strong> abre este menu com todo o resto: outras plantas, turmas, ajuda, idioma, tema e conta.</p>
+      <p>O botão Voltar do navegador também funciona: cada aba tem endereço próprio (<span style="font-family: ui-monospace, Consolas, monospace">/plants/{id}#monitor</span>).</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

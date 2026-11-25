@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T02 Menu principal</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.muted{color:#5f6368}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.mi{display:flex;align-items:center;min-height:44px;padding:0 16px;text-decoration:none;border-bottom:1px solid #eceff1}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 820px; display: flex; flex-direction: column; gap: 28px; padding-bottom: 40px">
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <span class="lbl" style="padding: 12px 24px 0">Visitante</span>
+    <dc-import name="GlobalBar" active="cenarios" user="visitante" hint-size="100%,64px"></dc-import>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <span class="lbl" style="padding: 0 24px">Aluno ou profissional com conta</span>
+    <dc-import name="GlobalBar" active="plantas" user="aluno" hint-size="100%,64px"></dc-import>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <span class="lbl" style="padding: 0 24px">Professor</span>
+    <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; padding: 0 24px">
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl">Menu da conta aberto</span>
+      <nav class="box" aria-label="Conta" style="width: 280px; padding: 0">
+        <div style="padding: 12px 16px; border-bottom: 1px solid #9aa0a6"><strong>[Nome do aluno]</strong><br><span class="muted">[e-mail]</span></div>
+        <a class="mi" href="T14-MinhasPlantas.dc.html">Minhas plantas</a>
+        <a class="mi" href="T16-Turmas.dc.html">Turmas</a>
+        <a class="mi" href="#conta">Conta e privacidade</a>
+        <a class="mi" href="#ajuda">Ajuda e guias</a>
+        <a class="mi" href="Main.dc.html" style="border-bottom: none">Sair</a>
+      </nav>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl">Celular (390 px): menu recolhido e aberto</span>
+      <div style="display: flex; gap: 24px; flex-wrap: wrap">
+        <div class="box" style="width: 390px; padding: 0">
+          <div style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 2px solid #9aa0a6">
+            <button type="button" aria-label="Abrir menu" style="width: 44px; height: 44px; border: 1px solid #9aa0a6; border-radius: 6px; background: #fff">☰</button>
+            <strong>[Nome do produto]</strong>
+            <a href="T13-Entrar.dc.html" style="margin-left: auto">Entrar</a>
+          </div>
+          <div style="height: 200px"></div>
+        </div>
+        <div class="box" style="width: 390px; padding: 0">
+          <div style="height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 2px solid #9aa0a6">
+            <button type="button" aria-label="Fechar menu" style="width: 44px; height: 44px; border: 1px solid #9aa0a6; border-radius: 6px; background: #fff">✕</button>
+            <strong>[Nome do produto]</strong>
+          </div>
+          <a class="mi" href="T03-Cenarios.dc.html">Cenários</a>
+          <a class="mi" href="T14-MinhasPlantas.dc.html">Minhas plantas</a>
+          <a class="mi" href="T16-Turmas.dc.html">Turmas</a>
+          <a class="mi" href="#ajuda">Ajuda e guias</a>
+          <div class="mi muted">Idioma: Português ▾ · Tema: automático ▾</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="box" style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 8px; align-self: flex-start">
+      <h2 style="font-size: 16px">Regras do menu</h2>
+      <p class="muted">Visitante vê Cenários, Ajuda e Entrar. Com conta aparecem Minhas plantas e Turmas.</p>
+      <p class="muted">O item da seção atual fica marcado (peso e sublinhado), não só por cor.</p>
+      <p class="muted">Dentro de uma planta não há barra global: a planta ocupa a tela. ⌂ volta a Minhas plantas e o menu no nome da planta leva ao resto (<a href="T24-MenuPlanta.dc.html">T24</a>).</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

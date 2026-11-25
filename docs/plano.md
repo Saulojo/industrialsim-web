@@ -44,7 +44,7 @@ E8  Config. e monitor
 E9  Implantação
 ◆ Marco 1: MVP com        ◆ Marco 2: aberto ao       ◆ Marco 3: 3D, HART e      ◆ Marco 4: Ladder e FBD
   Modbus no laboratório     público, contas e turmas   VR funcionando             no soft-PLC
-Trilha de design (entre E7 e E10): D1 Protótipo e teste com usuários → D2 Sistema de design
+Trilha de design (entre E7 e E10): D1 Protótipo → D2 Sistema de design
 (◆ em E2 = portão de decisão do HART)
 ```
 
@@ -395,9 +395,11 @@ Conversar com a TI antes da Etapa 9B; como DNS, certificado e IP público costum
 
 A trilha de design define como o simulador se apresenta: menu, seleção de cenários, configurações, IHM, contas, turmas e painéis em 3D e VR. Ela começa depois da Etapa 7, quando já existe uma IHM funcional para observar, e termina antes da Etapa 10, para que as telas da Fase 2 já nasçam no design final.
 
-### Etapa D1 — Prototipagem e teste com usuários
+### Etapa D1 — Prototipagem
 
-**Objetivo:** definir, antes das telas finais, como o usuário navega e o que vê, com um protótipo navegável validado com usuários reais.
+*(Alterada em 25/11/2026, D51: o teste com usuários foi retirado do plano, por decisão do autor, com o protótipo aprovado pelo orientador. O roteiro, o termo de consentimento e o formulário do moderador ficam em `docs/design/teste/`, para o caso de o teste voltar.)*
+
+**Objetivo:** definir, antes das telas finais, como o usuário navega e o que vê, com um protótipo navegável aprovado pelo orientador.
 
 **Depende de:** Etapa 7 (pode correr junto com as Etapas 8 e 9).
 
@@ -408,18 +410,18 @@ A trilha de design define como o simulador se apresenta: menu, seleção de cen�
 - Wireframes de baixa fidelidade e, depois, protótipo navegável de alta fidelidade das telas principais (ferramenta de design do Claude ou Figma).
 - Identidade visual: nome e logotipo, paleta com temas claro e escuro, tipografia e ícones.
 - Princípios de IHM industrial da ISA-101 (fundo neutro, cor só para alarmes e estados anormais) e acessibilidade WCAG 2.2 AA.
-- Teste de usabilidade com pelo menos 5 pessoas (alunos e um professor), com tarefas definidas e cronometradas.
+- ~~Teste de usabilidade com pelo menos 5 pessoas (alunos e um professor), com tarefas definidas e cronometradas.~~ *(Retirado em 25/11/2026, D51.)*
 
-**Entregáveis:** protótipo navegável, mapa de telas, guia de identidade visual e relatório do teste em `docs/design/`.
+**Entregáveis:** protótipo navegável, mapa de telas e guia de identidade visual em `docs/design/`.
 
 **Validação**
 
-- [ ] Todas as telas do mapa existem no protótipo e cobrem os fluxos do visitante, do aluno e do professor.
-- [ ] Nas tarefas principais (abrir uma planta, parear um mestre, mudar o formato analógico, compartilhar uma planta, professor injetar uma falha), pelo menos 4 de 5 participantes concluem sem ajuda.
-- [ ] Os problemas encontrados no teste estão registrados e corrigidos no protótipo.
-- [ ] Paleta aprovada no verificador de contraste WCAG AA, nos temas claro e escuro.
-- [ ] Telas de IHM revisadas contra os princípios da ISA-101.
-- [ ] Protótipo aprovado pelo orientador.
+- [x] Todas as telas do mapa existem no protótipo e cobrem os fluxos do visitante, do aluno e do professor. *(Conferido por `tools/design/mapa-prototipo.mjs` e percorrido no navegador.)*
+- ~~Nas tarefas principais (abrir uma planta, parear um mestre, mudar o formato analógico, compartilhar uma planta, professor injetar uma falha), pelo menos 4 de 5 participantes concluem sem ajuda.~~ *(Retirado em 25/11/2026, por decisão do autor, D51.)*
+- ~~Os problemas encontrados no teste estão registrados e corrigidos no protótipo.~~ *(Retirado em 25/11/2026, por decisão do autor, D51. Os problemas achados na conferência e na revisão ISA-101 foram corrigidos; lista em `docs/validacao/etapa-d1.md`.)*
+- [x] Paleta aprovada no verificador de contraste WCAG AA, nos temas claro e escuro. *(98 de 98 pares.)*
+- [x] Telas de IHM revisadas contra os princípios da ISA-101. *(`docs/design/isa-101.md`; ressalvas aprovadas pelo orientador.)*
+- [x] Protótipo aprovado pelo orientador. *(25/11/2026.)*
 
 ### Etapa D2 — Sistema de design aplicado
 

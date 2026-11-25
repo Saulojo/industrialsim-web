@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Menu principal</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.phone{width:390px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;overflow:hidden}
+.phone-bar{height:56px;display:flex;align-items:center;gap:12px;padding:0 12px;border-bottom:1px solid var(--color-border)}
+.app .phone a.mi{display:flex;align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid var(--color-border);color:var(--color-text);text-decoration:none}
+.app .phone a.mi.is-active{font-weight:600;box-shadow:inset 3px 0 0 var(--color-accent)}
+</style>
+</helmet>
+<div class="app col" style="min-height: 820px; gap: 28px; padding-bottom: 40px">
+  <div class="col" style="gap: 6px; position: relative; z-index: 3">
+    <span class="lbl" style="padding: 16px 24px 0">Visitante</span>
+    <dc-import name="GlobalBar" active="cenarios" user="visitante" hint-size="100%,64px"></dc-import>
+  </div>
+  <div class="col" style="gap: 6px; position: relative; z-index: 2">
+    <span class="lbl" style="padding: 0 24px">Com conta (aluno ou profissional) · clique no nome para abrir o menu da conta</span>
+    <dc-import name="GlobalBar" active="plantas" user="aluno" hint-size="100%,64px"></dc-import>
+  </div>
+  <div class="col" style="gap: 6px; position: relative; z-index: 1">
+    <span class="lbl" style="padding: 0 24px">Professor</span>
+    <dc-import name="GlobalBar" active="turmas" user="professor" hint-size="100%,64px"></dc-import>
+  </div>
+
+  <div class="row" style="gap: 40px; padding: 0 24px; align-items: flex-start">
+    <section class="col" style="gap: 8px">
+      <span class="lbl">Celular (390 px): menu recolhido e aberto</span>
+      <div class="row" style="gap: 24px; align-items: flex-start">
+        <div class="phone">
+          <div class="phone-bar">
+            <button type="button" class="btn btn-ghost btn-icon" aria-label="Abrir menu" aria-expanded="{{ phoneOpen }}" onClick="{{ togglePhone }}"><dc-import name="Icon" icon="{{ phoneIcon }}" size="{{ s20 }}" hint-size="20px,20px"></dc-import></button>
+            <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="none" style="stroke: var(--color-text)" stroke-width="5"></circle><path d="M6 32 H58" style="stroke: var(--color-text)" stroke-width="5"></path><path d="M13 26 H21 C25 26 25 13 31 13 C37 13 37 19 51 19" fill="none" style="stroke: var(--color-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <strong>IndustrialSim</strong>
+            <a class="btn btn-sm push" href="T13-Entrar.dc.html">Entrar</a>
+          </div>
+          <sc-if value="{{ phoneOpen }}" hint-placeholder-val="{{ false }}">
+            <nav aria-label="Menu principal">
+              <a class="mi is-active" href="T03-Cenarios.dc.html" aria-current="page">Cenários</a>
+              <a class="mi" href="#ajuda">Ajuda e guias</a>
+              <div class="row muted small" style="padding: 12px 16px; gap: 12px">Idioma: Português · Tema: automático</div>
+            </nav>
+          </sc-if>
+          <sc-if value="{{ phoneClosed }}" hint-placeholder-val="{{ true }}">
+            <div class="col" style="padding: 20px 16px; gap: 10px"><strong class="h3">Abrir uma planta</strong><span class="muted small">Escolha um cenário…</span></div>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel col" style="flex: 1 1 320px; gap: 8px">
+      <h2 class="h4">Regras do menu</h2>
+      <p class="muted">Visitante vê Cenários, Ajuda e Entrar. Com conta aparecem Minhas plantas e Turmas, e o nome abre o menu da conta.</p>
+      <p class="muted">O item da seção atual é marcado por peso e sublinhado, não só por cor.</p>
+      <p class="muted">Dentro de uma planta não há barra global: a planta ocupa a tela. ⌂ volta a Minhas plantas, e o menu no nome da planta leva ao resto (<a href="T24-MenuPlanta.dc.html">T24</a>).</p>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phone: true };
+  }
+  renderVals() {
+    const open = this.state.phone;
+    return {
+      s20: 20,
+      phoneOpen: open, phoneClosed: !open,
+      phoneIcon: open ? 'x' : 'list',
+      togglePhone: () => this.setState({ phone: !open })
+    };
+  }
+}
+</script>
+</body>
+</html>

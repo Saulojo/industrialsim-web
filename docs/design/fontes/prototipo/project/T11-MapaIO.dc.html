@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Mapa de I/O</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.sheet{width:100%;max-width:960px;background:#FFFFFF;color:#1A1D21;padding:40px 48px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-popover);border-radius:4px}
+.sheet .table th,.sheet .table td{padding:7px 8px;font-size:13px}
+</style>
+</helmet>
+<div class="app col" style="min-height: 1100px; align-items: center; gap: 16px; padding: 24px">
+  <div class="row" style="gap: 12px; width: 100%; max-width: 960px">
+    <a class="btn" href="T06-IHM.dc.html"><dc-import name="Icon" icon="arrow-left" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Voltar à planta</a>
+    <label for="io-fmt" class="push">Formato</label>
+    <select id="io-fmt" class="select" style="width: 220px" onChange="{{ pickFmt }}"><option value="c27648">0–27648 (Siemens)</option><option value="c10000">0–10000</option><option value="c32767">0–32767</option><option value="f32">float32</option></select>
+    <button type="button" class="btn btn-primary"><dc-import name="Icon" icon="download" size="{{ s18 }}" hint-size="18px,18px"></dc-import>Imprimir ou salvar em PDF</button>
+    <button type="button" class="btn">Baixar CSV</button>
+  </div>
+  <article class="sheet" aria-labelledby="io-t">
+    <header class="row" style="gap: 14px; border-bottom: 2px solid #1A1D21; padding-bottom: 12px; flex-wrap: nowrap">
+      <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="none" stroke="#1A1D21" stroke-width="5"></circle><path d="M6 32 H58" stroke="#1A1D21" stroke-width="5"></path><path d="M13 26 H21 C25 26 25 13 31 13 C37 13 37 19 51 19" fill="none" stroke="#1C5A91" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <div><h1 id="io-t" class="h3">Mapa de I/O · Caldeira com tubulão</h1>
+      <p class="small" style="color: #4D555D">Formato {{ fmtLabel }} · Unit ID 1 · servidor 192.168.10.20 · porta 15003 · gerado em 23/11/2026 às 09:20</p></div>
+    </header>
+    <table class="table">
+      <thead><tr><th>Área</th><th>Base 0</th><th>Clássica</th><th>Sinal</th><th>Mestre</th><th>Bruto</th><th>Faixa</th><th>Unidade</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="17">
+          <tr><td>{{ r.a }}</td><td class="mono">{{ r.b }}</td><td class="mono">{{ r.c }}</td><td>{{ r.s }}</td><td>{{ r.acc }}</td><td class="mono">{{ r.raw }}</td><td class="mono">{{ r.rng }}</td><td>{{ r.u }}</td></tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <p class="small" style="color: #4D555D">{{ note }}</p>
+  </article>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { fmt: 'c27648' };
+  }
+  renderVals() {
+    const fmt = this.state.fmt;
+    const f32 = fmt === 'f32';
+    const labels = { c27648: '0–27648 (Siemens)', c10000: '0–10000', c32767: '0–32767', f32: 'float32 (ordem normal)' };
+    const ai = f32 ? 'float32' : labels[fmt].split(' ')[0];
+    const R = (a, b, c, s, acc, raw, rng, u) => ({ a, b, c, s, acc, raw, rng, u });
+    // Em float32 cada medição analógica ocupa 2 registradores (D27).
+    const ir = (i) => f32 ? (2 * i) + '–' + (2 * i + 1) : String(i);
+    const irc = (i) => f32 ? (30001 + 2 * i) + '–' + (30002 + 2 * i) : String(30001 + i);
+    const hr = (i) => f32 && i < 10 ? (2 * i) + '–' + (2 * i + 1) : String(i);
+    const hrc = (i) => f32 && i < 10 ? (40001 + 2 * i) + '–' + (40002 + 2 * i) : String(40001 + i);
+    const rows = [
+      R('Coil', '0', '1', 'P-101 · Comando da bomba', 'escreve', '0/1', '', ''),
+      R('Entrada discreta', '0', '10001', 'P-101 · Bomba em operação', 'lê', '0/1', '', ''),
+      R('Entrada discreta', '1', '10002', 'LSLL-101 · Nível muito baixo', 'lê', '0/1', '', ''),
+      R('Entrada discreta', '2', '10003', 'LSHH-101 · Nível muito alto', 'lê', '0/1', '', ''),
+      R('Entrada discreta', '3', '10004', 'PSH-101 · Pressão alta', 'lê', '0/1', '', ''),
+      R('Entrada discreta', '4', '10005', 'PSV-101 · Válvula de alívio aberta', 'lê', '0/1', '', ''),
+      R('Entrada discreta', '5', '10006', 'Watchdog disparado', 'lê', '0/1', '', ''),
+      R('Holding register', hr(0), hrc(0), 'FV-101 · Comando da válvula de água', 'escreve', ai, '0–100', '%'),
+      R('Holding register', hr(1), hrc(1), 'FV-102 · Comando da válvula de combustível', 'escreve', ai, '0–100', '%'),
+      R('Holding register', '10', '40011', 'Heartbeat do mestre', 'escreve', 'livre', '', ''),
+      R('Input register', ir(0), irc(0), 'LT-101 · Nível do tubulão', 'lê', ai, '0–1,2', 'm'),
+      R('Input register', ir(1), irc(1), 'PT-101 · Pressão do vapor', 'lê', ai, '0–16', 'bar'),
+      R('Input register', ir(2), irc(2), 'FT-101 · Vazão de água', 'lê', ai, '0–4', 'kg/s'),
+      R('Input register', ir(3), irc(3), 'FT-102 · Vazão de vapor', 'lê', ai, '0–5', 'kg/s'),
+      R('Input register', ir(4), irc(4), 'FV-101 · Posição da válvula de água', 'lê', ai, '0–100', '%'),
+      R('Input register', ir(5), irc(5), 'FV-102 · Posição da válvula de combustível', 'lê', ai, '0–100', '%'),
+      R('Input register', '100–109', '30101–30110', 'Diagnóstico: nível, pressão, vazões, FV-103', 'lê', 'float32', '', 'm, bar, kg/s, %')
+    ];
+    const notes = {
+      c27648: 'A medição satura em 3,8 e 20,5 mA; abaixo de 4 mA o valor é negativo (ler como INT). Com o transmissor em falha (NAMUR NE43): 3,6 mA → −691; 21 mA → 29376.',
+      c10000: 'A medição satura em 3,8 e 20,5 mA; abaixo de 4 mA o valor é negativo (ler como INT). Com o transmissor em falha (NAMUR NE43): 3,6 mA → −250; 21 mA → 10625.',
+      c32767: 'A medição satura em 3,8 mA; acima de 20 mA o valor fica em 32767 (limite de INT). Abaixo de 4 mA, negativo (ler como INT). Com o transmissor em falha (NAMUR NE43): 3,6 mA → −819; 21 mA → 32767.',
+      f32: 'Valores em unidades de engenharia, 2 registradores por sinal (palavra alta primeiro). Falha NAMUR NE43 aparece como valor fora da faixa.'
+    };
+    return {
+      s18: 18, rows, fmtLabel: labels[fmt], note: notes[fmt],
+      pickFmt: (e) => { try { if (e.target.value) this.setState({ fmt: e.target.value }); } catch (x) { /* sem valor */ } }
+    };
+  }
+}
+</script>
+</body>
+</html>

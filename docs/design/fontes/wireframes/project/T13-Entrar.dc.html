@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T13 Entrar e criar conta</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#f1f3f4}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.fld{display:flex;flex-direction:column;gap:4px}
+.inp{min-height:44px;border:1px solid #5f6368;border-radius:6px;padding:0 12px;font:inherit;background:#fff;box-sizing:border-box}
+.ico{width:20px;height:20px;border:1px solid #9aa0a6;border-radius:4px}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 900px">
+  <dc-import name="GlobalBar" active="inicio" user="visitante" hint-size="100%,64px"></dc-import>
+  <main style="display: flex; justify-content: center; padding: 48px 16px">
+    <section class="box" aria-labelledby="t13-title" style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 16px; padding: 32px">
+      <h1 id="t13-title" style="font-size: 24px">Entrar</h1>
+      <p class="muted">Com conta, suas plantas ficam salvas, você compartilha com colegas e participa de turmas.</p>
+      <a class="btn" href="T14-MinhasPlantas.dc.html"><span class="ico" aria-hidden="true"></span>Continuar com Google</a>
+      <a class="btn" href="T14-MinhasPlantas.dc.html"><span class="ico" aria-hidden="true"></span>Continuar com Microsoft</a>
+      <a class="btn" href="T14-MinhasPlantas.dc.html"><span class="ico" aria-hidden="true"></span>Continuar com GitHub</a>
+      <div style="display: flex; align-items: center; gap: 12px" class="muted"><span style="flex: 1; height: 1px; background: #9aa0a6"></span>ou com e-mail<span style="flex: 1; height: 1px; background: #9aa0a6"></span></div>
+      <div class="fld"><label for="t13-mail">E-mail</label><input id="t13-mail" class="inp" type="email" autocomplete="email"></div>
+      <div class="fld"><label for="t13-pw">Senha</label><input id="t13-pw" class="inp" type="password" autocomplete="current-password"></div>
+      <a class="btn btn-p" href="T14-MinhasPlantas.dc.html">Entrar</a>
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px"><a href="#senha">Esqueci a senha</a><a href="#cadastro">Criar conta</a></div>
+      <div style="border-top: 1px solid #9aa0a6; padding-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <a class="btn" href="T03-Cenarios.dc.html">Continuar como visitante</a>
+        <p class="muted" style="font-size: 13px">Uma planta temporária de até 60 minutos, sem salvar nem compartilhar.</p>
+      </div>
+      <p class="muted" style="font-size: 12px">Guardamos só e-mail e nome de exibição. <a href="#termos">Termos de uso e política de privacidade</a>.</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

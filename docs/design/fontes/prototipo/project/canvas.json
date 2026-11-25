@@ -1,0 +1,74 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-23T16:00:00Z" },
+  "title": "IndustrialSim · Protótipo",
+  "launch": { "view": "canvas", "page": "t12" },
+  "pages": [
+    { "id": "t12", "name": "T1 e T2 · Abrir e parear" },
+    { "id": "t3", "name": "T3 · Ferramentas da planta" },
+    { "id": "t45", "name": "T4 e T5 · Contas e turmas" },
+    { "id": "estados", "name": "Estados e outras telas" },
+    { "id": "f34", "name": "Fases 3 e 4" },
+    { "id": "comp", "name": "Componentes" }
+  ],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1500, "title": "T01 · Página inicial", "page": "t12", "expand": "fill", "is_interactive": true },
+    "T03-Cenarios.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "T03 · Cenários", "page": "t12", "expand": "fill", "is_interactive": true },
+    "T04-CriarPlanta.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 900, "title": "T04 · Abrir planta (E07)", "page": "t12", "expand": "fill", "is_interactive": true },
+    "E01-SemMestre.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1100, "title": "E01 · Planta sem mestre (visitante)", "page": "t12", "expand": "fill", "is_interactive": true },
+    "T05b-Pareamento.dc.html": { "x": 6080, "y": 0, "w": 1440, "h": 1100, "title": "T05b · Conexão e pedido de pareamento", "page": "t12", "expand": "fill", "is_interactive": true },
+    "T06-IHM.dc.html": { "x": 7600, "y": 0, "w": 1440, "h": 1100, "title": "T06 · Processo (mestre conectado)", "page": "t12", "expand": "fill", "is_interactive": true },
+
+    "T23-NovaAba.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1100, "title": "T23 · Nova aba", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T08-Configuracoes.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 1250, "title": "T08 · Configurações", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T10-Log.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 1000, "title": "T10 · Log", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T09-Monitor.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1300, "title": "T09 · Monitor", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T05-Conexao.dc.html": { "x": 0, "y": 1650, "w": 1440, "h": 1100, "title": "T05 · Conexão (mestre conectado)", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T25-Graficos.dc.html": { "x": 1520, "y": 1650, "w": 1440, "h": 1100, "title": "T25 · Gráficos", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T07-Faceplate.dc.html": { "x": 3040, "y": 1650, "w": 1440, "h": 1100, "title": "T07 · Detalhe de instrumento", "page": "t3", "expand": "fill", "is_interactive": true },
+    "T24-MenuPlanta.dc.html": { "x": 4560, "y": 1650, "w": 1440, "h": 1100, "title": "T24 · Menu da planta", "page": "t3", "expand": "fill", "is_interactive": true },
+
+    "T13-Entrar.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "T13 · Entrar", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T14-MinhasPlantas.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 1000, "title": "T14 · Minhas plantas", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T06-Conta.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 1100, "title": "T06 · Processo (com conta)", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T15-Compartilhar.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1100, "title": "T15 · Compartilhar", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T16-Turmas.dc.html": { "x": 0, "y": 1650, "w": 1440, "h": 1000, "title": "T16 · Turmas", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T17-Turma.dc.html": { "x": 1520, "y": 1650, "w": 1440, "h": 1100, "title": "T17 · Turma e atividades", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T18-Painel.dc.html": { "x": 3040, "y": 1650, "w": 1440, "h": 1100, "title": "T18 · Painel do professor", "page": "t45", "expand": "fill", "is_interactive": true },
+    "T19-InjetarFalha.dc.html": { "x": 4560, "y": 1650, "w": 1440, "h": 1100, "title": "T19 · Injetar falha", "page": "t45", "expand": "fill", "is_interactive": true },
+
+    "EA-Alarme.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1100, "title": "E03 E04 E10 · Alarme, forçado e falha", "page": "estados", "expand": "fill", "is_interactive": true },
+    "EB-Pausada.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 1100, "title": "E05 E09 · Pausada, professor observando", "page": "estados", "expand": "fill", "is_interactive": true },
+    "EC-Avisos.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 1000, "title": "E06 · Reconectando, incompatível, encerrada", "page": "estados", "expand": "fill", "is_interactive": true },
+    "T06-Escuro.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1100, "title": "T06 · Processo no tema escuro", "page": "estados", "expand": "fill", "is_interactive": true },
+    "T02-Menu.dc.html": { "x": 0, "y": 1650, "w": 1440, "h": 820, "title": "T02 · Menu principal", "page": "estados", "expand": "fill", "is_interactive": true },
+    "T11-MapaIO.dc.html": { "x": 1520, "y": 1650, "w": 1440, "h": 1100, "title": "T11 · Mapa de I/O", "page": "estados", "expand": "fill", "is_interactive": true },
+
+    "T12-HART.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 1100, "title": "T12 · Configurador HART", "page": "f34", "expand": "fill", "is_interactive": true },
+    "T20-Cena3D.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "T20 · Painéis na cena 3D", "page": "f34", "expand": "fill", "is_interactive": true },
+    "T21-VR.dc.html": { "x": 3040, "y": 0, "w": 1440, "h": 900, "title": "T21 · Painel em VR", "page": "f34", "expand": "fill", "is_interactive": true },
+    "T22-Ladder.dc.html": { "x": 4560, "y": 0, "w": 1440, "h": 1000, "title": "T22 · Editor Ladder", "page": "f34", "expand": "fill", "is_interactive": true },
+
+    "GlobalBar.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 64, "title": "Barra global", "page": "comp" },
+    "PlantBar.dc.html": { "x": 0, "y": 200, "w": 1440, "h": 104, "title": "Barra da planta (abas, menu, nova aba)", "page": "comp", "is_interactive": true },
+    "Icon.dc.html": { "x": 0, "y": 500, "w": 40, "h": 40, "title": "Ícone", "page": "comp" }
+  },
+  "order": [
+    "Main.dc.html", "T03-Cenarios.dc.html", "T04-CriarPlanta.dc.html", "E01-SemMestre.dc.html", "T05b-Pareamento.dc.html", "T06-IHM.dc.html",
+    "T23-NovaAba.dc.html", "T08-Configuracoes.dc.html", "T10-Log.dc.html", "T09-Monitor.dc.html", "T05-Conexao.dc.html", "T25-Graficos.dc.html", "T07-Faceplate.dc.html", "T24-MenuPlanta.dc.html",
+    "T13-Entrar.dc.html", "T14-MinhasPlantas.dc.html", "T06-Conta.dc.html", "T15-Compartilhar.dc.html", "T16-Turmas.dc.html", "T17-Turma.dc.html", "T18-Painel.dc.html", "T19-InjetarFalha.dc.html",
+    "EA-Alarme.dc.html", "EB-Pausada.dc.html", "EC-Avisos.dc.html", "T06-Escuro.dc.html", "T02-Menu.dc.html", "T11-MapaIO.dc.html",
+    "T12-HART.dc.html", "T20-Cena3D.dc.html", "T21-VR.dc.html", "T22-Ladder.dc.html",
+    "GlobalBar.dc.html", "PlantBar.dc.html", "Icon.dc.html"
+  ],
+  "notes": {
+    "n12": { "x": 0, "y": -300, "text": "T1 e T2: do início ao mestre conectado", "kind": "title1", "maxW": 9040, "page": "t12" },
+    "s12": { "x": 9120, "y": 0, "w": 460, "page": "t12", "text": "Protótipo navegável (D1, parte D). Use Play a partir da página inicial.\n\nNa tela de Conexão sem mestre, o pedido de pareamento chega sozinho depois de alguns segundos (não há mestre real).\n\nValores da caldeira variam só para efeito visual; a física roda no servidor (D01)." },
+    "n3": { "x": 0, "y": -300, "text": "T3: ferramentas abertas pelo +", "kind": "title1", "maxW": 5960, "page": "t3" },
+    "n45": { "x": 0, "y": -300, "text": "T4: compartilhar · T5: professor injeta falha", "kind": "title1", "maxW": 5960, "page": "t45" },
+    "n5": { "x": 0, "y": 1350, "text": "Turmas e painel do professor", "kind": "title1", "maxW": 5960, "page": "t45" },
+    "ne": { "x": 0, "y": -300, "text": "Estados especiais e outras telas", "kind": "title1", "maxW": 5960, "page": "estados" },
+    "nf": { "x": 0, "y": -300, "text": "Fases 3 e 4 (fidelidade média)", "kind": "title1", "maxW": 5960, "page": "f34" }
+  },
+  "designSystems": []
+}

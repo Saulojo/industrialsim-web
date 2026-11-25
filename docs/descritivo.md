@@ -44,7 +44,7 @@ O projeto é feito do zero, com nova arquitetura, a partir da experiência com o
 - A simulação depende do `FixedUpdate` da Unity, em vez de um passo fixo próprio.
 - A imagem de I/O reserva os 65.536 endereços de cada área (cerca de 400 KB por planta), em vez de se dimensionar pelo mapa de I/O.
 
-**Estado atual do novo projeto:** Etapas 1 a 8 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9B; Etapas 3 e 4 em 15/11/2026; Etapa 5 em 17/11/2026, com o servidor do laboratório passando a Windows pela D10; Etapa 6 em 17/11/2026, validada com `pymodbus` e CODESYS, e com o teste com CLP real retirado do plano; Etapa 7 em 19/11/2026, com o reinício da planta trazido da Etapa 8; Etapa 8 em 20/11/2026). Etapa 9 replanejada em 21/11/2026, em 9A (implantação reproduzível) e 9B (PC do laboratório, Marco 1), com o servidor numa VM Linux pela D10; as duas aguardam o PC do laboratório. Próxima: trilha de design (Etapa D1), que corre entre as Etapas 7 e 10. Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
+**Estado atual do novo projeto:** Etapas 1 a 8 e D1 concluídas (Etapa 2 em 15/11/2026, com o portão do HART em A provisório: falta medir o tempo de resposta com o servidor em outro PC, na Etapa 9B; Etapas 3 e 4 em 15/11/2026; Etapa 5 em 17/11/2026, com o servidor do laboratório passando a Windows pela D10; Etapa 6 em 17/11/2026, validada com `pymodbus` e CODESYS, e com o teste com CLP real retirado do plano; Etapa 7 em 19/11/2026, com o reinício da planta trazido da Etapa 8; Etapa 8 em 20/11/2026; Etapa D1 em 25/11/2026, com o protótipo aprovado pelo orientador e o teste com usuários retirado do plano pela D51). Etapa 9 replanejada em 21/11/2026, em 9A (implantação reproduzível) e 9B (PC do laboratório, Marco 1), com o servidor numa VM Linux pela D10; as duas aguardam o PC do laboratório. Próxima: Etapa D2 (sistema de design aplicado), que termina antes da Etapa 10. Atualize esta linha ao concluir cada etapa do Plano de Desenvolvimento (ex.: “Etapa 3 concluída em dd/mm/aaaa; Etapa 4 em andamento”).
 
 ## Requisitos
 
@@ -62,7 +62,7 @@ A Fase 1 entrega o essencial: uma planta controlada por qualquer mestre Modbus, 
 | RF06 | Atender pelo menos 30 plantas simultâneas e isoladas. | Fase 1 (MVP) |
 | RF07 | Exportar o ensaio em CSV (comandos e medições) e reproduzir um ensaio gravado. | Fase 1 (MVP) |
 | RF08 | Contas (e-mail e login social), plantas salvas que retomam de onde pararam e modo visitante sem conta. | Fase 2 (Plataforma) |
-| RF09 | Compartilhar uma planta com papéis (dono, operador, observador); várias pessoas e vários mestres operando a mesma planta. | Fase 2 (Plataforma) |
+| RF09 | Compartilhar uma planta, por e-mail ou por código, sem papéis (D46); várias pessoas e vários mestres operando a mesma planta. | Fase 2 (Plataforma) |
 | RF10 | Turmas e painel do professor: ver as plantas dos alunos ao vivo e injetar falhas e distúrbios. | Fase 2 (Plataforma) |
 | RF11 | Interface em português, inglês e espanhol, com o idioma detectado pelo navegador. | Fase 2 (Plataforma) |
 | RF12 | Uso aberto a qualquer pessoa, com limites que protegem o servidor. | Fase 2 (Plataforma) |
@@ -90,7 +90,7 @@ A Fase 1 entrega o essencial: uma planta controlada por qualquer mestre Modbus, 
 | RNF09 | Evolução segura | Protocolo cliente-servidor versionado; cenários validados por um esquema JSON; migrações de banco versionadas. |
 | RNF10 | Privacidade (LGPD) | Dados pessoais mínimos; termos de uso e política de privacidade publicados; exportação e exclusão de conta funcionando. |
 | RNF11 | Multilíngue | Nenhum texto de interface fora dos arquivos de idioma, e nenhuma chave de tradução faltando (verificado no CI). |
-| RNF12 | Usabilidade e identidade visual | Interface projetada a partir de protótipo testado com usuários (trilha de design); contraste WCAG 2.2 AA nos temas claro e escuro; IHM segue a ISA-101 (cor reservada para estados anormais). |
+| RNF12 | Usabilidade e identidade visual | Interface projetada a partir de protótipo navegável aprovado pelo orientador (trilha de design; teste com usuários retirado em 25/11/2026, D51); contraste WCAG 2.2 AA nos temas claro e escuro; IHM segue a ISA-101 (cor reservada para estados anormais). |
 
 ## Decisões de arquitetura
 
@@ -112,11 +112,11 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D12 | Modelos 3D: Blender → glTF binário (.glb) com compressão (Draco ou Meshopt, texturas KTX2); ligação objeto ↔ variável por convenção de nomes. | Carregamento rápido no navegador; serve a qualquer motor. | FBX e formatos proprietários. |
 | D13 | Contas com ASP.NET Core Identity e PostgreSQL (EF Core): e-mail com verificação e login social (Google, Microsoft, GitHub); modo visitante sem conta, com limites. | Componente maduro, gratuito e no mesmo processo; visitante mantém o “só abrir o site”. | Provedor de identidade separado (ex.: Keycloak), pesado para o PC do laboratório. |
 | D14 | Planta salva (dono, cenário, configurações, estado) separada da instância em execução; instância hiberna sem ninguém conectado e retoma do mesmo estado. | Muitos usuários cadastrados com poucas plantas rodando ao mesmo tempo; o servidor modesto aguenta. | Plantas sempre rodando. |
-| D15 | Colaboração com papéis (dono, operador, observador); vale a última escrita; toda ação registrada com autor e horário. | Simples, previsível e auditável, como numa sala de controle com vários operadores. | Bloqueio de edição por usuário. |
+| D15 | (alterada em 25/11/2026, pela D46) Colaboração sem papéis: quem tem acesso a uma planta tem os mesmos direitos (D46); vale a última escrita; toda ação registrada com autor e horário. | Simples, previsível e auditável, como numa sala de controle com vários operadores. | Bloqueio de edição por usuário; papéis dono, operador e observador (até 25/11/2026). |
 | D16 | Idiomas: textos em arquivos de recurso (i18next no frontend, recursos .NET no backend); idioma do navegador; pt-BR, en e es; traduções iniciais geradas com IA e revisadas; termos técnicos (coil, holding register, HART) mantidos. | Tradução de qualidade e sem custo em tempo de uso; adicionar idioma = adicionar um arquivo. | Tradução automática em tempo real (custo, latência, erros em termos técnicos). |
 | D17 | Plataforma aberta ao público, com limites por conta e por IP, fila quando o servidor lotar, termos de uso e política de privacidade (LGPD). | Cumpre o objetivo de abrir o software a qualquer pessoa sem derrubar o servidor do laboratório. | Acesso restrito à universidade. |
 | D18 | Código escrito do zero; do protótipo, só os modelos 3D são aproveitados. | A arquitetura é outra (servidor autoritativo, web); código novo nasce testado e coerente com as decisões deste documento. | Portar código do protótipo Unity. |
-| D19 | Design numa trilha própria (D1: prototipagem e teste com usuários; D2: sistema de design), entre a Etapa 7 e a Etapa 10. Até lá, telas funcionais simples, já usando tokens (variáveis CSS). IHM segue a ISA-101. | Decisões de interface baseadas em teste com usuários; o redesenho vira troca de tokens e componentes, sem refazer telas; as telas da Fase 2 já nascem no design final. | Desenhar cada tela na etapa que a cria; design só no fim do projeto. |
+| D19 | (alterada em 25/11/2026, pela D51) Design numa trilha própria (D1: prototipagem; D2: sistema de design), entre a Etapa 7 e a Etapa 10. Até lá, telas funcionais simples, já usando tokens (variáveis CSS). IHM segue a ISA-101. | Decisões de interface tomadas num protótipo navegável aprovado pelo orientador; o redesenho vira troca de tokens e componentes, sem refazer telas; as telas da Fase 2 já nascem no design final. | Desenhar cada tela na etapa que a cria; design só no fim do projeto. |
 | D20 | (11/11/2026, Etapa 0) Testes .NET com xUnit v3 (4.x) sobre a Microsoft Testing Platform, ativada no `global.json` (`"test": {"runner": "Microsoft.Testing.Platform"}`), que também fixa o SDK 10 (`rollForward: latestFeature`). | É o caminho padrão do xUnit 4 com o SDK 10; dispensa `Microsoft.NET.Test.Sdk` e `xunit.runner.visualstudio`; local e CI usam o mesmo SDK, então os avisos tratados como erro são os mesmos nos dois. | VSTest (o xUnit 4 o trata como legado no SDK 10); deixar o SDK livre (o SDK 11 local daria avisos diferentes dos do CI). |
 | D21 | (11/11/2026, Etapa 0) TypeScript fixado em 6.0.x até o typescript-eslint aceitar o TypeScript 7; stylelint com `stylelint-declaration-strict-value` obriga tokens (`var(--…)`) em cor, fonte, espaçamento e raio. | O typescript-eslint 8.72 exige TypeScript abaixo de 6.1; a regra de tokens passa a ser verificada no lint, e não só combinada. | TypeScript 7 sem lint com tipos; tokens só por convenção. |
 | D22 | (14/11/2026, Etapa 1) Gerador pseudoaleatório próprio para o ruído: xoshiro256\*\* com a semente expandida por SplitMix64 (`IndustrialSim.Core.Numerics.SeededRandom`), com teste contra vetores de referência. | A sequência do `System.Random` com semente não é garantida entre versões do .NET, e a sequência do ruído faz parte do determinismo (RNF02). | `System.Random` com semente. |
@@ -143,6 +143,12 @@ A decisão central é a D01: a planta existe só no servidor, e todo o resto dec
 | D43 | (20/11/2026, Etapa 8) Pausar deixa a planta no laço com a situação `Paused`: o passo não avança (tempo simulado, ruído e watchdog param), o estado continua publicado a 20 Hz e o mestre continua lendo e escrevendo; os comandos valem no primeiro passo depois de retomar. Forçar ou liberar com a planta pausada publica as medições na hora; reiniciar uma planta pausada a mantém pausada. | Retomar continua do mesmo estado, bit a bit (mesmo hash de uma planta que nunca pausou); IHM e monitor continuam vivos durante a pausa. | Tirar a planta do laço (perderia a thread e a publicação do estado). |
 | D44 | (20/11/2026, Etapa 8) Monitor de registradores e log de comunicação pelo WebSocket da planta (protocolo versão 2). O monitor vai só para as conexões que o ligaram, a 10 Hz, com as linhas do mapa (reenviadas quando o formato muda), valores brutos e de engenharia calculados no servidor, marcas de forçado e a última escrita de cada linha (reenviada quando muda o autor ou a cada 1 s). O log guarda os últimos 500 eventos por planta, em memória, com tipo e argumentos estáveis traduzidos pela IHM; exceções e recusas repetidas viram uma linha com contagem; os novos vão a cada 250 ms. Até as contas, o autor das ações é o IP do navegador. | Escrita no monitor em cerca de 90 ms; 61 kbit/s com o monitor ligado e um mestre escrevendo (medido); a IHM não converte contagens (D01); textos só nos arquivos de idioma (RNF11). | Monitor a 20 Hz (cerca de 100 kbit/s só ele); API REST consultada pela IHM; texto pronto no log do servidor. |
 | D45 | (20/11/2026, Etapa 8) Mapa de I/O exportado pelo servidor, no formato e com as faixas atuais da planta: em CSV (`GET /api/plants/{id}/io-map.csv`, colunas em inglês e números na cultura invariante) e em JSON para a página `/plants/{id}/io-map`, que o navegador imprime ou salva em PDF. | Sem dependência nova; o PDF já sai traduzido pelos arquivos de idioma do web. | jsPDF (mais uma dependência no cliente); gerar o PDF no servidor (exigiria os textos traduzidos também no .NET). |
+| D46 | (25/11/2026, Etapa D1) Compartilhamento sem papéis. Quem tem acesso a uma planta pode tudo o que quem a compartilhou pode: operar, parear e retirar mestres, configurar, forçar e compartilhar; só quem criou a planta a exclui e remove pessoas. Convite pelo e-mail de quem já tem conta ou por código de 1 uso ou de vários usos, com validade (24 h, 7 dias ou até revogar) e revogável; o código entra em Minhas plantas ou em Turmas, no mesmo campo do código de turma, ou abre como link. Ver sem comandar só existe para o professor, que abre a planta de um aluno pelo painel da turma. | Numa aula, todos da dupla precisam comandar; escolher papel a cada convite é um passo que quase sempre dá "operador"; o código serve para quem está ao lado, sem trocar e-mail. Pedido do autor, aprovado pelo orientador. | Papéis dono, operador e observador (D15 e RF09 até 25/11/2026). |
+| D47 | (25/11/2026, Etapa D1) Histórico dos gráficos só da sessão atual, guardado pelo servidor em memória, por planta. A sessão vai de quando a planta começa a rodar (criada ou retomada da hibernação) até ela encerrar ou hibernar; reiniciar zera o histórico (D41). Quem entra depois recebe o histórico da sessão ao conectar. Os últimos minutos ficam a 20 Hz e o resto é reduzido (por exemplo, a 1 Hz: 16 sinais `float32` dão 230 kB por hora por planta). Os ensaios gravados (CSV) continuam como estão. | A aba Gráficos mostra a sessão inteira a quem chega atrasado (o professor, a dupla), sem guardar dados entre sessões, e cabe na memória do PC do laboratório (RNF07). | Histórico só no navegador (quem entra depois veria só dali em diante); histórico persistente entre sessões. |
+| D48 | (25/11/2026, Etapa D1) Identidade visual: nome "IndustrialSim Web"; logotipo conceito B (balão de instrumento ISA-5.1 com uma resposta ao degrau); fontes IBM Plex Sans e IBM Plex Mono (SIL OFL 1.1), servidas pelo próprio site, com números sempre em mono; ícones de interface Lucide (ISC) e símbolos de processo próprios no estilo da ISA-5.1. `docs/design/tokens.json` é a fonte dos tokens da D2 (cada chave de `color` vira `--color-<chave>`, nos temas claro e escuro), e o contraste WCAG 2.2 AA de cada par usado é conferido por `tools/design/contraste.mjs`. | Licenças livres e compatíveis; sem pedido a terceiros durante o uso (LGPD, rede do laboratório); paleta com o normal em cinza e cor só para o anormal (ISA-101); uma fonte única para o design e o código. | Conceitos de logotipo A (tubulação) e C (malha); fontes do Google Fonts carregadas em uso. |
+| D49 | (25/11/2026, Etapa D1) Navegação dentro da planta por abas, sem a barra global: ⌂ (sai da planta), nome da planta com o menu da planta, Processo fixa e as outras ferramentas em abas que fecham; o + abre o menu de nova aba com um clique. A barra de estado (mestre, situação, tempo simulado, alarmes, Pausar, Reiniciar, Exportar, Compartilhar) fica sempre visível. A aba Comunicação da Etapa 8 se divide em Conexão e Configurações, e entra a aba Gráficos. | Mais espaço para a planta; uma ferramenta a um clique de qualquer aba. Um clique, e não duplo clique: o duplo clique é difícil de descobrir, não existe em tela de toque e exige alternativa de teclado (WCAG 2.1.1). | Barra global dentro da planta; menus separados por ferramenta. |
+| D50 | (25/11/2026, Etapa D1) Prioridade de alarme vinda do cenário: cada alarme em `hmi.alarms` do `scenario.json` ganha `priority` (1, 2 ou 3), e a IHM mostra a prioridade por cor, forma e número (círculo com 1, triângulo com 2, quadrado com 3) na faixa de alarmes, no sinóptico e no painel do professor. Na caldeira: watchdog = 1; LSHH-101, LSLL-101 e PSH-101 = 2. | ISA-101: prioridade sempre visível e nunca só pela cor; a prioridade é do processo, e cada cenário define a sua. | Prioridade fixa no código da IHM. |
+| D51 | (25/11/2026, Etapa D1) O teste de usabilidade com usuários sai do plano: a Etapa D1 termina com o protótipo navegável aprovado pelo orientador, conferido contra o mapa de telas por script e revisado contra a ISA-101. O roteiro, o termo de consentimento e o formulário do moderador ficam em `docs/design/teste/`, prontos para o caso de o teste voltar. | Decisão do autor, com o protótipo aprovado pelo orientador em 25/11/2026. | Teste com 5 pessoas antes de fechar a D1; adiar o teste para a D2; uma etapa de teste própria. |
 
 ## Arquitetura e estrutura do repositório
 
@@ -349,17 +355,17 @@ Qualquer pessoa pode usar o simulador: sem conta, como visitante, ou com conta, 
 - A instância é a planta rodando no servidor. Ela nasce quando alguém abre a planta, hiberna (gravando o estado) após 30 minutos sem ninguém conectado e, ao ser reaberta, continua de onde parou.
 - Cada instância recebe uma porta Modbus (padrão 15000–15999) e, se o HART-IP for adotado, uma porta HART-IP (padrão 16000–16999). Ao reabrir, o servidor tenta devolver a mesma porta, para o mestre não precisar ser reconfigurado.
 
-**Compartilhamento**
+**Compartilhamento** (sem papéis, D46)
 
-| Papel | Pode |
+| Quem | Pode |
 | --- | --- |
-| Dono | Tudo: configurar, compartilhar, excluir |
-| Operador | Operar pela IHM, parear mestres Modbus e HART, provocar distúrbios |
-| Observador | Apenas ver a planta, a IHM e o monitor |
+| Quem criou a planta | Tudo, inclusive excluir a planta e remover pessoas |
+| Quem recebeu acesso | Tudo o mais: operar pela IHM, parear e retirar mestres Modbus e HART, configurar, forçar, provocar distúrbios e compartilhar |
+| Professor, pelo painel da turma | Apenas ver a planta do aluno, a IHM e o monitor (observador) |
 
-- Convite por link (com papel e validade) ou pelo e-mail de um usuário cadastrado; o acesso pode ser revogado.
+- Convite pelo e-mail de um usuário cadastrado, ou por código de 1 uso ou de vários usos, com validade (24 h, 7 dias ou até revogar), digitado em Minhas plantas ou em Turmas ou aberto como link; o acesso pode ser revogado.
 - Várias pessoas operam ao mesmo tempo: vale a última escrita, e cada ação fica registrada com autor e horário. A IHM mostra quem está na planta.
-- Vários mestres Modbus podem ser pareados na mesma planta; o monitor mostra quem escreveu cada registrador e avisa conflitos. O dono pode exigir um mestre por vez.
+- Vários mestres Modbus podem ser pareados na mesma planta; o monitor mostra quem escreveu cada registrador e avisa conflitos. Quem tem acesso à planta pode exigir um mestre por vez (D42).
 
 **Turmas e professor**
 
@@ -370,10 +376,10 @@ Qualquer pessoa pode usar o simulador: sem conta, como visitante, ou com conta, 
 **Pareamento de um mestre externo (Modbus ou HART-IP)**
 
 1. O site mostra o IP do servidor e a porta da planta, para configurar no mestre (ou no PACTware).
-2. Na primeira conexão de um IP novo, o servidor a segura e pergunta ao dono e aos operadores: “Aceitar conexão de 200.18.4.42?”.
+2. Na primeira conexão de um IP novo, o servidor a segura e pergunta a quem está na planta: “Aceitar conexão de 200.18.4.42?”.
 3. Aceita, aquele IP fica autorizado na planta; conexões de IPs não autorizados são recusadas e viram aviso na IHM.
 4. Recusada ou sem resposta em 60 s, a conexão é fechada.
-5. Dono e operadores podem retirar a autorização a qualquer momento.
+5. Quem tem acesso à planta pode retirar a autorização a qualquer momento.
 
 ## Configurações e diagnóstico da planta
 
@@ -383,15 +389,15 @@ O usuário vê e ajusta tudo o que um integrador ajustaria ao ligar um controlad
 | --- | --- | --- |
 | IP do servidor | Ninguém (só leitura) | É o endereço do servidor do laboratório. No futuro aplicativo desktop, o usuário escolherá o IP e a porta locais. |
 | Porta Modbus e porta HART-IP | Atribuídas pelo servidor | Mostradas na tela; reaproveitadas ao reabrir a planta. |
-| Unit ID | Dono | Padrão 1. |
-| Formato analógico | Dono | 0–27648 (padrão), 0–10000, 0–32767 ou `float32` em unidades de engenharia. |
-| Ordem das palavras do `float32` | Dono | Normal (big-endian) ou invertida (word swap). |
+| Unit ID | Quem tem acesso à planta | Padrão 1. |
+| Formato analógico | Quem tem acesso à planta | 0–27648 (padrão), 0–10000, 0–32767 ou `float32` em unidades de engenharia. |
+| Ordem das palavras do `float32` | Quem tem acesso à planta | Normal (big-endian) ou invertida (word swap). |
 | Notação de endereços exibida | Cada usuário | Base 0 ou clássica (1, 10001, 30001, 40001). |
-| Watchdog | Dono | Ligado ou desligado, e tempo limite. |
-| Mestres permitidos | Dono | Um por vez ou vários ao mesmo tempo. |
-| Bloco de diagnóstico em unidades de engenharia | Dono ou professor | Pode ser desligado em avaliações. |
+| Watchdog | Quem tem acesso à planta | Ligado ou desligado, e tempo limite. |
+| Mestres permitidos | Quem tem acesso à planta | Um por vez ou vários ao mesmo tempo. |
+| Bloco de diagnóstico em unidades de engenharia | Quem tem acesso à planta, ou o professor | Pode ser desligado em avaliações. |
 | Faixa, amortecimento e unidade dos instrumentos | Via HART | Pelo configurador do site ou pelo PACTware. |
-| Distúrbios e falhas | Operador e professor | Pela IHM ou pelo painel do professor. |
+| Distúrbios e falhas | Quem tem acesso à planta, e o professor | Pela IHM ou pelo painel do professor. |
 
 **Diagnóstico**
 
@@ -465,7 +471,7 @@ Cada chat trabalha em uma etapa do Plano de Desenvolvimento por vez, respeita as
 
 **Durante a etapa**
 
-- Seguir as decisões D01 a D45. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
+- Seguir as decisões D01 a D51. Se algo pedir para contrariá-las, apontar o conflito e propor a mudança explicitamente; nunca mudar em silêncio.
 - Entregar arquivos completos, com o caminho no repositório. Nada de trechos com “...” ou “resto igual”.
 - Se a etapa não couber numa resposta, anunciar no início a divisão em partes (A, B, C…). Cada parte termina compilando e com seus testes passando.
 - Entregar os testes junto com o código, nunca depois.

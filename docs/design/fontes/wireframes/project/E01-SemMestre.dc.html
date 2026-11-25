@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>E01 IHM sem mestre</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-s{min-height:36px;padding:0 12px}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.abn{border:3px solid #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="process" open="process" master="none" status="running" role="visitante" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 32px">
+    <section class="box abn" aria-labelledby="e01-title" style="display: flex; flex-direction: column; gap: 14px; padding: 20px">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+        <h2 id="e01-title" style="font-size: 18px">Conecte seu mestre Modbus</h2>
+        <span class="muted">A planta está rodando, mas nada a controla: ela não tem controle próprio.</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end">
+        <div><span class="lbl">Servidor</span><br><span class="mono" style="font-size: 20px">192.168.10.20</span> <button type="button" class="btn btn-s">Copiar</button></div>
+        <div><span class="lbl">Porta</span><br><span class="mono" style="font-size: 20px">15003</span> <button type="button" class="btn btn-s">Copiar</button></div>
+        <div><span class="lbl">Unit ID</span><br><span class="mono" style="font-size: 20px">1</span></div>
+        <div><span class="lbl">Formato analógico</span><br><span>0–27648 (Siemens)</span></div>
+      </div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center">
+        <a class="btn btn-p" href="T05-Conexao.dc.html">Abrir a aba Conexão (guias)</a>
+        <span class="muted">Guias: CODESYS · OpenPLC · TIA Portal (MB_CLIENT) · Python</span>
+        <a class="btn" href="T11-MapaIO.dc.html" style="margin-left: auto">Mapa de I/O</a>
+      </div>
+      <p class="muted">Quando o mestre conectar, esta página pede para você aceitar o IP dele.</p>
+    </section>
+
+    <div class="ph" style="height: 560px">Sinóptico, comandos do mestre, distúrbios e tendências, como em T06 (com os comandos no valor inicial do cenário)</div>
+
+    <section class="box" style="display: flex; flex-direction: column; gap: 6px">
+      <span class="lbl" style="color: #202124">E08 · visitante perto do limite</span>
+      <div class="abn" role="status" style="border-radius: 6px; padding: 10px 14px">▲ Esta planta temporária fecha em 10 minutos. <a href="T13-Entrar.dc.html">Crie uma conta</a> para salvá-la e continuar depois.</div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

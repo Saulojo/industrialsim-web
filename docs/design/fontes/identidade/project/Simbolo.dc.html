@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Símbolo do logotipo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<span style="display: inline-flex; line-height: 0">
+  <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M6 34 H58 V34 C58 42.8 50.8 50 42 50 H22 C13.2 50 6 42.8 6 34 Z" fill="{{ accent }}"></path>
+      <rect x="6" y="18" width="52" height="32" rx="16" fill="none" stroke="{{ ink }}" stroke-width="5"></rect>
+      <path d="M32 18 V6" stroke="{{ ink }}" stroke-width="5" stroke-linecap="round"></path>
+    </svg>
+  </sc-if>
+  <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="{{ ink }}" stroke-width="5"></circle>
+      <path d="M6 32 H58" stroke="{{ ink }}" stroke-width="5"></path>
+      <path d="M13 26 H21 C25 26 25 13 31 13 C37 13 37 19 51 19" fill="none" stroke="{{ accent }}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+  </sc-if>
+  <sc-if value="{{ isC }}" hint-placeholder-val="{{ false }}">
+    <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M51.05 43 A22 22 0 1 1 51.05 21" fill="none" stroke="{{ ink }}" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M54.4 27.5 L55.8 17.8 L46.3 22.9 Z" fill="{{ ink }}"></path>
+      <path d="M20 32 H44 C44 35.9 40.9 39 37 39 H27 C23.1 39 20 35.9 20 32 Z" fill="{{ accent }}"></path>
+      <rect x="20" y="25" width="24" height="14" rx="7" fill="none" stroke="{{ ink }}" stroke-width="3"></rect>
+    </svg>
+  </sc-if>
+</span>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"concept":{"editor":"enum","options":["a","b","c"],"default":"a"},"size":{"editor":"int","default":64},"ink":{"editor":"color","default":"#1A1D21"},"accent":{"editor":"color","default":"#1C5A91"},"$preview":{"width":64,"height":64}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const concept = this.props.concept ?? 'a';
+    return {
+      isA: concept === 'a',
+      isB: concept === 'b',
+      isC: concept === 'c',
+      size: Number(this.props.size ?? 64),
+      ink: this.props.ink ?? '#1A1D21',
+      accent: this.props.accent ?? '#1C5A91'
+    };
+  }
+}
+</script>
+</body>
+</html>

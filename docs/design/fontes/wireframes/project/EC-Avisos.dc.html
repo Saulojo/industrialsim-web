@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>E06 Avisos de conexão</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.abn{border:3px solid #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1000px">
+  <dc-import name="GlobalBar" active="plantas" user="aluno" hint-size="100%,64px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 32px; padding: 24px">
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl" style="color: #202124">Reconectando (a IHM continua visível, congelada)</span>
+      <div class="abn" role="status" style="border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; gap: 12px">
+        <span aria-hidden="true" style="width: 20px; height: 20px; border: 3px solid #9aa0a6; border-top-color: #202124; border-radius: 50%"></span>
+        <span><strong>Conexão com o servidor perdida; reconectando…</strong> Os valores na tela estão parados desde 09:21:14. A planta continua rodando no servidor.</span>
+      </div>
+      <p class="muted">Aparece só depois de 1 s sem reconectar, para não piscar em quedas curtas.</p>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl" style="color: #202124">Versão incompatível</span>
+      <div class="box abn" role="alert" style="max-width: 720px; display: flex; flex-direction: column; gap: 12px; padding: 24px">
+        <h2 style="font-size: 18px">O site foi atualizado</h2>
+        <p>Esta página usa a versão 2 do protocolo, mas o servidor usa a versão 3. Recarregue a página para carregar a versão atual. Sua planta continua rodando.</p>
+        <div><button type="button" class="btn btn-p">Recarregar a página</button></div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span class="lbl" style="color: #202124">Planta encerrada ou expirada</span>
+      <div class="box abn" role="alert" style="max-width: 720px; display: flex; flex-direction: column; gap: 12px; padding: 24px">
+        <h2 style="font-size: 18px">Esta planta não existe mais</h2>
+        <p>Ela pode ter expirado (sem ninguém conectado por 30 minutos) ou sido encerrada. Com conta, as plantas salvas hibernam em vez de expirar.</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap"><a class="btn btn-p" href="T03-Cenarios.dc.html">Abrir outra planta</a><a class="btn" href="T14-MinhasPlantas.dc.html">Minhas plantas</a></div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

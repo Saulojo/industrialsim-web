@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T25 Gráficos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:12px 16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 12px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.seg{display:inline-flex;border:1px solid #5f6368;border-radius:6px;overflow:hidden}
+.seg span{padding:6px 10px}
+.seg .on{background:#202124;color:#fff}
+.sig{display:flex;align-items:center;gap:8px;min-height:32px}
+.sw{width:14px;height:3px;background:#5f6368;flex:none}
+.ev{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed #5f6368}
+.evl{position:absolute;top:-2px;font-size:11px;background:#fff;padding:0 4px;border:1px solid #9aa0a6;border-radius:3px;white-space:nowrap}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="trends" open="process,trends,monitor" master="connected" status="running" role="membro" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div role="toolbar" aria-label="Controles dos gráficos" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #dadce0">
+    <span class="muted">Janela</span><span class="seg"><span>1 min</span><span class="on">2 min</span><span>10 min</span><span>30 min</span><span>Toda a sessão</span></span>
+    <span class="muted">Escala</span><span class="seg"><span class="on">% da faixa</span><span>Engenharia</span></span>
+    <button type="button" class="btn">⏸ Congelar</button>
+    <span style="margin-left: auto; display: flex; gap: 8px"><button type="button" class="btn">+ Gráfico</button><button type="button" class="btn">Exportar trecho (CSV)</button></span>
+  </div>
+  <div style="display: flex; flex-wrap: wrap">
+    <aside aria-label="Sinais" style="flex: 0 0 260px; box-sizing: border-box; border-right: 1px solid #dadce0; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px">
+      <span class="lbl">Medições</span>
+      <label class="sig"><input type="checkbox" checked><span class="sw" style="height: 3px"></span>LT-101 · Nível</label>
+      <label class="sig"><input type="checkbox" checked><span class="sw" style="height: 3px; background: repeating-linear-gradient(90deg,#5f6368 0 6px,transparent 6px 9px)"></span>PT-101 · Pressão</label>
+      <label class="sig"><input type="checkbox"><span class="sw"></span>FT-101 · Vazão de água</label>
+      <label class="sig"><input type="checkbox" checked><span class="sw" style="background: repeating-linear-gradient(90deg,#5f6368 0 2px,transparent 2px 5px)"></span>FT-102 · Vazão de vapor</label>
+      <span class="lbl" style="margin-top: 8px">Válvulas: posição</span>
+      <label class="sig"><input type="checkbox" checked><span class="sw"></span>FV-101</label>
+      <label class="sig"><input type="checkbox"><span class="sw"></span>FV-102</label>
+      <label class="sig"><input type="checkbox" checked><span class="sw"></span>FV-103 (distúrbio)</label>
+      <span class="lbl" style="margin-top: 8px">Comandos do mestre</span>
+      <label class="sig"><input type="checkbox" checked><span class="sw"></span>FV-101 · comando</label>
+      <label class="sig"><input type="checkbox"><span class="sw"></span>FV-102 · comando</label>
+      <span class="lbl" style="margin-top: 8px">Discretos (em degraus)</span>
+      <label class="sig"><input type="checkbox" checked> P-101 em operação</label>
+      <label class="sig"><input type="checkbox" checked> LSLL-101 · LSHH-101</label>
+      <label class="sig"><input type="checkbox"> PSH-101 · PSV-101</label>
+      <label class="sig"><input type="checkbox"> Watchdog</label>
+      <p class="muted" style="font-size: 12px; margin-top: 8px">Arraste um sinal para outro gráfico. Linhas diferem também por traço, não só por cor.</p>
+    </aside>
+
+    <main style="flex: 999 1 700px; min-width: 0; padding: 12px 16px 24px; display: flex; flex-direction: column; gap: 12px">
+      <section class="box" aria-labelledby="t25-g1" style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 12px"><h2 id="t25-g1" style="font-size: 15px">Malha de nível</h2><span class="muted">LT-101 · FV-101 comando e posição · FT-102</span><button type="button" class="btn" aria-label="Opções do gráfico Malha de nível" style="margin-left: auto">⋯</button></div>
+        <div style="position: relative; height: 230px">
+          <div class="ph" style="position: absolute; inset: 0">Linhas ao vivo (20 Hz), eixo do tempo simulado; arrastar dá zoom num trecho, duplo clique volta</div>
+          <span class="ev" style="left: 58%"></span><span class="evl" style="left: 58%">FV-103 50 → 70 %</span>
+          <span style="position: absolute; left: 72%; top: 0; bottom: 0; width: 1px; background: #202124"></span>
+          <div class="box" style="position: absolute; left: calc(72% + 8px); top: 30px; padding: 6px 10px; font-size: 12px">
+            <strong class="mono">t = 1 262,4 s</strong><br>LT-101 <span class="mono">0,641 m</span><br>FV-101 cmd <span class="mono">74,0 %</span> · pos <span class="mono">75,2 %</span><br>FT-102 <span class="mono">2,58 kg/s</span>
+          </div>
+        </div>
+      </section>
+      <section class="box" aria-labelledby="t25-g2" style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 12px"><h2 id="t25-g2" style="font-size: 15px">Malha de pressão</h2><span class="muted">PT-101 · FV-103</span><button type="button" class="btn" aria-label="Opções do gráfico Malha de pressão" style="margin-left: auto">⋯</button></div>
+        <div style="position: relative; height: 180px"><div class="ph" style="position: absolute; inset: 0">PT-101 e FV-103; faixa normal em cinza ao fundo</div><span class="ev" style="left: 58%"></span></div>
+      </section>
+      <section class="box" aria-labelledby="t25-g3" style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; align-items: center; gap: 12px"><h2 id="t25-g3" style="font-size: 15px">Discretos</h2></div>
+        <div class="ph" style="height: 90px">Faixas em degrau: P-101, LSLL-101, LSHH-101 (alarme marcado por padrão e texto, não só por cor)</div>
+      </section>
+      <p class="muted">Marcas no eixo do tempo: distúrbios, pausas, reinícios, valores forçados e mudanças de configuração. Os gráficos só desenham os estados que o servidor manda (D01). Histórico só da sessão atual: quem entra depois vê tudo desde o início da sessão, mandado pelo servidor ao conectar; ao encerrar ou hibernar, o histórico some (decisão do autor, 23/11).</p>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

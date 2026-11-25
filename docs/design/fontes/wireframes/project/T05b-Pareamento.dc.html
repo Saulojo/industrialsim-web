@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T05b Pedido de pareamento</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border:1px solid #5f6368;border-radius:6px;background:#fff;color:#202124;font:inherit;text-decoration:none}
+.btn-p{border:2px solid #202124;background:#202124;color:#fff;font-weight:600}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.lbl{font-size:12px;font-weight:600;color:#5f6368;text-transform:uppercase;letter-spacing:.04em}
+.abn{border:3px solid #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 900px">
+  <dc-import name="PlantBar" tab="process" open="process" master="pending" status="running" role="visitante" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; gap: 40px; padding: 40px 24px; background: #dadce0; min-height: 724px; box-sizing: border-box; align-items: flex-start">
+    <section role="alertdialog" aria-labelledby="t05b-title" aria-describedby="t05b-desc" class="box" style="flex: 0 1 520px; display: flex; flex-direction: column; gap: 16px; padding: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.2)">
+      <h2 id="t05b-title" style="font-size: 22px">Pedido de conexão Modbus</h2>
+      <p id="t05b-desc" style="font-size: 18px">Aceitar conexão de <strong class="mono">200.18.4.42</strong>?</p>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px">
+        <span class="muted">Porta da planta</span><span class="mono">15003</span>
+        <span class="muted">Chegou às</span><span class="mono">09:12:07</span>
+        <span class="muted">Fecha sozinho em</span><strong class="mono">52 s</strong>
+      </div>
+      <p class="muted">Aceite só se for o seu mestre. Sem resposta, a conexão é fechada às 09:13:07. Não sabe o IP do seu mestre? <a href="T05-Conexao.dc.html">Veja como descobrir</a>.</p>
+      <div style="display: flex; justify-content: flex-end; gap: 12px">
+        <a class="btn" href="E01-SemMestre.dc.html">Recusar</a>
+        <a class="btn btn-p" href="T06-IHM.dc.html">Aceitar</a>
+      </div>
+    </section>
+
+    <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="lbl" style="color: #202124">Variante: modo um mestre por vez</span>
+        <div class="box" style="display: flex; flex-direction: column; gap: 10px; padding: 20px">
+          <p>Aceitar conexão de <strong class="mono">200.18.4.57</strong>?</p>
+          <p class="abn" style="border-radius: 6px; padding: 8px 12px">▲ Modo um mestre por vez: aceitar desconecta o mestre <span class="mono">200.18.4.42</span>.</p>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="lbl" style="color: #202124">Depois de fechar sem responder</span>
+        <div class="box" style="padding: 20px">A barra da planta continua mostrando “◌ Pedido de conexão de 200.18.4.42 · 41 s”; clicar nela reabre este diálogo.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="lbl" style="color: #202124">Depois de aceitar</span>
+        <div class="box" style="padding: 20px">Aviso curto: “Mestre 200.18.4.42 conectado.” A barra da planta passa a “● Mestre conectado · 200.18.4.42”.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>

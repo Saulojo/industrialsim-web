@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>T21 Painel em VR</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:16px;line-height:1.5;color:#202124;background:#fff}
+.vrp{background:#fff;border:2px solid #5f6368;border-radius:16px;padding:16px;box-sizing:border-box}
+.vb{display:flex;align-items:center;justify-content:center;min-height:64px;border:2px solid #5f6368;border-radius:12px;background:#fff;font:inherit;font-size:18px;text-decoration:none;color:#202124}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 900px; position: relative; background: repeating-linear-gradient(135deg, #eceff1 0 18px, #e3e6e8 18px 36px); overflow: hidden">
+  <span class="muted" style="position: absolute; left: 50%; top: 24px; transform: translateX(-50%); font-size: 13px">Vista no óculos (Meta Quest, WebXR) · painéis presos ao mundo e ao pulso</span>
+
+  <div class="vrp" style="position: absolute; left: 140px; top: 220px; width: 360px; display: flex; flex-direction: column; gap: 12px; transform: perspective(900px) rotateY(14deg)">
+    <strong style="font-size: 20px">Menu do pulso</strong>
+    <a class="vb" href="T20-Cena3D.dc.html">Processo</a>
+    <a class="vb" href="#alarmes">Alarmes · 0</a>
+    <a class="vb" href="#disturbios">Distúrbios</a>
+    <a class="vb" href="T20-Cena3D.dc.html">Sair da VR</a>
+  </div>
+
+  <div class="vrp" style="position: absolute; left: 640px; top: 180px; width: 420px; display: flex; flex-direction: column; gap: 10px">
+    <span class="muted">Faceplate flutuante · aparece ao apontar</span>
+    <strong style="font-size: 24px">LT-101 · Nível do tubulão</strong>
+    <span class="mono" style="font-size: 44px; font-weight: 700">0,600 m</span>
+    <div style="height: 22px; border: 2px solid #5f6368; position: relative"><div style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #dadce0"></div><div style="position: absolute; left: calc(50% - 3px); top: -6px; width: 6px; height: 30px; background: #202124"></div></div>
+    <span class="muted">12,00 mA · faixa 0–1,2 m</span>
+    <div style="display: flex; gap: 10px"><a class="vb" href="#" style="flex: 1">Fechar</a><a class="vb" href="#" style="flex: 1">Fixar</a></div>
+  </div>
+
+  <div class="vrp" style="position: absolute; right: 60px; bottom: 60px; width: 380px; display: flex; flex-direction: column; gap: 6px">
+    <strong>Regras para VR (a confirmar na Etapa 19)</strong>
+    <span class="muted">Alvos grandes (mín. 64 px no painel, cerca de 2 cm a 1 m de distância); texto mínimo 20 px; painéis a 1–2 m, levemente inclinados; sem texto fixo na visão (nada preso à cabeça).</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Entrar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="/_blob/c8dfaff3c31198ac92f85c7937c771d0">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+.sep{display:flex;align-items:center;gap:12px}
+.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--color-border)}
+.prov{justify-content:flex-start;width:100%}
+.mono-ic{width:24px;height:24px;border-radius:6px;background:var(--color-surface-sunken);border:1px solid var(--color-border);display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
+</style>
+</helmet>
+<div class="app" style="min-height: 900px">
+  <dc-import name="GlobalBar" active="inicio" user="visitante" hint-size="100%,64px"></dc-import>
+  <main style="display: flex; justify-content: center; padding: 40px 16px 56px">
+    <section class="card col" aria-labelledby="t13-t" style="width: 100%; max-width: 440px; gap: 16px; padding: 32px">
+      <div class="row" role="tablist" aria-label="Entrar ou criar conta" style="gap: 0; border: 1px solid var(--color-border-strong); border-radius: 6px; overflow: hidden; align-self: flex-start">
+        <button type="button" role="tab" aria-selected="{{ isLogin }}" class="{{ loginCls }}" onClick="{{ setLogin }}" style="border: none; border-radius: 0">Entrar</button>
+        <button type="button" role="tab" aria-selected="{{ isSignup }}" class="{{ signupCls }}" onClick="{{ setSignup }}" style="border: none; border-radius: 0">Criar conta</button>
+      </div>
+      <h1 id="t13-t" class="h2">{{ title }}</h1>
+      <p class="muted">Com conta, suas plantas ficam salvas, você compartilha com colegas e participa de turmas.</p>
+      <a class="btn prov" href="{{ next }}"><span class="mono-ic" aria-hidden="true">G</span>Continuar com Google</a>
+      <a class="btn prov" href="{{ next }}"><span class="mono-ic" aria-hidden="true">M</span>Continuar com Microsoft</a>
+      <a class="btn prov" href="{{ next }}"><span class="mono-ic" aria-hidden="true">GH</span>Continuar com GitHub</a>
+      <div class="sep muted small">ou com e-mail</div>
+      <sc-if value="{{ isSignupB }}" hint-placeholder-val="{{ false }}">
+        <div class="field"><label for="t13-name">Nome de exibição</label><input id="t13-name" class="input" autocomplete="name"><span class="hint">Aparece para colegas e professores.</span></div>
+      </sc-if>
+      <div class="field"><label for="t13-mail">E-mail</label><input id="t13-mail" class="input" type="email" autocomplete="email"></div>
+      <div class="field"><label for="t13-pw">Senha</label><input id="t13-pw" class="input" type="password" autocomplete="{{ pwAuto }}"><sc-if value="{{ isSignupB }}" hint-placeholder-val="{{ false }}"><span class="hint">Pelo menos 10 caracteres.</span></sc-if></div>
+      <a class="btn btn-primary btn-lg" href="{{ next }}">{{ cta }}</a>
+      <sc-if value="{{ isLoginB }}" hint-placeholder-val="{{ true }}"><a href="#senha" class="small">Esqueci a senha</a></sc-if>
+      <div class="col" style="gap: 8px; border-top: 1px solid var(--color-border); padding-top: 16px">
+        <a class="btn" href="T03-Cenarios.dc.html">Continuar como visitante</a>
+        <p class="hint">Uma planta temporária de até 60 minutos, sem salvar nem compartilhar.</p>
+      </div>
+      <p class="hint">Guardamos só o e-mail e o nome de exibição. <a href="#termos">Termos de uso e política de privacidade</a>.</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["entrar","criar"],"default":"entrar"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: null };
+  }
+  renderVals() {
+    const mode = this.state.mode ?? this.props.mode ?? 'entrar';
+    const signup = mode === 'criar';
+    return {
+      isLogin: signup ? 'false' : 'true', isSignup: signup ? 'true' : 'false',
+      isLoginB: !signup, isSignupB: signup,
+      loginCls: signup ? 'btn btn-sm' : 'btn btn-sm btn-primary',
+      signupCls: signup ? 'btn btn-sm btn-primary' : 'btn btn-sm',
+      title: signup ? 'Criar conta' : 'Entrar',
+      cta: signup ? 'Criar conta' : 'Entrar',
+      pwAuto: signup ? 'new-password' : 'current-password',
+      next: 'T14-MinhasPlantas.dc.html',
+      setLogin: () => this.setState({ mode: 'entrar' }),
+      setSignup: () => this.setState({ mode: 'criar' })
+    };
+  }
+}
+</script>
+</body>
+</html>

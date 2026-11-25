@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>E05 E09 Pausada e observador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#202124}a:hover{color:#000}
+.wf{font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#202124;background:#fff}
+.box{border:1px solid #9aa0a6;border-radius:8px;background:#fff;padding:16px;box-sizing:border-box}
+.ph{background:#eceff1;border:1px dashed #9aa0a6;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#5f6368;font-size:12px;text-align:center}
+.muted{color:#5f6368}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.abn{border:3px solid #202124}
+h1,h2,h3,p{margin:0}
+</style>
+</helmet>
+<div class="wf" style="width: 100%; min-height: 1100px">
+  <dc-import name="PlantBar" tab="process" open="process" master="connected" status="paused" role="observador" alarms="{{ zero }}" hint-size="100%,100px"></dc-import>
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 32px">
+    <p role="status" class="abn" style="border-radius: 8px; padding: 12px 16px"><strong>E05 · Planta pausada:</strong> o tempo simulado está parado. O mestre Modbus continua conectado e rodando; o que ele escrever vale quando a planta for retomada.</p>
+    <p role="note" class="box" style="padding: 12px 16px"><strong>E09 · Você está observando esta planta</strong> (aberta pelo painel da turma; é o único caso de acesso só de leitura). Você vê tudo, mas não comanda: distúrbios, forçar, configurações, pausar e reiniciar ficam desabilitados.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 16px">
+      <div class="ph" style="flex: 999 1 640px; min-height: 480px">Sinóptico e tendências como em T06; a tendência mostra uma faixa vertical “pausada” no trecho parado</div>
+      <div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 16px">
+        <section class="box" aria-labelledby="eb-dist" style="display: flex; flex-direction: column; gap: 8px">
+          <h2 id="eb-dist" style="font-size: 16px">Distúrbios</h2>
+          <label for="eb-fv103" class="muted">FV-103 · Válvula de saída de vapor (carga)</label>
+          <div style="display: flex; align-items: center; gap: 12px"><input id="eb-fv103" type="range" min="0" max="100" value="50" disabled style="flex: 1"><span class="mono">50,0 %</span></div>
+          <p class="muted" style="font-size: 12px">Desabilitado: você está observando.</p>
+        </section>
+        <section class="box" aria-labelledby="eb-who" style="display: flex; flex-direction: column; gap: 6px">
+          <h2 id="eb-who" style="font-size: 16px">Quem está na planta</h2>
+          <span>[Aluno 07]</span><span>[Aluno 08]</span><span>Prof. [nome] · observando (você)</span>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { zero: 0 };
+  }
+}
+</script>
+</body>
+</html>
