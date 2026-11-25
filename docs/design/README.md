@@ -14,12 +14,12 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
 | D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aguardando revisão |
-| D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo, 4 ressalvas para o orientador |
+| D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo; as 4 ressalvas foram aprovadas pelo orientador em 25/11 |
 | D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
 | E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto; falta o teste piloto, e o termo precisa dos nomes e contatos |
 | E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto e conferido pelo autor no claude.ai em 23/11 (o CSV só tem o cabeçalho até o teste) |
 | F | Conferência do mapa contra o protótipo | `tools/design/mapa-prototipo.mjs`; fontes em [`fontes/`](fontes/) | pronta; todas as conferências passam |
-| F | Validação da etapa e decisões novas (D46 a D50) | [`docs/validacao/etapa-d1.md`](../validacao/etapa-d1.md) | rascunho; decisões ainda não estão no descritivo |
+| F | Validação da etapa e decisões novas (D46 a D50) | [`docs/validacao/etapa-d1.md`](../validacao/etapa-d1.md) | rascunho (o teste falta); D46 a D50 aprovadas pelo orientador e registradas no descritivo em 25/11 |
 | F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
 
 ## Links

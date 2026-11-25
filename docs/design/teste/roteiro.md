@@ -189,7 +189,7 @@ Mudanças depois do piloto (enunciados, limites, ordem) ficam anotadas aqui, com
 - **Participação:** voluntária, com termo de consentimento assinado antes de qualquer tarefa. A pessoa pode parar a qualquer momento, sem dar motivo.
 - **Dados guardados:** só o código do participante, perfil, experiência, tempos, resultados, notas e observações. Nada que identifique a pessoa vai para o repositório nem para o formulário. Isso segue o princípio de necessidade da LGPD (Lei 13.709/2018, art. 6º, III).
 - **Gravação de tela:** só com autorização marcada no termo. Fica fora do repositório e é apagada depois do relatório.
-- **Comitê de Ética:** **pendente, decidir com o orientador.** Confirmar se a instituição exige submissão ao Comitê de Ética em Pesquisa (Sistema CEP/Conep) para este teste. Se exigir, o teste só começa depois da aprovação, e o termo é ajustado ao modelo do comitê.
+- **Comitê de Ética:** dispensado pelo orientador em 25/11/2026. O teste segue com o termo deste repositório, preenchido com os nomes e contatos.
 
 ## Referências
 

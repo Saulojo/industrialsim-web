@@ -1,10 +1,10 @@
 # Validação — Etapa D1: Prototipagem e teste com usuários
 
-> **Rascunho (23/11/2026).** Escrito antes do teste com usuários.
+> **Rascunho (atualizado em 25/11/2026).** O teste com usuários ainda não aconteceu.
 >
 > - **Já tem evidência:** os critérios que não dependem do teste.
-> - **Pendente:** os do teste e a aprovação do orientador.
-> - **Ainda não aplicado:** as decisões novas da seção "Decisões novas" são proposta, e o descritivo não mudou.
+> - **Aprovado pelo orientador em 25/11/2026** (informado pelo autor): o protótipo, as decisões D46 a D50 (já registradas no descritivo), as ressalvas ISA-101 como estão e a dispensa do Comitê de Ética.
+> - **Pendente:** os critérios 2 e 3, que dependem do teste.
 >
 > Depois do teste, este arquivo ganha o relatório (`docs/design/teste/relatorio.md`), os números do `resultados.csv` e as correções. Os critérios só são marcados no plano com a confirmação do autor.
 
@@ -43,8 +43,8 @@ Nenhuma mudança em `web/src` nem no servidor (a D1 não tem código de produç�
 | 2 | Nas tarefas principais, pelo menos 4 de 5 participantes concluem sem ajuda | **pendente** | Teste ainda não feito. Roteiro, termo e formulário prontos; o formulário calcula o critério tarefa a tarefa. |
 | 3 | Os problemas encontrados no teste estão registrados e corrigidos no protótipo | **pendente** | Depende do teste. Os problemas achados antes do teste já foram corrigidos (ver "Correções antes do teste"). |
 | 4 | Paleta aprovada no verificador de contraste WCAG AA, nos temas claro e escuro | **verificado** | `node tools/design/contraste.mjs`: 98 pares, 98 passam, saída 0 (`docs/design/contraste.md`). |
-| 5 | Telas de IHM revisadas contra os princípios da ISA-101 | **verificado, com ressalvas** | `docs/design/isa-101.md`: 20 princípios tela a tela, 3 problemas corrigidos no protótipo, 4 ressalvas para o orientador. A conferência contra o texto da norma está pendente (fonte usada: Hollifield et al., 2008). |
-| 6 | Protótipo aprovado pelo orientador | **pendente** | Depois do teste e das correções. |
+| 5 | Telas de IHM revisadas contra os princípios da ISA-101 | **verificado** | `docs/design/isa-101.md`: 20 princípios tela a tela e 3 problemas corrigidos no protótipo. As 4 ressalvas foram decididas pelo orientador em 25/11/2026: ficam como estão, e a prioridade de alarme virou a D50. A conferência contra o texto da norma continua pendente (fonte usada: Hollifield et al., 2008). |
+| 6 | Protótipo aprovado pelo orientador | **verificado (antes do teste)** | Aprovado em 25/11/2026, segundo o autor, na versão publicada nessa data (fontes em `docs/design/fontes/prototipo/`). Se o teste levar a mudanças grandes no protótipo, mostrar de novo ao orientador antes de fechar a etapa. |
 
 ### Saída da conferência do mapa (critério 1)
 
@@ -80,9 +80,18 @@ Problemas achados na conferência no navegador, na revisão ISA-101 e na prepara
 | T05b | Pedido recusado ou expirado nunca voltava (a T2 travava) | Volta depois do bloqueio de 60 s ou 6 s depois de expirar, como um CLP que tenta de novo |
 | T11 | Notas de fora da faixa no formato 0–10000 contrariavam a D28 | Corrigidas: a medição satura em 3,8 e 20,5 mA |
 
-## Decisões novas (propostas; registrar no descritivo com a confirmação do autor)
+## Decisões novas (D46 a D50, registradas no descritivo em 25/11/2026)
 
-Numeração seguindo a D45.
+Aprovadas pelo orientador em 25/11/2026. Junto com elas, mudaram no descritivo:
+
+- a D15 (marcada como alterada pela D46);
+- o RF09;
+- a seção "Compartilhamento";
+- os passos 2 e 5 do pareamento;
+- a coluna "Quem altera" da tabela de configurações;
+- a referência "D01 a D50" (também no `CLAUDE.md`).
+
+O texto abaixo é o resumo com o raciocínio; a versão de referência é a tabela de decisões do descritivo.
 
 - **D46 (D1) · Compartilhamento sem papéis.**
   - Quem tem acesso a uma planta pode tudo o que quem a compartilhou pode: operar, parear e retirar mestres, configurar, forçar e compartilhar. Só quem criou a planta a exclui e remove pessoas.
@@ -96,7 +105,7 @@ Numeração seguindo a D45.
   - O servidor guarda em memória, por planta, o histórico desde o início da sessão. A sessão vai de quando a planta começa a rodar (criada ou retomada da hibernação) até ela encerrar ou hibernar; reiniciar zera o histórico (D41).
   - Quem entra depois recebe esse histórico ao conectar. Não há histórico de sessões anteriores; os ensaios gravados (CSV) continuam como hoje.
   - Os últimos minutos ficam a 20 Hz e o resto é reduzido (por exemplo, a 1 Hz). A 1 Hz, 16 sinais em `float32` dão 230 kB por hora por planta (16 × 4 B × 3600).
-  - *Suposição a confirmar:* a definição de sessão acima.
+  - A definição de sessão acima foi aprovada junto com a decisão.
   - *Motivo:* decisão do autor (23/11/2026). A aba Gráficos (T25) precisa mostrar a sessão inteira a quem chega atrasado, sem guardar dados entre sessões, e cabe na memória do PC do laboratório (RNF07).
   - *Descartado:* histórico só no navegador (quem entra depois veria só dali em diante); histórico persistente entre sessões.
 - **D48 (D1) · Identidade visual e tokens.**
@@ -113,7 +122,7 @@ Numeração seguindo a D45.
   - A aba Comunicação da Etapa 8 se divide em Conexão e Configurações, e entra a aba Gráficos (T25).
   - *Motivo:* pedido do autor (23/11/2026), para sobrar espaço para a planta. Um clique, e não duplo clique: o duplo clique é difícil de descobrir, não existe em tela de toque e exige alternativa de teclado (WCAG 2.1.1).
   - *Descartado:* manter a barra global dentro da planta; menus separados por ferramenta.
-- **D50 (D1) · Prioridade de alarme vinda do cenário** *(proposta; confirmar com o orientador, ressalva 4 de `isa-101.md`)*.
+- **D50 (D1) · Prioridade de alarme vinda do cenário** (ressalva 4 de `isa-101.md`).
   - Cada alarme em `hmi.alarms` do `scenario.json` ganha `priority` (1, 2 ou 3).
   - A IHM mostra a prioridade por cor, forma e número: círculo com 1, triângulo com 2, quadrado com 3. É assim na faixa de alarmes, no sinóptico e no painel do professor.
   - Na caldeira: watchdog = 1; LSHH-101, LSLL-101 e PSH-101 = 2.
@@ -124,12 +133,16 @@ Numeração seguindo a D45.
 
 1. **Teste:**
    - preencher o termo com nomes e contatos;
-   - decidir com o orientador sobre o Comitê de Ética;
    - fazer o teste piloto e as 5 sessões.
-2. **Relatório do teste** (`docs/design/teste/relatorio.md`): problemas por gravidade, correções no protótipo, números do critério 2. Depois, o protótipo vai para a aprovação do orientador.
-3. **Ressalvas da revisão ISA-101,** para o orientador decidir: cor da água no tubulão, barras nas vazões, forçar sem confirmação e prioridade no cenário (D50).
-4. **Logotipo:** converter o nome em curvas (Inkscape ou Figma).
-5. **Conferência contra o texto da ANSI/ISA-101.01-2015,** se houver acesso à norma.
+
+   O Comitê de Ética foi dispensado pelo orientador em 25/11/2026.
+2. **Relatório do teste** (`docs/design/teste/relatorio.md`): problemas por gravidade, correções no protótipo, números do critério 2. Se as correções forem grandes, mostrar o protótipo de novo ao orientador.
+3. **Logotipo:** converter o nome em curvas (Inkscape ou Figma).
+4. **Conferência contra o texto da ANSI/ISA-101.01-2015,** se houver acesso à norma.
+5. **Fechamento** (com a confirmação do autor):
+   - marcar os critérios em `docs/plano.md`;
+   - atualizar a linha "Estado atual" do descritivo;
+   - abrir o pull request.
 
 ## Observações
 

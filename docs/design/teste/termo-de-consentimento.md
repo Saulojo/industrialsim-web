@@ -6,7 +6,7 @@
 
 **Orientador:** [nome do orientador], [departamento e instituição]. Contato: [e-mail institucional].
 
-> Modelo preparado na Etapa D1. Antes de usar, preencha os campos entre colchetes. Confirme com o orientador se a instituição exige aprovação do Comitê de Ética em Pesquisa (roteiro, seção 9); se exigir, use o modelo de termo do comitê, que substitui este.
+> Modelo preparado na Etapa D1. Antes de usar, preencha os campos entre colchetes. O orientador dispensou a submissão ao Comitê de Ética em 25/11/2026 (roteiro, seção 9).
 
 ## Convite
 
