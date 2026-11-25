@@ -5,7 +5,7 @@
 > Aprovado pelo orientador em 25/11/2026 (informado pelo autor): o protótipo, as decisões D46 a D50, as ressalvas ISA-101 como estão e a dispensa do Comitê de Ética.
 
 - Branch: `etapa-d1-design`
-- Pull request: *(preenchido ao abrir)*
+- Pull request: [Saulojo/industrialsim-web#11](https://github.com/Saulojo/industrialsim-web/pull/11)
 - Data: 23/11/2026 (partes A a E) e 25/11/2026 (parte F e fechamento)
 
 ## Ambiente
