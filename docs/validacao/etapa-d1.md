@@ -1,16 +1,12 @@
-# Validação — Etapa D1: Prototipagem e teste com usuários
+# Validação — Etapa D1: Prototipagem
 
-> **Rascunho (atualizado em 25/11/2026).** O teste com usuários ainda não aconteceu.
+> **Concluída em 25/11/2026, sem o teste com usuários.** O teste foi retirado do plano por decisão do autor (D51), com o protótipo aprovado pelo orientador nessa data. O roteiro, o termo e o formulário do moderador continuam em `docs/design/teste/`, prontos para o caso de o teste voltar.
 >
-> - **Já tem evidência:** os critérios que não dependem do teste.
-> - **Aprovado pelo orientador em 25/11/2026** (informado pelo autor): o protótipo, as decisões D46 a D50 (já registradas no descritivo), as ressalvas ISA-101 como estão e a dispensa do Comitê de Ética.
-> - **Pendente:** os critérios 2 e 3, que dependem do teste.
->
-> Depois do teste, este arquivo ganha o relatório (`docs/design/teste/relatorio.md`), os números do `resultados.csv` e as correções. Os critérios só são marcados no plano com a confirmação do autor.
+> Aprovado pelo orientador em 25/11/2026 (informado pelo autor): o protótipo, as decisões D46 a D50, as ressalvas ISA-101 como estão e a dispensa do Comitê de Ética.
 
 - Branch: `etapa-d1-design`
-- Pull request: *(depois do teste)*
-- Data: 23/11/2026 (partes A a E e parte F sem o teste)
+- Pull request: *(preenchido ao abrir)*
+- Data: 23/11/2026 (partes A a E) e 25/11/2026 (parte F e fechamento)
 
 ## Ambiente
 
@@ -33,18 +29,18 @@ Nenhuma mudança em `web/src` nem no servidor (a D1 não tem código de produç�
 | C | `identidade-visual.md`, `tokens.json`, `logo/`, `contraste.md`; Artifact de identidade; `tools/design/contraste.mjs` | Logotipo B (balão de instrumento ISA-5.1 com resposta ao degrau), paleta clara e escura, IBM Plex Sans e Mono, ícones Lucide, regras de cor na IHM. Contraste WCAG 2.2 AA conferido por script. |
 | D | Artifact do protótipo; `fontes/prototipo/`; `isa-101.md` | 35 pranchas: todas as telas T01–T25, os estados E01–E10, as fases 3 e 4 em fidelidade média. Revisão ISA-101 com 3 correções e 4 ressalvas. 475 chaves de idioma propostas para os textos novos (`mapa-de-telas.md`, "Textos novos"). |
 | E | `teste/roteiro.md`, `teste/termo-de-consentimento.md`, `teste/resultados.csv`; Artifact do formulário | Roteiro de 45 min com T1–T5, S1, S2 e S11, SEQ e SUS (versão brasileira validada); teste piloto; termo; formulário com cronômetro, resumo do critério e exportação do CSV. |
-| F (parcial) | `tools/design/mapa-prototipo.mjs` e testes | Conferência por script do mapa de telas contra os wireframes e o protótipo. |
+| F | `tools/design/mapa-prototipo.mjs` e testes; `docs/design/fontes/` | Conferência por script do mapa de telas contra os wireframes e o protótipo; fontes dos Artifacts no repositório; decisões D46 a D51 no descritivo. |
 
 ## Critérios de validação
 
 | # | Critério (plano, Etapa D1) | Situação | Como foi verificado |
 | --- | --- | --- | --- |
 | 1 | Todas as telas do mapa existem no protótipo e cobrem os fluxos do visitante, do aluno e do professor | **verificado** | Script `tools/design/mapa-prototipo.mjs` (saída abaixo): 26 de 26 telas com prancha de wireframe e de protótipo, 10 de 10 estados, nenhum link quebrado, e a partir da página inicial se chega ao fim das 5 tarefas principais. Os fluxos das 5 tarefas foram percorridos à mão no navegador, sem login, em 23/11. Na T4, "Convidar" mostra "Convite enviado" e "Gerar código" mostra o código com a validade. |
-| 2 | Nas tarefas principais, pelo menos 4 de 5 participantes concluem sem ajuda | **pendente** | Teste ainda não feito. Roteiro, termo e formulário prontos; o formulário calcula o critério tarefa a tarefa. |
-| 3 | Os problemas encontrados no teste estão registrados e corrigidos no protótipo | **pendente** | Depende do teste. Os problemas achados antes do teste já foram corrigidos (ver "Correções antes do teste"). |
+| 2 | Nas tarefas principais, pelo menos 4 de 5 participantes concluem sem ajuda | **retirado (D51)** | Teste com usuários retirado do plano em 25/11/2026, por decisão do autor. Não foi verificado. |
+| 3 | Os problemas encontrados no teste estão registrados e corrigidos no protótipo | **retirado (D51)** | Sem teste, não há problemas do teste. Os problemas achados na conferência no navegador e na revisão ISA-101 foram corrigidos (ver "Correções no protótipo"). |
 | 4 | Paleta aprovada no verificador de contraste WCAG AA, nos temas claro e escuro | **verificado** | `node tools/design/contraste.mjs`: 98 pares, 98 passam, saída 0 (`docs/design/contraste.md`). |
 | 5 | Telas de IHM revisadas contra os princípios da ISA-101 | **verificado** | `docs/design/isa-101.md`: 20 princípios tela a tela e 3 problemas corrigidos no protótipo. As 4 ressalvas foram decididas pelo orientador em 25/11/2026: ficam como estão, e a prioridade de alarme virou a D50. A conferência contra o texto da norma continua pendente (fonte usada: Hollifield et al., 2008). |
-| 6 | Protótipo aprovado pelo orientador | **verificado (antes do teste)** | Aprovado em 25/11/2026, segundo o autor, na versão publicada nessa data (fontes em `docs/design/fontes/prototipo/`). Se o teste levar a mudanças grandes no protótipo, mostrar de novo ao orientador antes de fechar a etapa. |
+| 6 | Protótipo aprovado pelo orientador | **verificado** | Aprovado em 25/11/2026, segundo o autor, na versão publicada nessa data (fontes em `docs/design/fontes/prototipo/`). |
 
 ### Saída da conferência do mapa (critério 1)
 
@@ -60,11 +56,11 @@ Comando: `node tools/design/mapa-prototipo.mjs` (saída 0). Testes: `node --test
 | Nenhum link do protótipo aponta para prancha inexistente | passa | nenhum link quebrado |
 | Da página inicial se chega ao fim de cada tarefa principal | passa | T1 → E01-SemMestre, T2 → T06-IHM, T3 → T08-Configuracoes, T4 → T15-Compartilhar, T5 → T18-Painel |
 
-Pranchas que só abrem pelo canvas, porque são variantes de estado ou telas abertas por um menu: `EA-Alarme`, `EC-Avisos`, `T02-Menu`, `T06-Escuro`, `T19-InjetarFalha`, `T23-NovaAba`, `T24-MenuPlanta`. O roteiro diz quando abrir cada uma.
+Pranchas que só abrem pelo canvas, porque são variantes de estado ou telas abertas por um menu: `EA-Alarme`, `EC-Avisos`, `T02-Menu`, `T06-Escuro`, `T19-InjetarFalha`, `T23-NovaAba`, `T24-MenuPlanta`. O roteiro do teste diz quando abrir cada uma.
 
-## Correções antes do teste
+## Correções no protótipo
 
-Problemas achados na conferência no navegador, na revisão ISA-101 e na preparação do roteiro. Todos foram corrigidos e republicados em 23/11.
+Problemas achados na conferência no navegador, na revisão ISA-101 e na preparação do roteiro do teste. Todos foram corrigidos e republicados em 23/11.
 
 | Onde | Problema | Correção |
 | --- | --- | --- |
@@ -80,16 +76,20 @@ Problemas achados na conferência no navegador, na revisão ISA-101 e na prepara
 | T05b | Pedido recusado ou expirado nunca voltava (a T2 travava) | Volta depois do bloqueio de 60 s ou 6 s depois de expirar, como um CLP que tenta de novo |
 | T11 | Notas de fora da faixa no formato 0–10000 contrariavam a D28 | Corrigidas: a medição satura em 3,8 e 20,5 mA |
 
-## Decisões novas (D46 a D50, registradas no descritivo em 25/11/2026)
+## Decisões novas (D46 a D51, registradas no descritivo em 25/11/2026)
 
-Aprovadas pelo orientador em 25/11/2026. Junto com elas, mudaram no descritivo:
+D46 a D50 foram aprovadas pelo orientador em 25/11/2026; a D51 é decisão do autor na mesma data. Junto com elas, mudaram no descritivo:
 
 - a D15 (marcada como alterada pela D46);
 - o RF09;
 - a seção "Compartilhamento";
 - os passos 2 e 5 do pareamento;
 - a coluna "Quem altera" da tabela de configurações;
-- a referência "D01 a D50" (também no `CLAUDE.md`).
+- o RNF12 e a D19 (sem o teste com usuários, D51);
+- a linha "Estado atual";
+- a referência "D01 a D51" (também no `CLAUDE.md`).
+
+No plano, a Etapa D1 passou a se chamar "Prototipagem", e o teste e os critérios 2 e 3 ficaram riscados, com a nota da D51.
 
 O texto abaixo é o resumo com o raciocínio; a versão de referência é a tabela de decisões do descritivo.
 
@@ -128,27 +128,23 @@ O texto abaixo é o resumo com o raciocínio; a versão de referência é a tabe
   - Na caldeira: watchdog = 1; LSHH-101, LSLL-101 e PSH-101 = 2.
   - *Motivo:* ISA-101 (prioridade sempre visível e nunca só pela cor); a prioridade é do processo, e cada cenário define a sua.
   - *Descartado:* prioridade fixa no código da IHM.
+- **D51 (D1) · Teste com usuários retirado do plano.**
+  - A Etapa D1 termina com o protótipo aprovado pelo orientador, conferido contra o mapa de telas por script e revisado contra a ISA-101.
+  - O material do teste (roteiro, termo, formulário do moderador e `resultados.csv` vazio) fica no repositório para o caso de o teste voltar.
+  - *Motivo:* decisão do autor, com o protótipo aprovado pelo orientador em 25/11/2026.
+  - *Descartado:* fazer o teste antes de fechar a D1; adiar o teste para a D2; criar uma etapa de teste própria.
 
-## Pendências
+## Pendências (não impedem o fechamento)
 
-1. **Teste:**
-   - preencher o termo com nomes e contatos;
-   - fazer o teste piloto e as 5 sessões.
-
-   O Comitê de Ética foi dispensado pelo orientador em 25/11/2026.
-2. **Relatório do teste** (`docs/design/teste/relatorio.md`): problemas por gravidade, correções no protótipo, números do critério 2. Se as correções forem grandes, mostrar o protótipo de novo ao orientador.
-3. **Logotipo:** converter o nome em curvas (Inkscape ou Figma).
-4. **Conferência contra o texto da ANSI/ISA-101.01-2015,** se houver acesso à norma.
-5. **Fechamento** (com a confirmação do autor):
-   - marcar os critérios em `docs/plano.md`;
-   - atualizar a linha "Estado atual" do descritivo;
-   - abrir o pull request.
+1. **Logotipo:** converter o nome em curvas (Inkscape ou Figma).
+2. **Conferência contra o texto da ANSI/ISA-101.01-2015,** se houver acesso à norma.
+3. **Teste com usuários,** se voltar ao plano: material pronto em `docs/design/teste/`; o Comitê de Ética foi dispensado pelo orientador.
 
 ## Observações
 
 - **Zoom do canvas:** desde a atualização do tipo Design em 23/11, o canvas do protótipo às vezes abre com zoom de 1% e parece vazio. Para ver as pranchas, use o menu de zoom › "Fit artboards" (Shift+1) ou troque de página. É do visualizador do claude.ai, não das pranchas; o roteiro tem a mesma dica.
 - **Links do protótipo:** sem login, o claude.ai mostra o aviso "Faça login para ver os dados deste artefato", mas ver e navegar pelo protótipo funciona.
 
-## Linha "Estado atual" (sugestão, para depois do teste)
+## Linha "Estado atual"
 
-> Trilha de design: Etapa D1 concluída em [data] (protótipo testado com 5 pessoas; [n] de 5 tarefas principais com pelo menos 4 de 5 sem ajuda; decisões D46 a D50); próxima, D2.
+Atualizada no descritivo em 25/11/2026: "Etapas 1 a 8 e D1 concluídas (…; Etapa D1 em 25/11/2026, com o protótipo aprovado pelo orientador e o teste com usuários retirado do plano pela D51). … Próxima: Etapa D2 (sistema de design aplicado), que termina antes da Etapa 10."

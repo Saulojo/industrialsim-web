@@ -1,6 +1,6 @@
 # Design — trilha D1
 
-Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/plano.md`. O que sai daqui é a referência da Etapa D2 (sistema de design aplicado no código).
+Entregáveis da Etapa D1 (prototipagem), concluída em 25/11/2026, conforme `docs/plano.md`. O teste com usuários saiu do plano (D51). O que sai daqui é a referência da Etapa D2 (sistema de design aplicado no código).
 
 ## Entregáveis
 
@@ -8,19 +8,18 @@ Entregáveis da Etapa D1 (prototipagem e teste com usuários), conforme `docs/pl
 | --- | --- | --- | --- |
 | A | Perfis e tarefas | [`perfis-e-tarefas.md`](perfis-e-tarefas.md) | pronto |
 | A | Mapa de telas e fluxos | [`mapa-de-telas.md`](mapa-de-telas.md) | pronto |
-| B | Wireframes de baixa fidelidade | Artifact (link abaixo) | pronto, aguardando revisão |
+| B | Wireframes de baixa fidelidade | Artifact (link abaixo) | pronto |
 | C | Guia de identidade visual | [`identidade-visual.md`](identidade-visual.md) e Artifact (link abaixo) | pronto |
 | C | Logotipo | [`logo/`](logo/) | conceito B escolhido em 23/11; falta converter o nome em curvas (autor, Inkscape ou Figma) |
 | C | Tokens (fonte para a D2) | [`tokens.json`](tokens.json) | pronto |
 | C | Verificação de contraste WCAG 2.2 AA | [`contraste.md`](contraste.md) e `tools/design/contraste.mjs` | 98 pares, todos passam |
-| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aguardando revisão |
+| D | Protótipo navegável de alta fidelidade | Artifact (link abaixo) | todas as telas T01–T25 e estados E01–E10; aprovado pelo orientador em 25/11 |
 | D | Revisão ISA-101 das telas de IHM | [`isa-101.md`](isa-101.md) | pronta; 3 problemas corrigidos no protótipo; as 4 ressalvas foram aprovadas pelo orientador em 25/11 |
 | D | Chaves de idioma dos textos novos | [`mapa-de-telas.md`](mapa-de-telas.md#textos-novos) | 475 chaves propostas para a D2 (telas de fidelidade média ficam para as etapas delas) |
-| E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto; falta o teste piloto, e o termo precisa dos nomes e contatos |
-| E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto e conferido pelo autor no claude.ai em 23/11 (o CSV só tem o cabeçalho até o teste) |
+| E | Roteiro, tarefas cronometradas e termo de consentimento | [`teste/roteiro.md`](teste/roteiro.md), [`teste/termo-de-consentimento.md`](teste/termo-de-consentimento.md) | pronto, sem uso: o teste saiu do plano (D51); fica para o caso de voltar |
+| E | Formulário do moderador | Artifact (link abaixo) e [`teste/resultados.csv`](teste/resultados.csv) | pronto e conferido pelo autor em 23/11; sem uso (D51), o CSV só tem o cabeçalho |
 | F | Conferência do mapa contra o protótipo | `tools/design/mapa-prototipo.mjs`; fontes em [`fontes/`](fontes/) | pronta; todas as conferências passam |
-| F | Validação da etapa e decisões novas (D46 a D50) | [`docs/validacao/etapa-d1.md`](../validacao/etapa-d1.md) | rascunho (o teste falta); D46 a D50 aprovadas pelo orientador e registradas no descritivo em 25/11 |
-| F | Relatório do teste e correções | `teste/relatorio.md` | depois do teste |
+| F | Validação da etapa e decisões novas (D46 a D51) | [`docs/validacao/etapa-d1.md`](../validacao/etapa-d1.md) | pronta; etapa concluída em 25/11; decisões registradas no descritivo |
 
 ## Links
 
